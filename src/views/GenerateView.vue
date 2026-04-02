@@ -96,8 +96,10 @@ function viewAll() {
       >
         <i v-if="generating" class="fa-solid fa-spinner fa-spin mr-2"></i>
         <i v-else class="fa-solid fa-bolt mr-2"></i>
-        {{ generating ? 'Generating...' : 'Generate All Content' }}
+        {{ generating ? `Generating ${completed.length + 1} of ${contentTypes.length}...` : 'Generate All Content' }}
       </button>
+      <p v-if="!generating" class="text-xs text-text-3 mt-2">Generates all 6 content types one by one. Takes 2-3 minutes.</p>
+      <p v-if="generating" class="text-xs text-text-3 mt-2">{{ completed.length }} of {{ contentTypes.length }} done — please keep this tab open</p>
     </div>
 
     <!-- Error -->
