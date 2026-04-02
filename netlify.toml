@@ -6,6 +6,10 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+[functions."generate"]
+  external_node_modules = ["pg"]
+  timeout = 26
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
