@@ -1,5 +1,28 @@
-# Vue 3 + TypeScript + Vite
+# ClientPilot
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+AI-powered freelance client acquisition tool. Generates personalized outreach content (emails, proposals, LinkedIn messages) based on your freelancer profile and target client details. Built with Vue 3, Firebase auth, Netlify Functions, Neon PostgreSQL, and Stripe for payments.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Links
+
+| Resource | URL |
+|----------|-----|
+| **Production** | https://clientpilot-app.netlify.app |
+| **Netlify** | https://app.netlify.com/projects/clientpilot-app |
+| **GitHub** | https://github.com/dizid/clientpilot |
+
+## Tech Stack
+
+- **Frontend:** Vue 3 + TypeScript + Vite + Tailwind CSS 4
+- **Auth:** Firebase Authentication
+- **Backend:** Netlify Functions (Node.js)
+- **Database:** Neon PostgreSQL
+- **Payments:** Stripe
+- **Hosting:** Netlify
+
+## Development
+
+```bash
+npm install
+npm run dev      # Start dev server
+npm run build    # Production build
+```
