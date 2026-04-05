@@ -1,5 +1,6 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
+import { validate, requireString } from './lib/validate.mjs'
 
 interface SaveTargetBody {
   name: string
@@ -18,11 +19,16 @@ export default async (req: Request) => {
     const body = await req.json() as SaveTargetBody
     const { name, niche, platform, pain_point } = body
 
-    if (!name || !niche || !platform || !pain_point) {
-      return Response.json(
-        { error: 'Missing required fields: name, niche, platform, pain_point' },
-        { status: 400 }
-      )
+    // Validate inputs before any DB queries
+    const validationError = validate(
+      requireString(name, 'name', 1, 100),
+      requireString(niche, 'niche', 1, 100),
+      requireString(platform, 'platform', 1, 50),
+      requireString(pain_point, 'pain_point', 1, 500)
+    )
+
+    if (validationError) {
+      return Response.json({ error: validationError }, { status: 400 })
     }
 
     const result = await query(

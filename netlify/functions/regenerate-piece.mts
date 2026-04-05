@@ -1,11 +1,12 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { buildProfileContext } from './lib/prompts.mjs'
+import { validate, requireUUID, optionalString } from './lib/validate.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
 
 interface RegeneratePieceBody {
-  pieceId: number
+  pieceId: string
   feedback?: string
 }
 
@@ -51,8 +52,14 @@ export default async (req: Request) => {
     const body = await req.json() as RegeneratePieceBody
     const { pieceId, feedback } = body
 
-    if (!pieceId) {
-      return Response.json({ error: 'Missing pieceId' }, { status: 400 })
+    // Validate inputs before any DB queries
+    const validationError = validate(
+      requireUUID(pieceId, 'pieceId'),
+      optionalString(feedback, 'feedback', 500)
+    )
+
+    if (validationError) {
+      return Response.json({ error: validationError }, { status: 400 })
     }
 
     // Fetch the piece and verify ownership

@@ -2,6 +2,7 @@ import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { buildProfileContext, PROMPTS, Profile } from './lib/prompts.mjs'
 import { parsePieces } from './lib/parse-pieces.mjs'
+import { validate, requireOneOf, requireUUID } from './lib/validate.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
 
@@ -21,8 +22,17 @@ export default async (req: Request) => {
     const user = await authenticateRequest(req)
     const { type, target_id } = await req.json()
 
-    if (!PROMPTS[type]) {
-      return Response.json({ error: 'Invalid content type' }, { status: 400 })
+    // Validate inputs before any DB queries
+    const validationError = validate(
+      requireOneOf(type, 'type', Object.keys(PROMPTS)),
+      // target_id is optional — only validate format when provided
+      (target_id !== undefined && target_id !== null)
+        ? requireUUID(target_id, 'target_id')
+        : null
+    )
+
+    if (validationError) {
+      return Response.json({ error: validationError }, { status: 400 })
     }
 
     // Check limits for free users

@@ -1,8 +1,9 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
+import { validate, requireUUID } from './lib/validate.mjs'
 
 interface DeletePieceBody {
-  id: number
+  id: string
 }
 
 export default async (req: Request) => {
@@ -15,8 +16,11 @@ export default async (req: Request) => {
     const body = await req.json() as DeletePieceBody
     const { id } = body
 
-    if (!id) {
-      return Response.json({ error: 'Missing piece id' }, { status: 400 })
+    // Validate inputs before any DB queries
+    const validationError = validate(requireUUID(id, 'id'))
+
+    if (validationError) {
+      return Response.json({ error: validationError }, { status: 400 })
     }
 
     const result = await query(

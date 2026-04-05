@@ -8,6 +8,7 @@ import AppNav from '@/components/AppNav.vue'
 import StatsBar from '@/components/workspace/StatsBar.vue'
 import WorkspaceSidebar from '@/components/workspace/WorkspaceSidebar.vue'
 import ContentCard from '@/components/workspace/ContentCard.vue'
+import DistributionGuide from '@/components/workspace/DistributionGuide.vue'
 
 const content = useContentStore()
 const profile = useProfileStore()
@@ -144,6 +145,12 @@ watch(() => content.activeTab, (tab) => {
             :piece="piece"
           />
         </div>
+
+        <!-- Distribution guide — shown below cards when content exists -->
+        <DistributionGuide
+          :content-type="content.activeTab"
+          :piece-count="content.piecesByType.length"
+        />
 
       </main>
     </div>

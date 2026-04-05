@@ -1,11 +1,12 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
+import { validate, requireUUID, requireOneOf, optionalString } from './lib/validate.mjs'
 
 const VALID_STATUSES = ['draft', 'used', 'replied'] as const
 type Status = typeof VALID_STATUSES[number]
 
 interface UpdatePieceBody {
-  id: number
+  id: string
   content?: string
   status?: string
 }
@@ -20,15 +21,15 @@ export default async (req: Request) => {
     const body = await req.json() as UpdatePieceBody
     const { id, content, status } = body
 
-    if (!id) {
-      return Response.json({ error: 'Missing piece id' }, { status: 400 })
-    }
+    // Validate inputs before any DB queries
+    const validationError = validate(
+      requireUUID(id, 'id'),
+      status !== undefined ? requireOneOf(status, 'status', [...VALID_STATUSES]) : null,
+      content !== undefined ? optionalString(content, 'content', 10000) : null
+    )
 
-    if (status !== undefined && !VALID_STATUSES.includes(status as Status)) {
-      return Response.json(
-        { error: `Invalid status. Must be one of: ${VALID_STATUSES.join(', ')}` },
-        { status: 400 }
-      )
+    if (validationError) {
+      return Response.json({ error: validationError }, { status: 400 })
     }
 
     // Build SET clause dynamically from provided fields

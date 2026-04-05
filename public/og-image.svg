@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0a0a12"/>
+
+  <!-- Subtle radial glow behind logo -->
+  <radialGradient id="glow" cx="50%" cy="48%" r="40%">
+    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.18"/>
+    <stop offset="100%" stop-color="#0a0a12" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1200" height="3" fill="#6366f1"/>
+
+  <!-- Rocket icon (simplified path) -->
+  <g transform="translate(542, 168)">
+    <!-- Rocket body -->
+    <path d="M28 0 C28 0 56 20 56 56 L56 84 L0 84 L0 56 C0 20 28 0 28 0 Z" fill="#6366f1" opacity="0.9"/>
+    <!-- Rocket nose -->
+    <ellipse cx="28" cy="0" rx="8" ry="12" fill="#a5b4fc"/>
+    <!-- Rocket window -->
+    <circle cx="28" cy="44" r="8" fill="#0a0a12" stroke="#a5b4fc" stroke-width="2"/>
+    <!-- Rocket fins left -->
+    <path d="M0 72 L-14 90 L0 84 Z" fill="#4f46e5"/>
+    <!-- Rocket fins right -->
+    <path d="M56 72 L70 90 L56 84 Z" fill="#4f46e5"/>
+    <!-- Flame -->
+    <ellipse cx="28" cy="94" rx="10" ry="14" fill="#f59e0b" opacity="0.85"/>
+    <ellipse cx="28" cy="98" rx="6" ry="8" fill="#fbbf24" opacity="0.9"/>
+  </g>
+
+  <!-- ClientPilot wordmark -->
+  <text
+    x="600"
+    y="340"
+    font-family="Inter, Arial, sans-serif"
+    font-size="80"
+    font-weight="800"
+    text-anchor="middle"
+    fill="#ffffff"
+    letter-spacing="-2"
+  >Client<tspan fill="#6366f1">Pilot</tspan></text>
+
+  <!-- Tagline -->
+  <text
+    x="600"
+    y="408"
+    font-family="Inter, Arial, sans-serif"
+    font-size="28"
+    font-weight="400"
+    text-anchor="middle"
+    fill="#94a3b8"
+    letter-spacing="0.5"
+  >AI-Powered Client Acquisition for Freelancers</text>
+
+  <!-- Bottom pill badges -->
+  <!-- Badge 1 -->
+  <rect x="272" y="468" width="180" height="40" rx="20" fill="#6366f1" opacity="0.15" stroke="#6366f1" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="362" y="493" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="middle" fill="#a5b4fc">LinkedIn Posts</text>
+
+  <!-- Badge 2 -->
+  <rect x="472" y="468" width="180" height="40" rx="20" fill="#6366f1" opacity="0.15" stroke="#6366f1" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="562" y="493" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="middle" fill="#a5b4fc">Cold Emails</text>
+
+  <!-- Badge 3 -->
+  <rect x="672" y="468" width="180" height="40" rx="20" fill="#6366f1" opacity="0.15" stroke="#6366f1" stroke-width="1" stroke-opacity="0.4"/>
+  <text x="762" y="493" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="500" text-anchor="middle" fill="#a5b4fc">Dev.to Articles</text>
+
+  <!-- Dizid credit -->
+  <text
+    x="600"
+    y="580"
+    font-family="Inter, Arial, sans-serif"
+    font-size="18"
+    font-weight="400"
+    text-anchor="middle"
+    fill="#475569"
+  >clientpilot-app.netlify.app</text>
+</svg>

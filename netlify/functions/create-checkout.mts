@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
+import { validate, requireString } from './lib/validate.mjs'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -13,8 +14,17 @@ export default async (req: Request) => {
     const user = await authenticateRequest(req)
     const { priceId } = await req.json()
 
-    if (!priceId) {
-      return Response.json({ error: 'Missing priceId' }, { status: 400 })
+    // Validate inputs before any Stripe calls
+    const validationError = validate(
+      requireString(priceId, 'priceId', 1, 500),
+      // Stripe price IDs always start with 'price_'
+      (typeof priceId === 'string' && !priceId.startsWith('price_'))
+        ? "priceId must start with 'price_'"
+        : null
+    )
+
+    if (validationError) {
+      return Response.json({ error: validationError }, { status: 400 })
     }
 
     // Get or create Stripe customer
