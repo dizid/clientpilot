@@ -1,6 +1,6 @@
 # ClientPilot
 
-AI-powered freelance client acquisition tool — generates personalized outreach content based on freelancer profile and target client details.
+AI-powered freelance client acquisition platform — generates personalized outreach content based on freelancer profile and target client context.
 
 ## Deployment
 
@@ -11,12 +11,37 @@ AI-powered freelance client acquisition tool — generates personalized outreach
 - **Neon project ID:** `flat-meadow-93593842`
 - **Neon database:** `neondb`
 - **Firebase project:** `clientpilot-dizid`
+- **Stripe price IDs:** Pro monthly `price_1THLUl8gBja0qkMxP8KOwmfc`, Lifetime `price_1THLUn8gBja0qkMxskIJvm36`
 
 ## Database Schema
 
-All IDs are UUID (gen_random_uuid()). Tables:
-- `users` — firebase_uid, email, name, plan, generations_used, stripe_customer_id
-- `profiles` — user_id FK, headline, bio, skills[], tech_stack[], experience_years, projects JSONB, social_links JSONB, target_market, pricing_model, availability
-- `generations` — user_id FK, type, content JSONB, target_id FK, created_at
-- `targets` — user_id FK, name, niche, platform, pain_point, created_at
-- `pieces` — user_id FK, generation_id FK, type, label, content, status (draft/used/replied), updated_at, created_at
+All IDs are UUID (`gen_random_uuid()`). Tables:
+
+- **users** — `id`, `firebase_uid` (unique), `email`, `name`, `avatar_url`, `stripe_customer_id`, `plan` (free/pro/lifetime), `plan_expires_at`, `generations_used`, `created_at`, `updated_at`
+- **profiles** — `id`, `user_id` FK, `headline`, `bio`, `skills` TEXT[], `tech_stack` TEXT[], `experience_years` INT, `projects` JSONB, `social_links` JSONB, `target_market`, `pricing_model`, `availability`, `created_at`, `updated_at`
+- **generations** — `id`, `user_id` FK, `type`, `content` JSONB, `target_id` FK (nullable), `created_at`
+- **targets** — `id`, `user_id` FK, `name`, `niche`, `platform`, `pain_point`, `created_at`
+- **pieces** — `id`, `user_id` FK, `generation_id` FK, `type`, `label`, `content` TEXT, `status` (draft/used/replied), `updated_at`, `created_at`
+
+Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`
+
+## Architecture
+
+### Frontend (Vue 3 + Pinia)
+- **Views:** Landing, Login, Onboarding (4-step with validation + auto-save), Workspace (content management), Generate (with target context modal), Settings
+- **Stores:** `auth` (Firebase + plan), `profile` (user profile), `content` (pieces + stats + CRUD), `toast` (notifications)
+- **Key components:** ContentCard (edit/copy/status/regenerate/delete per piece), WorkspaceSidebar (type tabs), StatsBar, TargetContextModal
+
+### Backend (Netlify Functions)
+- **Auth:** Firebase Admin SDK verifies ID tokens, upserts user in DB
+- **AI:** Anthropic Claude API (`claude-sonnet-4-20250514`) generates content, responses parsed into individual pieces
+- **Content types:** `linkedin_posts` (10), `outreach_templates` (9), `devto_article` (1), `platform_profile` (5), `portfolio_page` (7), `elevator_pitch` (6)
+- **Piece lifecycle:** Generated → individual pieces stored → edit/regenerate/status track → stats aggregation
+- **Payments:** Stripe Checkout for Pro ($9/mo subscription) and Lifetime ($69 one-time), webhook handles plan updates
+
+### Key Patterns
+- All functions: `export default async (req: Request) => { ... }` with `authenticateRequest(req)` guard
+- DB: `query(sql, params)` from shared pool, parameterized queries only
+- Imports use `.mjs` extension in functions (esbuild resolves `.mts` → `.mjs`)
+- Frontend API layer: Axios with Firebase token interceptor at `/.netlify/functions`
+- Optimistic updates in content store with rollback on error
