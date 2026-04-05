@@ -1,31 +1,51 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
 const router = useRouter()
+const route = useRoute()
 const mobileOpen = ref(false)
 
 async function handleLogout() {
   await auth.logout()
   router.push('/')
 }
+
+const navLinks = [
+  { to: '/workspace', label: 'Workspace', icon: 'fa-solid fa-th-large' },
+  { to: '/generate', label: 'Generate', icon: 'fa-solid fa-wand-magic-sparkles' },
+  { to: '/settings', label: 'Settings', icon: 'fa-solid fa-gear' },
+]
+
+function isActive(path: string) {
+  return route.path === path
+}
 </script>
 
 <template>
   <nav class="fixed top-0 inset-x-0 z-50 border-b border-border bg-bg/90 backdrop-blur-lg">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-      <router-link to="/dashboard" class="flex items-center gap-2 text-lg font-bold text-text no-underline">
+      <router-link to="/workspace" class="flex items-center gap-2 text-lg font-bold text-text no-underline">
         <i class="fa-solid fa-rocket text-brand"></i>
         <span>Client<span class="text-brand">Pilot</span></span>
       </router-link>
 
       <!-- Desktop nav -->
-      <div class="hidden md:flex items-center gap-6">
-        <router-link to="/dashboard" class="text-sm text-text-2 hover:text-text no-underline transition">Dashboard</router-link>
-        <router-link to="/generate" class="text-sm text-text-2 hover:text-text no-underline transition">Generate</router-link>
-        <router-link to="/settings" class="text-sm text-text-2 hover:text-text no-underline transition">Settings</router-link>
+      <div class="hidden md:flex items-center gap-1">
+        <router-link
+          v-for="link in navLinks"
+          :key="link.to"
+          :to="link.to"
+          class="flex items-center gap-2 px-3 py-2 text-sm rounded-lg no-underline transition"
+          :class="isActive(link.to)
+            ? 'bg-brand/10 text-brand-light font-medium'
+            : 'text-text-2 hover:text-text hover:bg-surface-2'"
+        >
+          <i :class="link.icon" class="text-xs"></i>
+          {{ link.label }}
+        </router-link>
 
         <div class="flex items-center gap-3 ml-4 pl-4 border-l border-border">
           <span v-if="auth.isPro" class="text-xs font-semibold px-2 py-1 rounded-full bg-brand/20 text-brand-light">
@@ -41,17 +61,40 @@ async function handleLogout() {
       </div>
 
       <!-- Mobile toggle -->
-      <button class="md:hidden text-text bg-transparent border-0 text-xl cursor-pointer" @click="mobileOpen = !mobileOpen">
+      <button class="md:hidden text-text bg-transparent border-0 text-xl cursor-pointer" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
         <i :class="mobileOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
       </button>
     </div>
 
     <!-- Mobile menu -->
-    <div v-if="mobileOpen" class="md:hidden border-t border-border bg-surface p-4 flex flex-col gap-3">
-      <router-link to="/dashboard" class="text-text-2 no-underline" @click="mobileOpen = false">Dashboard</router-link>
-      <router-link to="/generate" class="text-text-2 no-underline" @click="mobileOpen = false">Generate</router-link>
-      <router-link to="/settings" class="text-text-2 no-underline" @click="mobileOpen = false">Settings</router-link>
-      <button @click="handleLogout" class="text-left text-text-3 bg-transparent border-0 cursor-pointer">Sign out</button>
+    <div v-if="mobileOpen" class="md:hidden border-t border-border bg-surface p-4 flex flex-col gap-1">
+      <router-link
+        v-for="link in navLinks"
+        :key="link.to"
+        :to="link.to"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-lg no-underline transition"
+        :class="isActive(link.to)
+          ? 'bg-brand/10 text-brand-light font-medium'
+          : 'text-text-2 hover:bg-surface-2'"
+        @click="mobileOpen = false"
+      >
+        <i :class="link.icon"></i>
+        {{ link.label }}
+      </router-link>
+
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-border">
+        <div class="flex items-center gap-2">
+          <img v-if="auth.user?.photoURL" :src="auth.user.photoURL" class="w-7 h-7 rounded-full" alt="" />
+          <span class="text-sm text-text-2">{{ auth.user?.displayName }}</span>
+          <span v-if="auth.isPro" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand/20 text-brand-light">
+            {{ auth.plan === 'lifetime' ? 'LIFETIME' : 'PRO' }}
+          </span>
+          <span v-else class="text-xs font-semibold px-2 py-0.5 rounded-full bg-surface-2 text-text-3">FREE</span>
+        </div>
+        <button @click="handleLogout" class="text-xs text-text-3 hover:text-text cursor-pointer bg-transparent border-0">
+          Sign out
+        </button>
+      </div>
     </div>
   </nav>
 </template>

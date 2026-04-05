@@ -1,140 +1,15 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
+import { buildProfileContext, PROMPTS, Profile } from './lib/prompts.mjs'
+import { parsePieces } from './lib/parse-pieces.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
 
-interface Profile {
-  headline: string
-  bio: string
-  skills: string[]
-  tech_stack: string[]
-  experience_years: number
-  projects: Array<{ name: string; description: string; url: string; tech: string[]; timeline: string }>
-  social_links: Record<string, string>
-  target_market: string
-  pricing_model: string
-  availability: string
-}
-
-function buildProfileContext(profile: Profile, userName: string): string {
-  const projects = profile.projects.map(p =>
-    `- ${p.name}: ${p.description} (${p.tech.join(', ')}) ${p.url ? `[${p.url}]` : ''} ${p.timeline ? `Built in ${p.timeline}` : ''}`
-  ).join('\n')
-
-  return `
-Name: ${userName}
-Headline: ${profile.headline}
-Bio: ${profile.bio}
-Skills: ${profile.skills.join(', ')}
-Tech Stack: ${profile.tech_stack.join(', ')}
-Experience: ${profile.experience_years} years
-Target Market: ${profile.target_market}
-Pricing Model: ${profile.pricing_model}
-Availability: ${profile.availability}
-Social Links: ${Object.entries(profile.social_links || {}).map(([k, v]) => `${k}: ${v}`).join(', ')}
-
-Projects:
-${projects}
-`.trim()
-}
-
-const PROMPTS: Record<string, (ctx: string) => string> = {
-  linkedin_posts: (ctx) => `You are writing LinkedIn posts for a freelance developer looking to attract clients.
-
-Profile:
-${ctx}
-
-Write 10 LinkedIn posts that:
-1. Establish technical expertise
-2. Show shipping speed and real results
-3. Include a soft CTA (DM me, check my work, etc.)
-4. Use line breaks for readability
-5. Are 100-200 words each
-6. Sound human, not AI-generated
-7. Each has a different angle (case study, insight, availability, tutorial teaser, etc.)
-8. Maximum 3-4 hashtags per post
-
-Return as JSON: { "posts": ["post1 text", "post2 text", ...] }`,
-
-  outreach_templates: (ctx) => `You are writing outreach templates for a freelance developer.
-
-Profile:
-${ctx}
-
-Write 7 outreach templates:
-1. Cold outreach to a recently funded startup (LinkedIn DM)
-2. Cold outreach to a CTO/tech lead (LinkedIn DM)
-3. Cold outreach to an agency/studio (email)
-4. Warm outreach to a former colleague (email)
-5. LinkedIn network activation (DM after engaging with someone's post)
-6. Freelance platform inquiry response
-7. Hacker News "Who's Hiring" post
-
-Each should be personalized with [brackets] for customization, include their specific skills/projects, and end with a CTA.
-
-Also include 2 follow-up templates (3-day and 7-day).
-
-Return as JSON: { "templates": ["template1", "template2", ...] }`,
-
-  devto_article: (ctx) => `You are writing a Dev.to technical article for a freelance developer.
-
-Profile:
-${ctx}
-
-Pick their most impressive project and write a full case study article (1000-1500 words) that:
-1. Has a catchy, SEO-friendly title
-2. Opens with a hook (what was built, how fast, the result)
-3. Covers the problem, tech decisions, architecture, key code insights
-4. Includes realistic code snippets (not toy examples)
-5. Ends with lessons learned and a soft CTA about their freelance work
-6. Has Dev.to frontmatter (title, description, tags)
-
-Return as JSON: { "text": "the full article in markdown" }`,
-
-  platform_profile: (ctx) => `You are writing freelance platform profiles.
-
-Profile:
-${ctx}
-
-Write reusable profile content for freelance platforms (Toptal, freelance.nl, Arc.dev, Gun.io, Freelancermap):
-
-1. Short bio (100 words) — for search results
-2. Full bio (300 words) — for profile page
-3. List of skills to select
-4. Availability description
-5. Rate/pricing description
-
-Return as JSON: { "sections": { "short_bio": "...", "full_bio": "...", "skills_list": "...", "availability": "...", "pricing": "..." } }`,
-
-  portfolio_page: (ctx) => `You are writing content for a freelance developer's /hire landing page.
-
-Profile:
-${ctx}
-
-Write all the content needed for a professional hire page:
-1. Hero headline + subheadline
-2. Services section (3 services with title, description, timeline, price range)
-3. Case studies (use their projects — title, subtitle, description, key metric)
-4. "Why hire me" section (4 bullet points)
-5. Process steps (4 steps)
-6. CTA section text
-
-Return as JSON: { "sections": { "hero_headline": "...", "hero_subtitle": "...", "services": "...", "case_studies": "...", "why_hire": "...", "process": "...", "cta": "..." } }`,
-
-  elevator_pitch: (ctx) => `You are writing short-form bios and pitches for a freelance developer.
-
-Profile:
-${ctx}
-
-Write:
-1. 30-second elevator pitch (spoken, casual)
-2. Twitter/X bio (160 chars max)
-3. LinkedIn headline (120 chars max)
-4. Email signature block
-5. GitHub profile README summary (200 words)
-6. One-liner for freelance platforms
-
-Return as JSON: { "sections": { "elevator_pitch": "...", "twitter_bio": "...", "linkedin_headline": "...", "email_signature": "...", "github_readme": "...", "one_liner": "..." } }`
+interface TargetRow {
+  id: number
+  niche: string
+  platform: string
+  pain_point: string
 }
 
 export default async (req: Request) => {
@@ -144,7 +19,7 @@ export default async (req: Request) => {
 
   try {
     const user = await authenticateRequest(req)
-    const { type } = await req.json()
+    const { type, target_id } = await req.json()
 
     if (!PROMPTS[type]) {
       return Response.json({ error: 'Invalid content type' }, { status: 400 })
@@ -166,7 +41,22 @@ export default async (req: Request) => {
     }
 
     const profile = profileResult.rows[0] as Profile
-    const profileContext = buildProfileContext(profile, user.name)
+    let profileContext = buildProfileContext(profile, user.name)
+
+    // Append target context if a target_id was provided
+    let target: TargetRow | null = null
+    if (target_id) {
+      const targetResult = await query(
+        'SELECT * FROM targets WHERE id = $1 AND user_id = $2',
+        [target_id, user.id]
+      )
+
+      if (targetResult.rows.length > 0) {
+        target = targetResult.rows[0] as TargetRow
+        profileContext += `\nTarget Context:\nNiche: ${target.niche}\nPlatform: ${target.platform}\nKey Pain Point: ${target.pain_point}`
+      }
+    }
+
     const prompt = PROMPTS[type](profileContext)
 
     // Call Claude
@@ -196,11 +86,23 @@ export default async (req: Request) => {
       content = { text: rawText }
     }
 
-    // Save generation
-    await query(
-      'INSERT INTO generations (user_id, type, content) VALUES ($1, $2, $3)',
-      [user.id, type, JSON.stringify(content)]
+    // Save generation (include target_id if present)
+    const generationResult = await query(
+      'INSERT INTO generations (user_id, type, content, target_id) VALUES ($1, $2, $3, $4) RETURNING id',
+      [user.id, type, JSON.stringify(content), target_id ?? null]
     )
+
+    const generationId = generationResult.rows[0].id as number
+
+    // Parse into individual pieces and batch-insert
+    const parsedPieces = parsePieces(type, content)
+
+    for (const piece of parsedPieces) {
+      await query(
+        'INSERT INTO pieces (user_id, generation_id, type, label, content) VALUES ($1, $2, $3, $4, $5)',
+        [user.id, generationId, type, piece.label, piece.content]
+      )
+    }
 
     // Increment usage
     await query(
@@ -208,7 +110,7 @@ export default async (req: Request) => {
       [user.id]
     )
 
-    return Response.json({ generation: { type, content } })
+    return Response.json({ generation: { type, content }, pieces: parsedPieces })
   } catch (e: unknown) {
     const message = e instanceof Error ? e.message : 'Generation failed'
     console.error('Generate error:', e)

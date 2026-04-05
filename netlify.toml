@@ -10,6 +10,11 @@
   external_node_modules = ["pg"]
   timeout = 26
 
+[functions."regenerate-piece"]
+  external_node_modules = ["pg"]
+  node_bundler = "esbuild"
+  timeout = 26
+
 [[redirects]]
   from = "/*"
   to = "/index.html"

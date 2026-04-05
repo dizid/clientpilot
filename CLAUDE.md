@@ -8,3 +8,15 @@ AI-powered freelance client acquisition tool — generates personalized outreach
 - **Netlify site name:** `clientpilot-app`
 - **Production URL:** https://clientpilot-app.netlify.app
 - **GitHub repo:** `dizid/clientpilot`
+- **Neon project ID:** `flat-meadow-93593842`
+- **Neon database:** `neondb`
+- **Firebase project:** `clientpilot-dizid`
+
+## Database Schema
+
+All IDs are UUID (gen_random_uuid()). Tables:
+- `users` — firebase_uid, email, name, plan, generations_used, stripe_customer_id
+- `profiles` — user_id FK, headline, bio, skills[], tech_stack[], experience_years, projects JSONB, social_links JSONB, target_market, pricing_model, availability
+- `generations` — user_id FK, type, content JSONB, target_id FK, created_at
+- `targets` — user_id FK, name, niche, platform, pain_point, created_at
+- `pieces` — user_id FK, generation_id FK, type, label, content, status (draft/used/replied), updated_at, created_at

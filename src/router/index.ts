@@ -14,9 +14,9 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('@/views/DashboardView.vue'),
+      path: '/workspace',
+      name: 'workspace',
+      component: () => import('@/views/WorkspaceView.vue'),
       meta: { requiresAuth: true }
     },
     {
@@ -26,17 +26,16 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/content/:type',
-      name: 'content',
-      component: () => import('@/views/ContentView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
       path: '/settings',
       name: 'settings',
       component: () => import('@/views/SettingsView.vue'),
       meta: { requiresAuth: true }
-    }
+    },
+    // Backward compatibility redirects
+    { path: '/dashboard', redirect: '/workspace' },
+    { path: '/content/:type', redirect: '/workspace' },
+    // 404 catch-all
+    { path: '/:pathMatch(.*)*', redirect: '/' }
   ],
   scrollBehavior() {
     return { top: 0 }
