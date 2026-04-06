@@ -4,6 +4,7 @@ import { useContentStore } from '@/stores/content'
 import { useToastStore } from '@/stores/toast'
 import type { ContentPiece } from '@/lib/api'
 import { renderMarkdown } from '@/lib/markdown'
+import { track } from '@/lib/analytics'
 
 const props = defineProps<{
   piece: ContentPiece
@@ -40,6 +41,7 @@ const statusOptions: Array<{ value: ContentPiece['status']; label: string }> = [
 ]
 
 function startEdit() {
+  track('piece_edit', { type: props.piece.type })
   editValue.value = props.piece.content
   isEditing.value = true
 }
@@ -58,6 +60,7 @@ async function saveEdit() {
 async function copyToClipboard() {
   try {
     await navigator.clipboard.writeText(props.piece.content)
+    track('piece_copy', { type: props.piece.type })
     copied.value = true
     setTimeout(() => { copied.value = false }, 2000)
   } catch {
@@ -67,6 +70,7 @@ async function copyToClipboard() {
 
 async function onStatusChange(event: Event) {
   const select = event.target as HTMLSelectElement
+  track('piece_status_change', { type: props.piece.type, status: select.value })
   await content.updatePiece(props.piece.id, { status: select.value })
   toast.add('Status updated', 'success')
 }

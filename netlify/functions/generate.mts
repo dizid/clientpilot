@@ -3,8 +3,10 @@ import { query } from './lib/db.mjs'
 import { buildProfileContext, PROMPTS, Profile } from './lib/prompts.mjs'
 import { parsePieces } from './lib/parse-pieces.mjs'
 import { validate, requireOneOf, requireUUID } from './lib/validate.mjs'
+import { safeError } from './lib/errors.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514'
 
 interface TargetRow {
   id: number
@@ -78,7 +80,7 @@ export default async (req: Request) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: 4096,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -107,10 +109,18 @@ export default async (req: Request) => {
     // Parse into individual pieces and batch-insert
     const parsedPieces = parsePieces(type, content)
 
-    for (const piece of parsedPieces) {
+    // Batch insert all pieces in a single query instead of N+1 sequential INSERTs
+    if (parsedPieces.length > 0) {
+      const values = parsedPieces.map((_, i) =>
+        `($1, $2, $3, $${4 + i * 2}, $${5 + i * 2})`
+      ).join(', ')
+      const params = [
+        user.id, generationId, type,
+        ...parsedPieces.flatMap(p => [p.label, p.content])
+      ]
       await query(
-        'INSERT INTO pieces (user_id, generation_id, type, label, content) VALUES ($1, $2, $3, $4, $5)',
-        [user.id, generationId, type, piece.label, piece.content]
+        `INSERT INTO pieces (user_id, generation_id, type, label, content) VALUES ${values}`,
+        params
       )
     }
 
@@ -122,8 +132,6 @@ export default async (req: Request) => {
 
     return Response.json({ generation: { type, content }, pieces: parsedPieces })
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Generation failed'
-    console.error('Generate error:', e)
-    return Response.json({ error: message }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Generation failed') }, { status: 500 })
   }
 }

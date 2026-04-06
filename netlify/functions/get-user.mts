@@ -1,4 +1,5 @@
 import { authenticateRequest } from './lib/auth.mjs'
+import { safeError } from './lib/errors.mjs'
 
 export default async (req: Request) => {
   if (req.method !== 'GET') {
@@ -9,7 +10,6 @@ export default async (req: Request) => {
     const user = await authenticateRequest(req)
     return Response.json({ user: { plan: user.plan, generations_used: user.generations_used } })
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Auth failed'
-    return Response.json({ error: message }, { status: 401 })
+    return Response.json({ error: safeError(e, 'Authentication failed') }, { status: 401 })
   }
 }

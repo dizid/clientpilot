@@ -2,11 +2,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { track } from '@/lib/analytics'
 
 const router = useRouter()
 const auth = useAuthStore()
 
-function getStarted() {
+function getStarted(source: string = 'unknown') {
+  track('cta_click', { source })
   if (auth.isLoggedIn) {
     router.push('/dashboard')
   } else {
@@ -148,7 +150,7 @@ function toggleFaq(index: number) {
           <a href="#features" class="text-sm text-text-2 hover:text-text no-underline transition hidden sm:block">Features</a>
           <a href="#pricing" class="text-sm text-text-2 hover:text-text no-underline transition hidden sm:block">Pricing</a>
           <button
-            @click="getStarted"
+            @click="getStarted('nav')"
             class="px-4 py-2 text-sm font-semibold bg-brand hover:bg-brand-dark text-white rounded-lg cursor-pointer border-0 transition"
           >
             {{ auth.isLoggedIn ? 'Dashboard' : 'Get Started Free' }}
@@ -180,7 +182,7 @@ function toggleFaq(index: number) {
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <button
-            @click="getStarted"
+            @click="getStarted('hero')"
             class="btn-glow px-8 py-4 text-base font-bold bg-brand hover:bg-brand-dark text-white rounded-xl cursor-pointer border-0 transition shadow-lg shadow-brand/20"
           >
             <i class="fa-solid fa-rocket mr-2"></i>
@@ -359,7 +361,7 @@ function toggleFaq(index: number) {
         <!-- CTA below demo -->
         <div class="text-center mt-10">
           <button
-            @click="getStarted"
+            @click="getStarted('demo')"
             class="px-7 py-3.5 text-sm font-bold bg-brand hover:bg-brand-dark text-white rounded-xl cursor-pointer border-0 transition shadow-lg shadow-brand/20"
           >
             <i class="fa-solid fa-bolt mr-2"></i>
@@ -435,7 +437,7 @@ function toggleFaq(index: number) {
             <li class="flex items-start gap-2"><i class="fa-solid fa-xmark text-text-3 mt-0.5 shrink-0"></i> <span class="text-text-3">Limited copy/export</span></li>
           </ul>
           <button
-            @click="getStarted"
+            @click="getStarted('pricing_free')"
             class="w-full py-3 text-sm font-semibold bg-surface-2 hover:bg-surface-3 text-text rounded-lg cursor-pointer border-0 transition"
           >
             Get Started
@@ -458,7 +460,7 @@ function toggleFaq(index: number) {
             <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> Weekly AI content refresh</li>
           </ul>
           <button
-            @click="getStarted"
+            @click="getStarted('pricing_pro')"
             class="w-full py-3 text-sm font-bold bg-brand hover:bg-brand-dark text-white rounded-lg cursor-pointer border-0 transition shadow-lg shadow-brand/20"
           >
             Start Pro
@@ -481,7 +483,7 @@ function toggleFaq(index: number) {
             <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> Priority support</li>
           </ul>
           <button
-            @click="getStarted"
+            @click="getStarted('pricing_lifetime')"
             class="w-full py-3 text-sm font-semibold bg-accent/20 hover:bg-accent/30 text-accent-light rounded-lg cursor-pointer border border-accent/30 transition"
           >
             Get Lifetime Access
@@ -553,7 +555,7 @@ function toggleFaq(index: number) {
           5 minutes to set up. AI generates everything. You just publish and wait for DMs.
         </p>
         <button
-          @click="getStarted"
+          @click="getStarted('final_cta')"
           class="btn-glow px-10 py-4 text-base font-bold bg-brand hover:bg-brand-dark text-white rounded-xl cursor-pointer border-0 transition shadow-xl shadow-brand/25"
         >
           <i class="fa-solid fa-rocket mr-2"></i>

@@ -9,6 +9,9 @@ AI-powered freelance client acquisition platform. Generate personalized outreach
 | **Production** | https://clientpilot-app.netlify.app |
 | **Netlify** | https://app.netlify.com/projects/clientpilot-app |
 | **GitHub** | https://github.com/dizid/clientpilot |
+| **Neon DB** | https://console.neon.tech/app/projects/flat-meadow-93593842 |
+| **Firebase** | https://console.firebase.google.com/project/clientpilot-dizid |
+| **Stripe** | https://dashboard.stripe.com |
 
 ## Features
 
@@ -17,6 +20,9 @@ AI-powered freelance client acquisition platform. Generate personalized outreach
 - **6 Content Types** — LinkedIn posts (10), outreach templates (9), Dev.to articles, platform profiles (5), portfolio page sections, elevator pitches & bios (6)
 - **Individual Piece Management** — edit inline, regenerate with feedback, mark as Used/Got Reply, delete
 - **Smart Dashboard** — total pieces, used this week, replies tracked, profile completeness
+- **Distribution Guide** — per-type actionable next steps with external links (LinkedIn, Dev.to, Buffer, etc.)
+- **Input Validation** — shared validation lib on all backend endpoints (UUID, string length, enums)
+- **SEO** — meta tags, OG/Twitter cards, JSON-LD structured data
 - **Stripe Payments** — Free (1 preview), Pro ($9/mo), Lifetime ($69)
 
 ## Tech Stack
@@ -37,13 +43,13 @@ src/
 ├── components/
 │   ├── AppNav.vue      # Navigation with active route highlighting
 │   ├── ToastContainer.vue
-│   └── workspace/      # ContentCard, StatsBar, WorkspaceSidebar, TargetContextModal, etc.
+│   └── workspace/      # ContentCard, StatsBar, WorkspaceSidebar, TargetContextModal, DistributionGuide, etc.
 ├── stores/             # Pinia: auth, profile, content, toast
 ├── lib/                # api.ts, firebase.ts, markdown.ts
 └── router/             # Vue Router with auth guards
 
 netlify/functions/
-├── lib/                # Shared: db, auth, prompts, parse-pieces
+├── lib/                # Shared: db, auth, prompts, parse-pieces, validate
 ├── generate.mts        # AI content generation with target context + piece splitting
 ├── get-pieces.mts      # Individual content pieces (filterable by type)
 ├── update-piece.mts    # Edit content or change status

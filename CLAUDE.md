@@ -30,13 +30,14 @@ Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`
 ### Frontend (Vue 3 + Pinia)
 - **Views:** Landing, Login, Onboarding (4-step with validation + auto-save), Workspace (content management), Generate (with target context modal), Settings
 - **Stores:** `auth` (Firebase + plan), `profile` (user profile), `content` (pieces + stats + CRUD), `toast` (notifications)
-- **Key components:** ContentCard (edit/copy/status/regenerate/delete per piece), WorkspaceSidebar (type tabs), StatsBar, TargetContextModal
+- **Key components:** ContentCard (edit/copy/status/regenerate/delete per piece), WorkspaceSidebar (type tabs), StatsBar, TargetContextModal, DistributionGuide (per-type next steps)
 
 ### Backend (Netlify Functions)
 - **Auth:** Firebase Admin SDK verifies ID tokens, upserts user in DB
 - **AI:** Anthropic Claude API (`claude-sonnet-4-20250514`) generates content, responses parsed into individual pieces
 - **Content types:** `linkedin_posts` (10), `outreach_templates` (9), `devto_article` (1), `platform_profile` (5), `portfolio_page` (7), `elevator_pitch` (6)
 - **Piece lifecycle:** Generated → individual pieces stored → edit/regenerate/status track → stats aggregation
+- **Validation:** Shared `lib/validate.mts` (requireString, requireUUID, requireOneOf, optionalString) used by all mutating endpoints
 - **Payments:** Stripe Checkout for Pro ($9/mo subscription) and Lifetime ($69 one-time), webhook handles plan updates
 
 ### Key Patterns
@@ -45,3 +46,4 @@ Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`
 - Imports use `.mjs` extension in functions (esbuild resolves `.mts` → `.mjs`)
 - Frontend API layer: Axios with Firebase token interceptor at `/.netlify/functions`
 - Optimistic updates in content store with rollback on error
+- Input validation via `validate()` helper at top of every mutating function, returns 400 on failure

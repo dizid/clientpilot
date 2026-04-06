@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { track } from '@/lib/analytics'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -14,6 +15,7 @@ async function handleGoogleLogin() {
   error.value = ''
   try {
     await auth.login()
+    track('login_success')
     const redirect = (route.query.redirect as string) || '/onboarding'
     router.push(redirect)
   } catch (e: unknown) {

@@ -1,6 +1,8 @@
-// Minimal markdown renderer for Dev.to articles — no external dependencies
+import DOMPurify from 'dompurify'
+
+// Markdown renderer with XSS sanitization via DOMPurify
 export function renderMarkdown(text: string): string {
-  return text
+  const html = text
     // Code blocks (``` ... ```)
     .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="bg-surface-2 rounded-lg p-4 overflow-x-auto my-4 text-sm"><code>$2</code></pre>')
     // Headings (order: h3 before h2 before h1 to avoid partial matches)
@@ -13,11 +15,16 @@ export function renderMarkdown(text: string): string {
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     // Inline code
     .replace(/`([^`]+)`/g, '<code class="bg-surface-2 px-1.5 py-0.5 rounded text-brand-light text-sm">$1</code>')
-    // Links
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-brand hover:text-brand-light underline">$1</a>')
+    // Links — block javascript: URLs
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, url) => {
+      const safeUrl = /^javascript:/i.test(url) ? '#' : url
+      return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="text-brand hover:text-brand-light underline">${label}</a>`
+    })
     // Paragraph breaks
     .replace(/\n\n/g, '</p><p class="mb-4">')
     // Wrap in paragraph
     .replace(/^/, '<p class="mb-4">')
     .replace(/$/, '</p>')
+
+  return DOMPurify.sanitize(html)
 }

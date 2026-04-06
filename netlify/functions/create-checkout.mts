@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { validate, requireString } from './lib/validate.mjs'
+import { safeError } from './lib/errors.mjs'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -48,7 +49,8 @@ export default async (req: Request) => {
     const price = await stripe.prices.retrieve(priceId)
     const mode = price.recurring ? 'subscription' : 'payment'
 
-    const origin = req.headers.get('origin') || 'https://clientpilot.dev'
+    // Never trust req.headers.get('origin') — attacker can redirect Stripe to malicious URL
+    const origin = process.env.SITE_URL || 'https://clientpilot-app.netlify.app'
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -61,8 +63,6 @@ export default async (req: Request) => {
 
     return Response.json({ url: session.url })
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Checkout failed'
-    console.error('Checkout error:', e)
-    return Response.json({ error: message }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Checkout failed') }, { status: 500 })
   }
 }

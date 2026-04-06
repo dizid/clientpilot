@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { trackPageView } from '@/lib/analytics'
 import LandingView from '@/views/LandingView.vue'
 
 const router = createRouter({
@@ -49,6 +50,11 @@ router.beforeEach(async (to) => {
       return { name: 'login', query: { redirect: to.fullPath } }
     }
   }
+})
+
+// Track pageviews on every route change
+router.afterEach((to) => {
+  trackPageView(to.fullPath)
 })
 
 export default router

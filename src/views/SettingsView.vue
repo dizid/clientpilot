@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useProfileStore } from '@/stores/profile'
 import { useContentStore } from '@/stores/content'
 import { createCheckout } from '@/lib/api'
+import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
 
 const auth = useAuthStore()
@@ -26,6 +27,7 @@ const profileCompleteness = computed(() => {
 })
 
 async function handleUpgrade(priceId: string) {
+  track('upgrade_click', { source: 'settings', price_id: priceId })
   const { data } = await createCheckout(priceId)
   window.location.href = data.url
 }

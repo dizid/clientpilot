@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { query } from './lib/db.mjs'
+import { safeError } from './lib/errors.mjs'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
@@ -19,8 +20,7 @@ export default async (req: Request) => {
     const body = await req.text()
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Webhook verification failed'
-    return Response.json({ error: message }, { status: 400 })
+    return Response.json({ error: safeError(e, 'Webhook verification failed') }, { status: 400 })
   }
 
   switch (event.type) {
@@ -53,6 +53,37 @@ export default async (req: Request) => {
         "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1",
         [customerId]
       )
+      break
+    }
+
+    case 'invoice.payment_failed': {
+      // Card declined — downgrade to free so they can't keep using Pro for free
+      const invoice = event.data.object as Stripe.Invoice
+      const customerId = invoice.customer as string
+      if (customerId) {
+        await query(
+          "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1",
+          [customerId]
+        )
+      }
+      break
+    }
+
+    case 'customer.subscription.updated': {
+      // Sync plan state when subscription status changes (upgrade, downgrade, past_due)
+      const subscription = event.data.object as Stripe.Subscription
+      const customerId = subscription.customer as string
+      if (subscription.status === 'active') {
+        await query(
+          "UPDATE users SET plan = 'pro', updated_at = NOW() WHERE stripe_customer_id = $1",
+          [customerId]
+        )
+      } else if (subscription.status === 'past_due' || subscription.status === 'canceled' || subscription.status === 'unpaid') {
+        await query(
+          "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1",
+          [customerId]
+        )
+      }
       break
     }
   }

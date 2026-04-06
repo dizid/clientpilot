@@ -1,5 +1,6 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
+import { safeError } from './lib/errors.mjs'
 
 export default async (req: Request) => {
   if (req.method !== 'GET') {
@@ -16,8 +17,6 @@ export default async (req: Request) => {
 
     return Response.json({ targets: result.rows })
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Fetch failed'
-    console.error('get-targets error:', e)
-    return Response.json({ error: message }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Failed to fetch targets') }, { status: 500 })
   }
 }

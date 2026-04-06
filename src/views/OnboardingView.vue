@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProfileStore } from '@/stores/profile'
+import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
 
 const profileStore = useProfileStore()
@@ -271,12 +272,15 @@ function nextStep() {
   if (step.value === 1) {
     touchStep1()
     if (!step1Valid.value) return
+    track('onboarding_step', { step: 2 })
     step.value = 2
   } else if (step.value === 2) {
     touchStep2()
     if (!step2Valid.value) return
+    track('onboarding_step', { step: 3 })
     step.value = 3
   } else if (step.value === 3) {
+    track('onboarding_step', { step: 4 })
     step.value = 4
   } else if (step.value === 4) {
     touchStep4()
@@ -295,6 +299,7 @@ async function finish() {
   saving.value = true
   try {
     await profileStore.save()
+    track('onboarding_complete')
     clearDraft()
     router.push('/workspace')
   } finally {

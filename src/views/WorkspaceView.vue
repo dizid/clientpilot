@@ -9,6 +9,7 @@ import StatsBar from '@/components/workspace/StatsBar.vue'
 import WorkspaceSidebar from '@/components/workspace/WorkspaceSidebar.vue'
 import ContentCard from '@/components/workspace/ContentCard.vue'
 import DistributionGuide from '@/components/workspace/DistributionGuide.vue'
+import { track } from '@/lib/analytics'
 
 const content = useContentStore()
 const profile = useProfileStore()
@@ -26,6 +27,11 @@ const tabLabels: Record<string, string> = {
 }
 
 onMounted(async () => {
+  // Track checkout success if redirected from Stripe
+  if (route.query.checkout === 'success') {
+    track('checkout_success')
+  }
+
   // Sync active tab from URL query param
   const tab = route.query.tab as string
   if (tab && tabLabels[tab]) {

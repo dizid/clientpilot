@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
 import { generateContent, createCheckout, saveTarget } from '@/lib/api'
+import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
 
 const auth = useAuthStore()
@@ -116,10 +117,12 @@ async function generate(type: string, targetId?: string) {
 
   generating.value = type
   error.value = ''
+  track('generate_start', { content_type: type })
 
   try {
     await generateContent(type, targetId)
     completed.value.push(type)
+    track('generate_complete', { content_type: type })
     auth.refreshPlan()
     const ct = contentTypes.find(c => c.type === type)
     toast.add(`${ct?.title ?? type} generated!`, 'success')
@@ -150,6 +153,7 @@ function cancelGeneration() {
 // ── Upgrade ─────────────────────────────────────────────────────────────────
 
 async function handleUpgrade(priceId: string) {
+  track('upgrade_click', { source: 'generate', price_id: priceId })
   try {
     const { data } = await createCheckout(priceId)
     window.location.href = data.url

@@ -2,8 +2,10 @@ import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { buildProfileContext } from './lib/prompts.mjs'
 import { validate, requireUUID, optionalString } from './lib/validate.mjs'
+import { safeError } from './lib/errors.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514'
 
 interface RegeneratePieceBody {
   pieceId: string
@@ -123,7 +125,7 @@ Rewrite this single piece. Keep the same format and approximate length. Return O
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: CLAUDE_MODEL,
         max_tokens: 2048,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -140,8 +142,6 @@ Rewrite this single piece. Keep the same format and approximate length. Return O
 
     return Response.json({ piece: updateResult.rows[0] })
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Regeneration failed'
-    console.error('regenerate-piece error:', e)
-    return Response.json({ error: message }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Regeneration failed') }, { status: 500 })
   }
 }
