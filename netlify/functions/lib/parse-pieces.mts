@@ -35,9 +35,6 @@ const OUTREACH_LABELS = [
   'Warm - Former Colleague',
   'LinkedIn Engagement',
   'Platform Response',
-  'HN Who\'s Hiring',
-  'Follow-up (3-day)',
-  'Follow-up (7-day)',
 ]
 
 function humanize(key: string): string {

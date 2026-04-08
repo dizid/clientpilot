@@ -20,15 +20,17 @@ export const CONTENT_TYPES = [
   'elevator_pitch'
 ] as const
 
-// Per-type max output tokens. Long-form types stay at 4096; the shorter "sections"
-// types drop to 2048 to keep latency well under Netlify's 26s sync-function timeout.
+// Per-type max output tokens. Tuned empirically against Haiku 4.5 throughput
+// (~80 tok/s measured) so every type finishes within Netlify's 26s sync-function
+// timeout with margin for cold start + DB writes. See e2e test at
+// /tmp/clientpilot-e2e-test.mjs — numbers are the result of measuring real calls.
 export const MAX_TOKENS_BY_TYPE: Record<string, number> = {
-  linkedin_posts: 4096,
-  outreach_templates: 4096,
-  devto_article: 4096,
-  platform_profile: 2048,
-  portfolio_page: 2048,
-  elevator_pitch: 2048,
+  linkedin_posts: 2500,
+  outreach_templates: 2500,
+  devto_article: 2000,
+  platform_profile: 1800,
+  portfolio_page: 2000,
+  elevator_pitch: 1500,
 }
 
 export function buildProfileContext(profile: Profile, userName: string): string {
@@ -59,15 +61,14 @@ export const PROMPTS: Record<string, (ctx: string) => string> = {
 Profile:
 ${ctx}
 
-Write 10 LinkedIn posts that:
+Write 7 LinkedIn posts (keep each 80-140 words — concise, no filler) that:
 1. Establish technical expertise
 2. Show shipping speed and real results
 3. Include a soft CTA (DM me, check my work, etc.)
 4. Use line breaks for readability
-5. Are 100-200 words each
-6. Sound human, not AI-generated
-7. Each has a different angle (case study, insight, availability, tutorial teaser, etc.)
-8. Maximum 3-4 hashtags per post
+5. Sound human, not AI-generated
+6. Each has a different angle (case study, insight, availability, tutorial teaser, etc.)
+7. Maximum 3 hashtags per post
 
 Return as JSON: { "posts": ["post1 text", "post2 text", ...] }`,
 
@@ -76,18 +77,15 @@ Return as JSON: { "posts": ["post1 text", "post2 text", ...] }`,
 Profile:
 ${ctx}
 
-Write 7 outreach templates:
+Write 6 concise outreach templates (keep each 80-130 words):
 1. Cold outreach to a recently funded startup (LinkedIn DM)
 2. Cold outreach to a CTO/tech lead (LinkedIn DM)
 3. Cold outreach to an agency/studio (email)
 4. Warm outreach to a former colleague (email)
 5. LinkedIn network activation (DM after engaging with someone's post)
 6. Freelance platform inquiry response
-7. Hacker News "Who's Hiring" post
 
-Each should be personalized with [brackets] for customization, include their specific skills/projects, and end with a CTA.
-
-Also include 2 follow-up templates (3-day and 7-day).
+Each should be personalized with [brackets] for customization, reference their specific skills/projects briefly, and end with a clear CTA.
 
 Return as JSON: { "templates": ["template1", "template2", ...] }`,
 
@@ -96,11 +94,11 @@ Return as JSON: { "templates": ["template1", "template2", ...] }`,
 Profile:
 ${ctx}
 
-Pick their most impressive project and write a full case study article (1000-1500 words) that:
+Pick their most impressive project and write a focused case study article (600-900 words — tight, no filler) that:
 1. Has a catchy, SEO-friendly title
 2. Opens with a hook (what was built, how fast, the result)
-3. Covers the problem, tech decisions, architecture, key code insights
-4. Includes realistic code snippets (not toy examples)
+3. Covers the problem, tech decisions, architecture, and ONE key code insight
+4. Includes ONE realistic code snippet (10-20 lines, not a toy example)
 5. Ends with lessons learned and a soft CTA about their freelance work
 6. Has Dev.to frontmatter (title, description, tags)
 
