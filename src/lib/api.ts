@@ -95,7 +95,7 @@ export const createCheckout = (priceId: string) =>
 
 // User
 export const getUser = () =>
-  api.get<{ user: { plan: string; generations_used: number } }>('/get-user')
+  api.get<{ user: { plan: string; generations_used: number; has_profile: boolean } }>('/get-user')
 
 export const getPieces = (type?: string) =>
   api.get<{ pieces: ContentPiece[] }>('/get-pieces', { params: type ? { type } : {} })

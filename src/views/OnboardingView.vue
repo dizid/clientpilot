@@ -2,10 +2,12 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProfileStore } from '@/stores/profile'
+import { useAuthStore } from '@/stores/auth'
 import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
 
 const profileStore = useProfileStore()
+const auth = useAuthStore()
 const router = useRouter()
 const step = ref(1)
 const saving = ref(false)
@@ -299,6 +301,7 @@ async function finish() {
   saving.value = true
   try {
     await profileStore.save()
+    auth.markProfileSaved()
     track('onboarding_complete')
     clearDraft()
     router.push('/workspace')

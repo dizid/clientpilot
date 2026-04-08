@@ -20,6 +20,17 @@ export const CONTENT_TYPES = [
   'elevator_pitch'
 ] as const
 
+// Per-type max output tokens. Long-form types stay at 4096; the shorter "sections"
+// types drop to 2048 to keep latency well under Netlify's 26s sync-function timeout.
+export const MAX_TOKENS_BY_TYPE: Record<string, number> = {
+  linkedin_posts: 4096,
+  outreach_templates: 4096,
+  devto_article: 4096,
+  platform_profile: 2048,
+  portfolio_page: 2048,
+  elevator_pitch: 2048,
+}
+
 export function buildProfileContext(profile: Profile, userName: string): string {
   const projects = profile.projects.map(p =>
     `- ${p.name}: ${p.description} (${p.tech.join(', ')}) ${p.url ? `[${p.url}]` : ''} ${p.timeline ? `Built in ${p.timeline}` : ''}`

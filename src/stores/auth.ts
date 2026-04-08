@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const plan = ref<string>('free')
   const generationsUsed = ref(0)
+  const hasProfile = ref(false)
   const loading = ref(true)
 
   const isLoggedIn = computed(() => !!user.value)
@@ -22,9 +23,13 @@ export const useAuthStore = defineStore('auth', () => {
           const { data } = await getUser()
           plan.value = data.user.plan
           generationsUsed.value = data.user.generations_used
+          hasProfile.value = data.user.has_profile
         } catch {
           // New user, defaults are fine
+          hasProfile.value = false
         }
+      } else {
+        hasProfile.value = false
       }
       loading.value = false
     })
@@ -39,6 +44,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     plan.value = 'free'
     generationsUsed.value = 0
+    hasProfile.value = false
   }
 
   async function refreshPlan() {
@@ -46,10 +52,20 @@ export const useAuthStore = defineStore('auth', () => {
       const { data } = await getUser()
       plan.value = data.user.plan
       generationsUsed.value = data.user.generations_used
+      hasProfile.value = data.user.has_profile
     } catch {
       // ignore
     }
   }
 
-  return { user, plan, generationsUsed, loading, isLoggedIn, isPro, canGenerate, init, login, logout, refreshPlan }
+  // Call after onboarding completes so the router guard stops bouncing the user
+  function markProfileSaved() {
+    hasProfile.value = true
+  }
+
+  return {
+    user, plan, generationsUsed, hasProfile, loading,
+    isLoggedIn, isPro, canGenerate,
+    init, login, logout, refreshPlan, markProfileSaved,
+  }
 })

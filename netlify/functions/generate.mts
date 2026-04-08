@@ -1,12 +1,16 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
-import { buildProfileContext, PROMPTS, Profile } from './lib/prompts.mjs'
+import { buildProfileContext, PROMPTS, Profile, MAX_TOKENS_BY_TYPE } from './lib/prompts.mjs'
 import { parsePieces } from './lib/parse-pieces.mjs'
 import { validate, requireOneOf, requireUUID } from './lib/validate.mjs'
 import { safeError } from './lib/errors.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
-const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514'
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6'
+
+// Abort the Anthropic call before Netlify kills the function (hard 26s timeout in netlify.toml).
+// We give Claude 24s and reserve ~2s for response parsing + DB writes.
+const ANTHROPIC_TIMEOUT_MS = 24000
 
 interface TargetRow {
   id: number
@@ -70,21 +74,39 @@ export default async (req: Request) => {
     }
 
     const prompt = PROMPTS[type](profileContext)
+    const maxTokens = MAX_TOKENS_BY_TYPE[type] ?? 4096
 
-    // Call Claude
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY!,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 4096,
-        messages: [{ role: 'user', content: prompt }]
+    // Call Claude with an explicit abort so we can return a clean 504 before Netlify kills us.
+    const controller = new AbortController()
+    const abortTimer = setTimeout(() => controller.abort(), ANTHROPIC_TIMEOUT_MS)
+    let response: Response
+    try {
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_API_KEY!,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: maxTokens,
+          messages: [{ role: 'user', content: prompt }]
+        }),
+        signal: controller.signal,
       })
-    })
+    } finally {
+      clearTimeout(abortTimer)
+    }
+
+    if (!response.ok) {
+      const errText = await response.text()
+      console.error('Anthropic API error', response.status, errText)
+      return Response.json(
+        { error: `AI service returned ${response.status}. Please try again in a moment.` },
+        { status: 502 }
+      )
+    }
 
     const data = await response.json() as { content: Array<{ text: string }> }
     const rawText = data.content[0].text
@@ -132,6 +154,11 @@ export default async (req: Request) => {
 
     return Response.json({ generation: { type, content }, pieces: parsedPieces })
   } catch (e: unknown) {
-    return Response.json({ error: safeError(e, 'Generation failed') }, { status: 500 })
+    // AbortError = our 24s safety timeout fired before Anthropic responded → return 504 not 500
+    const isAbort = e instanceof Error && e.name === 'AbortError'
+    return Response.json(
+      { error: safeError(e, 'Generation failed') },
+      { status: isAbort ? 504 : 500 }
+    )
   }
 }

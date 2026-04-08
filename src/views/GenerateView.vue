@@ -83,8 +83,10 @@ async function confirmTarget() {
         pain_point: targetPainPoint.value || ''
       })
       targetId = data.target.id
-    } catch {
-      // proceed without target — non-fatal
+    } catch (e) {
+      // Non-fatal: continue without a target, but tell the user we dropped it
+      console.error('saveTarget failed', e)
+      toast.add('Could not save target — generating without it', 'error')
     }
     savingTarget.value = false
   }

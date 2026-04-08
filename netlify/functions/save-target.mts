@@ -1,6 +1,6 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
-import { validate, requireString } from './lib/validate.mjs'
+import { validate, requireString, optionalString } from './lib/validate.mjs'
 import { safeError } from './lib/errors.mjs'
 
 interface SaveTargetBody {
@@ -20,12 +20,13 @@ export default async (req: Request) => {
     const body = await req.json() as SaveTargetBody
     const { name, niche, platform, pain_point } = body
 
-    // Validate inputs before any DB queries
+    // Validate inputs before any DB queries.
+    // pain_point is optional in the UI — accept empty/missing values rather than 400ing.
     const validationError = validate(
       requireString(name, 'name', 1, 100),
       requireString(niche, 'niche', 1, 100),
       requireString(platform, 'platform', 1, 50),
-      requireString(pain_point, 'pain_point', 1, 500)
+      optionalString(pain_point, 'pain_point', 500)
     )
 
     if (validationError) {
@@ -34,7 +35,7 @@ export default async (req: Request) => {
 
     const result = await query(
       'INSERT INTO targets (user_id, name, niche, platform, pain_point) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [user.id, name, niche, platform, pain_point]
+      [user.id, name, niche, platform, pain_point ?? '']
     )
 
     return Response.json({ target: result.rows[0] })

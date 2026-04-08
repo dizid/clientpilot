@@ -5,7 +5,10 @@ import { validate, requireUUID, optionalString } from './lib/validate.mjs'
 import { safeError } from './lib/errors.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
-const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-20250514'
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6'
+
+// Same hard-cap as generate.mts: abort 2s before Netlify's 26s function timeout
+const ANTHROPIC_TIMEOUT_MS = 24000
 
 interface RegeneratePieceBody {
   pieceId: string
@@ -116,20 +119,37 @@ Original piece (label: "${piece.label}"): ${piece.content}
 ${feedbackSection}
 Rewrite this single piece. Keep the same format and approximate length. Return ONLY the rewritten text, no JSON wrapper.`
 
-    // Call Claude
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY!,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 2048,
-        messages: [{ role: 'user', content: prompt }]
+    // Call Claude with explicit abort so we return cleanly before Netlify kills us
+    const controller = new AbortController()
+    const abortTimer = setTimeout(() => controller.abort(), ANTHROPIC_TIMEOUT_MS)
+    let response: Response
+    try {
+      response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_API_KEY!,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: 2048,
+          messages: [{ role: 'user', content: prompt }]
+        }),
+        signal: controller.signal,
       })
-    })
+    } finally {
+      clearTimeout(abortTimer)
+    }
+
+    if (!response.ok) {
+      const errText = await response.text()
+      console.error('Anthropic API error', response.status, errText)
+      return Response.json(
+        { error: `AI service returned ${response.status}. Please try again in a moment.` },
+        { status: 502 }
+      )
+    }
 
     const data = await response.json() as { content: Array<{ text: string }> }
     const newContent = data.content[0].text.trim()
@@ -142,6 +162,10 @@ Rewrite this single piece. Keep the same format and approximate length. Return O
 
     return Response.json({ piece: updateResult.rows[0] })
   } catch (e: unknown) {
-    return Response.json({ error: safeError(e, 'Regeneration failed') }, { status: 500 })
+    const isAbort = e instanceof Error && e.name === 'AbortError'
+    return Response.json(
+      { error: safeError(e, 'Regeneration failed') },
+      { status: isAbort ? 504 : 500 }
+    )
   }
 }
