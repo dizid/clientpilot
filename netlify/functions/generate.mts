@@ -6,11 +6,14 @@ import { validate, requireOneOf, requireUUID } from './lib/validate.mjs'
 import { safeError } from './lib/errors.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
-const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6'
+// Haiku 4.5 is ~2x faster than Sonnet 4.6 — required to fit comfortably under
+// Netlify's 26s sync function timeout. Override with CLAUDE_MODEL env var
+// if you want to trade speed for quality (and only if you also raise the timeout).
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001'
 
 // Abort the Anthropic call before Netlify kills the function (hard 26s timeout in netlify.toml).
-// We give Claude 24s and reserve ~2s for response parsing + DB writes.
-const ANTHROPIC_TIMEOUT_MS = 24000
+// We give Claude 23s and reserve ~3s for response parsing + DB writes + cold start overhead.
+const ANTHROPIC_TIMEOUT_MS = 23000
 
 interface TargetRow {
   id: number

@@ -11,7 +11,10 @@ AI-powered freelance client acquisition platform — generates personalized outr
 - **Neon project ID:** `flat-meadow-93593842`
 - **Neon database:** `neondb`
 - **Firebase project:** `clientpilot-dizid`
-- **Stripe price IDs:** Pro monthly `price_1THLUl8gBja0qkMxP8KOwmfc`, Lifetime `price_1THLUn8gBja0qkMxskIJvm36`
+- **Production domain:** https://clientpilot.dev
+- **Stripe price IDs (LIVE):** Pro monthly `price_1TJr2B8gBja0qkMx2ZfnugJ4`, Lifetime `price_1TJr2H8gBja0qkMxM6sic98C`
+- **Stripe product IDs (LIVE):** Pro `prod_UIRvS6cB4lWbzM`, Lifetime `prod_UIRwCCNZUq3vx6`
+- **Stripe webhook (LIVE):** `we_1TJr2K8gBja0qkMxLfDqp29A` → `https://clientpilot.dev/.netlify/functions/stripe-webhook`
 
 ## Database Schema
 

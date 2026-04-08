@@ -197,13 +197,13 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
       <p class="text-text-2 mb-6">Upgrade to unlock unlimited generations and full content export.</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <button
-          @click="handleUpgrade('price_1THLUl8gBja0qkMxP8KOwmfc')"
+          @click="handleUpgrade('price_1TJr2B8gBja0qkMx2ZfnugJ4')"
           class="px-6 py-3 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl cursor-pointer border-0 transition"
         >
           Pro — $9/mo
         </button>
         <button
-          @click="handleUpgrade('price_1THLUn8gBja0qkMxskIJvm36')"
+          @click="handleUpgrade('price_1TJr2H8gBja0qkMxM6sic98C')"
           class="px-6 py-3 bg-accent/20 hover:bg-accent/30 text-accent-light font-semibold rounded-xl cursor-pointer border border-accent/30 transition"
         >
           Lifetime — $69

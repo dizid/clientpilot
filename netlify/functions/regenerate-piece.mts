@@ -5,10 +5,11 @@ import { validate, requireUUID, optionalString } from './lib/validate.mjs'
 import { safeError } from './lib/errors.mjs'
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
-const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6'
+// Haiku 4.5 — see generate.mts for rationale (must fit under Netlify's 26s sync timeout)
+const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001'
 
-// Same hard-cap as generate.mts: abort 2s before Netlify's 26s function timeout
-const ANTHROPIC_TIMEOUT_MS = 24000
+// Same hard-cap as generate.mts: abort 3s before Netlify's 26s function timeout
+const ANTHROPIC_TIMEOUT_MS = 23000
 
 interface RegeneratePieceBody {
   pieceId: string

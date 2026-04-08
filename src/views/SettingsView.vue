@@ -63,10 +63,10 @@ async function handleUpgrade(priceId: string) {
           </span>
         </div>
         <div v-if="!auth.isPro" class="flex gap-2">
-          <button @click="handleUpgrade('price_1THLUl8gBja0qkMxP8KOwmfc')" class="px-4 py-2 bg-brand hover:bg-brand-dark text-white text-sm font-semibold rounded-lg cursor-pointer border-0 transition">
+          <button @click="handleUpgrade('price_1TJr2B8gBja0qkMx2ZfnugJ4')" class="px-4 py-2 bg-brand hover:bg-brand-dark text-white text-sm font-semibold rounded-lg cursor-pointer border-0 transition">
             Pro — $9/mo
           </button>
-          <button @click="handleUpgrade('price_1THLUn8gBja0qkMxskIJvm36')" class="px-4 py-2 bg-accent/20 text-accent-light text-sm font-semibold rounded-lg cursor-pointer border border-accent/30 transition">
+          <button @click="handleUpgrade('price_1TJr2H8gBja0qkMxM6sic98C')" class="px-4 py-2 bg-accent/20 text-accent-light text-sm font-semibold rounded-lg cursor-pointer border border-accent/30 transition">
             Lifetime — $69
           </button>
         </div>
