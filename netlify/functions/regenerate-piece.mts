@@ -1,51 +1,29 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
-import { buildProfileContext } from './lib/prompts.mjs'
 import { validate, requireUUID, optionalString } from './lib/validate.mjs'
 import { safeError } from './lib/errors.mjs'
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
-// Haiku 4.5 — see generate.mts for rationale (must fit under Netlify's 26s sync timeout)
-const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001'
+/**
+ * Sync enqueue for single-piece regeneration.
+ *
+ * Marks the piece as regen_status='running', dispatches the background
+ * worker, returns { piece_id, status: 'running' }.
+ *
+ * Client should poll /get-piece-status until regen_status clears.
+ */
 
-// Same hard-cap as generate.mts: abort 3s before Netlify's 26s function timeout
-const ANTHROPIC_TIMEOUT_MS = 23000
+const INTERNAL_SECRET = process.env.INTERNAL_FUNCTION_SECRET
 
 interface RegeneratePieceBody {
   pieceId: string
   feedback?: string
 }
 
-interface ProfileRow {
-  headline: string
-  bio: string
-  skills: string[]
-  tech_stack: string[]
-  experience_years: number
-  projects: Array<{ name: string; description: string; url: string; tech: string[]; timeline: string }>
-  social_links: Record<string, string>
-  target_market: string
-  pricing_model: string
-  availability: string
-}
-
-interface TargetRow {
-  id: number
-  niche: string
-  platform: string
-  pain_point: string
-}
-
 interface PieceRow {
-  id: number
-  user_id: number
-  generation_id: number
+  id: string
+  user_id: string
   type: string
-  label: string
-  content: string
-  status: string
-  updated_at: string
-  created_at: string
+  regen_status: string | null
 }
 
 export default async (req: Request) => {
@@ -58,115 +36,91 @@ export default async (req: Request) => {
     const body = await req.json() as RegeneratePieceBody
     const { pieceId, feedback } = body
 
-    // Validate inputs before any DB queries
     const validationError = validate(
       requireUUID(pieceId, 'pieceId'),
       optionalString(feedback, 'feedback', 500)
     )
-
     if (validationError) {
       return Response.json({ error: validationError }, { status: 400 })
     }
 
-    // Fetch the piece and verify ownership
+    // Verify ownership + check not already running
     const pieceResult = await query(
-      'SELECT * FROM pieces WHERE id = $1 AND user_id = $2',
+      'SELECT id, user_id, type, regen_status FROM pieces WHERE id = $1 AND user_id = $2',
       [pieceId, user.id]
     )
-
     if (pieceResult.rows.length === 0) {
       return Response.json({ error: 'Piece not found' }, { status: 404 })
     }
 
     const piece = pieceResult.rows[0] as PieceRow
-
-    // Fetch the generation's target (may be null if no target was linked)
-    const targetResult = await query(
-      `SELECT t.*
-       FROM generations g
-       LEFT JOIN targets t ON g.target_id = t.id
-       WHERE g.id = $1`,
-      [piece.generation_id]
-    )
-
-    const target = (targetResult.rows[0]?.id ? targetResult.rows[0] : null) as TargetRow | null
-
-    // Fetch user profile
-    const profileResult = await query(
-      'SELECT * FROM profiles WHERE user_id = $1',
-      [user.id]
-    )
-
-    if (profileResult.rows.length === 0) {
-      return Response.json({ error: 'Profile not found' }, { status: 400 })
+    if (piece.regen_status === 'running') {
+      return Response.json({ error: 'Regeneration already in progress' }, { status: 409 })
     }
 
-    const profile = profileResult.rows[0] as ProfileRow
-    const profileContext = buildProfileContext(profile, user.name)
+    // Mark as running, clear any previous error
+    await query(
+      `UPDATE pieces
+       SET regen_status = 'running', regen_error = NULL, updated_at = NOW()
+       WHERE id = $1 AND user_id = $2`,
+      [pieceId, user.id]
+    )
 
-    // Build the focused rewrite prompt
-    const targetSection = target
-      ? `Target Context:\nNiche: ${target.niche}\nPlatform: ${target.platform}\nKey Pain Point: ${target.pain_point}\n`
-      : ''
+    // Dispatch background worker
+    if (!INTERNAL_SECRET) {
+      await clearRegenStatus(pieceId, 'INTERNAL_FUNCTION_SECRET not configured')
+      return Response.json({ error: 'Server misconfiguration' }, { status: 500 })
+    }
 
-    const feedbackSection = feedback ? `User feedback: ${feedback}\n` : ''
+    const origin = process.env.SITE_URL || 'https://clientpilot.dev'
+    const invokeUrl = `${origin}/.netlify/functions/regenerate-piece-background`
 
-    const prompt = `You are rewriting a single piece of freelance marketing content.
-
-Profile: ${profileContext}
-${targetSection}
-Content type: ${piece.type}
-Original piece (label: "${piece.label}"): ${piece.content}
-${feedbackSection}
-Rewrite this single piece. Keep the same format and approximate length. Return ONLY the rewritten text, no JSON wrapper.`
-
-    // Call Claude with explicit abort so we return cleanly before Netlify kills us
-    const controller = new AbortController()
-    const abortTimer = setTimeout(() => controller.abort(), ANTHROPIC_TIMEOUT_MS)
-    let response: Response
     try {
-      response = await fetch('https://api.anthropic.com/v1/messages', {
+      const invokeRes = await fetch(invokeUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_API_KEY!,
-          'anthropic-version': '2023-06-01'
+          'x-internal-secret': INTERNAL_SECRET,
         },
         body: JSON.stringify({
-          model: CLAUDE_MODEL,
-          max_tokens: 2048,
-          messages: [{ role: 'user', content: prompt }]
+          piece_id: pieceId,
+          user_id: user.id,
+          user_name: user.name,
+          feedback: feedback ?? null,
         }),
-        signal: controller.signal,
       })
-    } finally {
-      clearTimeout(abortTimer)
+
+      if (invokeRes.status !== 202 && !invokeRes.ok) {
+        const txt = await invokeRes.text()
+        console.error('Background dispatch failed', invokeRes.status, txt)
+        await clearRegenStatus(pieceId, `Background dispatch failed: ${invokeRes.status}`)
+        return Response.json({ error: 'Failed to start regeneration' }, { status: 500 })
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'dispatch failed'
+      console.error('Background dispatch threw', msg)
+      await clearRegenStatus(pieceId, msg.slice(0, 500))
+      return Response.json({ error: 'Failed to start regeneration' }, { status: 500 })
     }
 
-    if (!response.ok) {
-      const errText = await response.text()
-      console.error('Anthropic API error', response.status, errText)
-      return Response.json(
-        { error: `AI service returned ${response.status}. Please try again in a moment.` },
-        { status: 502 }
-      )
-    }
-
-    const data = await response.json() as { content: Array<{ text: string }> }
-    const newContent = data.content[0].text.trim()
-
-    // Persist the updated content
-    const updateResult = await query(
-      'UPDATE pieces SET content = $1, updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING *',
-      [newContent, pieceId, user.id]
-    )
-
-    return Response.json({ piece: updateResult.rows[0] })
+    return Response.json({ piece_id: pieceId, status: 'running' }, { status: 202 })
   } catch (e: unknown) {
-    const isAbort = e instanceof Error && e.name === 'AbortError'
     return Response.json(
       { error: safeError(e, 'Regeneration failed') },
-      { status: isAbort ? 504 : 500 }
+      { status: 500 }
     )
+  }
+}
+
+async function clearRegenStatus(pieceId: string, reason: string): Promise<void> {
+  try {
+    await query(
+      `UPDATE pieces
+       SET regen_status = 'failed', regen_error = $1, updated_at = NOW()
+       WHERE id = $2`,
+      [reason, pieceId]
+    )
+  } catch (e) {
+    console.error('clearRegenStatus query error', e)
   }
 }

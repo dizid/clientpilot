@@ -12,11 +12,15 @@ const toast = useToastStore()
 const router = useRouter()
 
 // Generation state
-const generating = ref<string | null>(null)
+// `generating` is now a Set of types (parallel mode) — kept as a plain object
+// for Vue reactivity. `generating.value['linkedin_posts'] = true` means it's in flight.
+const generating = ref<Record<string, boolean>>({})
 const error = ref('')
 const completed = ref<string[]>([])
 const failed = ref<string[]>([])
-const cancelled = ref(false)
+
+// Any type currently generating (used to disable buttons during work)
+const anyGenerating = () => Object.keys(generating.value).length > 0
 
 // Target modal state
 const showTargetModal = ref(false)
@@ -36,21 +40,11 @@ const contentTypes = [
   { type: 'elevator_pitch', icon: 'fa-solid fa-bullhorn', title: 'Elevator Pitch & Bios', time: '~15 sec' },
 ]
 
-// Computed: seconds-per-type average used for time estimate
-const AVG_SECONDS_PER_TYPE = 30
-
 function getStatus(type: string): 'pending' | 'generating' | 'done' | 'failed' {
   if (completed.value.includes(type)) return 'done'
+  if (generating.value[type]) return 'generating'
   if (failed.value.includes(type)) return 'failed'
-  if (generating.value === type) return 'generating'
   return 'pending'
-}
-
-function estimatedSecondsRemaining(): number {
-  const remaining = contentTypes.filter(
-    ct => !completed.value.includes(ct.type) && generating.value !== ct.type
-  ).length
-  return remaining * AVG_SECONDS_PER_TYPE
 }
 
 // ── Modal triggers ──────────────────────────────────────────────────────────
@@ -117,7 +111,9 @@ async function generate(type: string, targetId?: string) {
     return
   }
 
-  generating.value = type
+  generating.value = { ...generating.value, [type]: true }
+  // Clear stale failed marker when retrying
+  failed.value = failed.value.filter(t => t !== type)
   error.value = ''
   track('generate_start', { content_type: type })
 
@@ -130,26 +126,27 @@ async function generate(type: string, targetId?: string) {
     toast.add(`${ct?.title ?? type} generated!`, 'success')
   } catch (e: unknown) {
     failed.value.push(type)
-    error.value = e instanceof Error ? e.message : 'Generation failed. Please try again.'
+    const msg = e instanceof Error ? e.message : 'Generation failed. Please try again.'
+    // Show the last error in the banner but don't wipe it if a later success comes in
+    error.value = msg
   } finally {
-    generating.value = null
+    // Remove this type from the in-flight map
+    const next = { ...generating.value }
+    delete next[type]
+    generating.value = next
   }
 }
 
 async function generateAll(targetId?: string) {
-  cancelled.value = false
+  error.value = ''
 
-  for (const ct of contentTypes) {
-    if (cancelled.value) break
-    if (completed.value.includes(ct.type)) continue
-    await generate(ct.type, targetId)
-    // Stop on hard errors that aren't just "already done"
-    if (error.value) break
-  }
-}
+  // Parallel fire-and-await: kick off all 6 (minus already-done) at once.
+  // Promise.allSettled so one failure doesn't abort the others.
+  const pending = contentTypes.filter(ct => !completed.value.includes(ct.type))
 
-function cancelGeneration() {
-  cancelled.value = true
+  await Promise.allSettled(
+    pending.map(ct => generate(ct.type, targetId))
+  )
 }
 
 // ── Upgrade ─────────────────────────────────────────────────────────────────
@@ -216,33 +213,23 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
       <div class="flex items-center justify-center gap-3">
         <button
           @click="startGenerateAll"
-          :disabled="!!generating"
+          :disabled="anyGenerating()"
           class="px-8 py-4 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl cursor-pointer border-0 transition shadow-lg shadow-brand/20 disabled:opacity-50 text-base"
         >
-          <i v-if="generating" class="fa-solid fa-spinner fa-spin mr-2"></i>
+          <i v-if="anyGenerating()" class="fa-solid fa-spinner fa-spin mr-2"></i>
           <i v-else class="fa-solid fa-bolt mr-2"></i>
-          {{ generating ? `Generating ${completed.length + 1} of ${contentTypes.length}...` : 'Generate All Content' }}
-        </button>
-
-        <!-- Cancel button during generateAll -->
-        <button
-          v-if="generating && pendingAction === 'all'"
-          @click="cancelGeneration"
-          class="px-4 py-4 bg-surface-2 hover:bg-surface-3 text-text-2 hover:text-text text-sm font-medium rounded-xl cursor-pointer border border-border transition"
-        >
-          <i class="fa-solid fa-xmark mr-1"></i> Cancel
+          {{ anyGenerating()
+              ? `Generating ${Object.keys(generating).length} in parallel...`
+              : 'Generate All Content' }}
         </button>
       </div>
 
       <!-- Progress hint -->
-      <p v-if="!generating" class="text-xs text-text-3">
-        Generates all 6 content types one by one — takes 2–3 minutes.
+      <p v-if="!anyGenerating()" class="text-xs text-text-3">
+        Generates all 6 content types in parallel — takes ~30 seconds.
       </p>
-      <p v-if="generating" class="text-xs text-text-3">
-        {{ completed.length }} of {{ contentTypes.length }} done
-        <span v-if="estimatedSecondsRemaining() > 0">
-          — ~{{ Math.ceil(estimatedSecondsRemaining() / 60) }} min remaining — keep this tab open
-        </span>
+      <p v-if="anyGenerating()" class="text-xs text-text-3">
+        {{ completed.length }} of {{ contentTypes.length }} done — keep this tab open
       </p>
     </div>
 
@@ -295,7 +282,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
           <button
             v-if="getStatus(ct.type) !== 'done' && (auth.canGenerate || auth.isPro)"
             @click="startGenerate(ct.type)"
-            :disabled="!!generating"
+            :disabled="!!generating[ct.type]"
             class="px-4 py-2 bg-surface-2 hover:bg-surface-3 text-text text-sm font-medium rounded-lg cursor-pointer border-0 transition disabled:opacity-50"
           >
             {{ getStatus(ct.type) === 'failed' ? 'Retry' : getStatus(ct.type) === 'generating' ? 'Working…' : 'Generate' }}

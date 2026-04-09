@@ -8,12 +8,21 @@
 
 [functions."generate"]
   external_node_modules = ["pg"]
-  timeout = 26
+
+[functions."generate-background"]
+  external_node_modules = ["pg"]
+
+[functions."get-generation-status"]
+  external_node_modules = ["pg"]
 
 [functions."regenerate-piece"]
   external_node_modules = ["pg"]
-  node_bundler = "esbuild"
-  timeout = 26
+
+[functions."regenerate-piece-background"]
+  external_node_modules = ["pg"]
+
+[functions."get-piece-status"]
+  external_node_modules = ["pg"]
 
 [[redirects]]
   from = "/*"
