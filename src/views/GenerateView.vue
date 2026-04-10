@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
@@ -20,7 +20,7 @@ const completed = ref<string[]>([])
 const failed = ref<string[]>([])
 
 // Any type currently generating (used to disable buttons during work)
-const anyGenerating = () => Object.keys(generating.value).length > 0
+const anyGenerating = computed(() => Object.keys(generating.value).length > 0)
 
 // Target modal state
 const showTargetModal = ref(false)
@@ -213,22 +213,22 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
       <div class="flex items-center justify-center gap-3">
         <button
           @click="startGenerateAll"
-          :disabled="anyGenerating()"
+          :disabled="anyGenerating"
           class="px-8 py-4 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl cursor-pointer border-0 transition shadow-lg shadow-brand/20 disabled:opacity-50 text-base"
         >
-          <i v-if="anyGenerating()" class="fa-solid fa-spinner fa-spin mr-2"></i>
+          <i v-if="anyGenerating" class="fa-solid fa-spinner fa-spin mr-2"></i>
           <i v-else class="fa-solid fa-bolt mr-2"></i>
-          {{ anyGenerating()
+          {{ anyGenerating
               ? `Generating ${Object.keys(generating).length} in parallel...`
               : 'Generate All Content' }}
         </button>
       </div>
 
       <!-- Progress hint -->
-      <p v-if="!anyGenerating()" class="text-xs text-text-3">
+      <p v-if="!anyGenerating" class="text-xs text-text-3">
         Generates all 6 content types in parallel — takes ~30 seconds.
       </p>
-      <p v-if="anyGenerating()" class="text-xs text-text-3">
+      <p v-if="anyGenerating" class="text-xs text-text-3">
         {{ completed.length }} of {{ contentTypes.length }} done — keep this tab open
       </p>
     </div>

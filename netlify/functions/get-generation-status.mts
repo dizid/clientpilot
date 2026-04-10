@@ -66,8 +66,25 @@ export default async (req: Request) => {
 
     const gen = genResult.rows[0] as GenerationRow
 
-    // Still running — return status only
+    // Still running — but detect orphaned generations that the background
+    // worker never completed (e.g. Netlify killed it at 15 min, or dispatch
+    // silently failed since background functions always return 202).
     if (gen.status === 'queued' || gen.status === 'running') {
+      const ageMs = Date.now() - new Date(gen.created_at).getTime()
+      const STALE_THRESHOLD_MS = 15 * 60 * 1000 // 15 min — matches Netlify bg function ceiling
+      if (ageMs > STALE_THRESHOLD_MS) {
+        // Mark as failed so subsequent polls don't keep waiting
+        await query(
+          `UPDATE generations SET status = 'failed', error = 'Generation timed out', completed_at = NOW() WHERE id = $1`,
+          [gen.id]
+        )
+        // Refund the free-tier credit
+        await query(
+          'UPDATE users SET generations_used = GREATEST(generations_used - 1, 0), updated_at = NOW() WHERE id = $1',
+          [user.id]
+        )
+        return Response.json({ status: 'failed', error: 'Generation timed out. Please try again.' })
+      }
       return Response.json({ status: gen.status })
     }
 

@@ -40,11 +40,6 @@ export default async (req: Request) => {
       return Response.json({ error: validationError }, { status: 400 })
     }
 
-    // Enforce free-tier limit at enqueue time (counter is bumped on success)
-    if (user.plan === 'free' && user.generations_used >= 1) {
-      return Response.json({ error: 'Free tier limit reached. Please upgrade.' }, { status: 403 })
-    }
-
     // Verify profile exists before we queue anything — cheap early-fail
     const profileCheck = await query(
       'SELECT 1 FROM profiles WHERE user_id = $1 LIMIT 1',
@@ -52,6 +47,24 @@ export default async (req: Request) => {
     )
     if (profileCheck.rows.length === 0) {
       return Response.json({ error: 'Please set up your profile first' }, { status: 400 })
+    }
+
+    // Atomic free-tier limit: increment the counter NOW (at enqueue time) so
+    // parallel requests can't all pass the check before any background worker
+    // bumps the counter. The background worker decrements on failure so the
+    // user gets their credit back if generation doesn't succeed.
+    // Pro/lifetime users skip this — they have no limit.
+    if (user.plan === 'free') {
+      const limitResult = await query(
+        `UPDATE users
+         SET generations_used = generations_used + 1, updated_at = NOW()
+         WHERE id = $1 AND generations_used < 1
+         RETURNING id`,
+        [user.id]
+      )
+      if (limitResult.rows.length === 0) {
+        return Response.json({ error: 'Free tier limit reached. Please upgrade.' }, { status: 403 })
+      }
     }
 
     // Insert the queued row
@@ -67,7 +80,7 @@ export default async (req: Request) => {
     // Netlify doesn't kill the request before the dispatch completes.
     // Background functions return 202 almost immediately.
     if (!INTERNAL_SECRET) {
-      await markFailed(generationId, 'INTERNAL_FUNCTION_SECRET not configured')
+      await markFailed(generationId, user.id, 'INTERNAL_FUNCTION_SECRET not configured')
       return Response.json({ error: 'Server misconfiguration' }, { status: 500 })
     }
 
@@ -94,13 +107,13 @@ export default async (req: Request) => {
       if (invokeRes.status !== 202 && !invokeRes.ok) {
         const txt = await invokeRes.text()
         console.error('Background dispatch failed', invokeRes.status, txt)
-        await markFailed(generationId, `Background dispatch failed: ${invokeRes.status}`)
+        await markFailed(generationId, user.id, `Background dispatch failed: ${invokeRes.status}`)
         return Response.json({ error: 'Failed to start generation' }, { status: 500 })
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'dispatch failed'
       console.error('Background dispatch threw', msg)
-      await markFailed(generationId, msg.slice(0, 500))
+      await markFailed(generationId, user.id, msg.slice(0, 500))
       return Response.json({ error: 'Failed to start generation' }, { status: 500 })
     }
 
@@ -113,11 +126,16 @@ export default async (req: Request) => {
   }
 }
 
-async function markFailed(generationId: string, reason: string): Promise<void> {
+async function markFailed(generationId: string, userId: string, reason: string): Promise<void> {
   try {
     await query(
       `UPDATE generations SET status = 'failed', error = $1, completed_at = NOW() WHERE id = $2`,
       [reason, generationId]
+    )
+    // Give the free-tier credit back — counter was incremented at enqueue time
+    await query(
+      'UPDATE users SET generations_used = GREATEST(generations_used - 1, 0), updated_at = NOW() WHERE id = $1',
+      [userId]
     )
   } catch (e) {
     console.error('markFailed query error', e)

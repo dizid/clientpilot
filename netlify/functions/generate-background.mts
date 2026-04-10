@@ -1,4 +1,4 @@
-import { query } from './lib/db.mjs'
+import { query, withTransaction } from './lib/db.mjs'
 import { buildProfileContext, PROMPTS, Profile, MAX_TOKENS_BY_TYPE } from './lib/prompts.mjs'
 import { parsePieces } from './lib/parse-pieces.mjs'
 
@@ -61,7 +61,7 @@ export default async (req: Request) => {
       [user_id]
     )
     if (profileResult.rows.length === 0) {
-      await markFailed(generation_id, 'Profile not found')
+      await markFailed(generation_id, user_id, 'Profile not found')
       return Response.json({ ok: false })
     }
 
@@ -109,7 +109,7 @@ export default async (req: Request) => {
     if (!response.ok) {
       const errText = await response.text()
       console.error('Anthropic API error', response.status, errText)
-      await markFailed(generation_id, `AI service returned ${response.status}`)
+      await markFailed(generation_id, user_id, `AI service returned ${response.status}`)
       return Response.json({ ok: false })
     }
 
@@ -128,52 +128,53 @@ export default async (req: Request) => {
     // Parse into individual pieces
     const parsedPieces = parsePieces(type, content)
 
-    // Batch insert pieces + update generation row + bump user counter in one transaction-ish flow
-    // (three separate queries — we don't have a BEGIN/COMMIT helper but ordering matters: pieces first, then mark complete)
-    if (parsedPieces.length > 0) {
-      const values = parsedPieces.map((_, i) =>
-        `($1, $2, $3, $${4 + i * 2}, $${5 + i * 2})`
-      ).join(', ')
-      const params = [
-        user_id, generation_id, type,
-        ...parsedPieces.flatMap(p => [p.label, p.content])
-      ]
-      await query(
-        `INSERT INTO pieces (user_id, generation_id, type, label, content) VALUES ${values}`,
-        params
+    // All writes in a single transaction — partial failure rolls back cleanly.
+    // Counter was already incremented at enqueue time (generate.mts), so we
+    // only need to insert pieces + mark the generation complete here.
+    await withTransaction(async (client) => {
+      if (parsedPieces.length > 0) {
+        const values = parsedPieces.map((_, i) =>
+          `($1, $2, $3, $${4 + i * 2}, $${5 + i * 2})`
+        ).join(', ')
+        const params = [
+          user_id, generation_id, type,
+          ...parsedPieces.flatMap(p => [p.label, p.content])
+        ]
+        await client.query(
+          `INSERT INTO pieces (user_id, generation_id, type, label, content) VALUES ${values}`,
+          params
+        )
+      }
+
+      await client.query(
+        `UPDATE generations
+         SET content = $1, status = 'complete', completed_at = NOW()
+         WHERE id = $2`,
+        [JSON.stringify(content), generation_id]
       )
-    }
-
-    // Save content JSON + mark complete
-    await query(
-      `UPDATE generations
-       SET content = $1, status = 'complete', completed_at = NOW()
-       WHERE id = $2`,
-      [JSON.stringify(content), generation_id]
-    )
-
-    // Only bump the free-tier counter on success — users get their credit back on failure
-    await query(
-      'UPDATE users SET generations_used = generations_used + 1, updated_at = NOW() WHERE id = $1',
-      [user_id]
-    )
+    })
 
     return Response.json({ ok: true })
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Unknown error'
     console.error('Background generate failed', msg, e)
-    await markFailed(generation_id, msg.slice(0, 500))
+    await markFailed(generation_id, user_id, msg.slice(0, 500))
     return Response.json({ ok: false })
   }
 }
 
-async function markFailed(generationId: string, reason: string): Promise<void> {
+async function markFailed(generationId: string, userId: string, reason: string): Promise<void> {
   try {
     await query(
       `UPDATE generations
        SET status = 'failed', error = $1, completed_at = NOW()
        WHERE id = $2 AND status IN ('queued', 'running')`,
       [reason, generationId]
+    )
+    // Give the free-tier credit back — counter was incremented at enqueue time
+    await query(
+      'UPDATE users SET generations_used = GREATEST(generations_used - 1, 0), updated_at = NOW() WHERE id = $1',
+      [userId]
     )
   } catch (e) {
     console.error('Failed to mark generation as failed', e)
