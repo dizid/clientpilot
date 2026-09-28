@@ -54,3 +54,12 @@ Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`, `idx_r
 - Frontend API layer: Axios with Firebase token interceptor at `/.netlify/functions`
 - Optimistic updates in content store with rollback on error
 - Input validation via `validate()` helper at top of every mutating function, returns 400 on failure
+
+## E2E Tests
+
+`e2e/new-user-journey.spec.ts` drives the full no-forms journey (landing URL → Google sign-in → auto import → first targeted outreach) against the local Vite dev server with real functions and real Claude calls.
+
+- Login: Firebase **Auth emulator** (throwaway users, prod auth untouched) — `VITE_FIREBASE_AUTH_EMULATOR_HOST` is set only by `playwright.config.ts`
+- Database: **must** be a Neon branch — `E2E_DATABASE_URL` is required, the config refuses to run without it
+- Run: `NODE_OPTIONS=--network-family-autoselection-attempt-timeout=3000 E2E_DATABASE_URL=<branch url> npm run test:e2e` (the NODE_OPTIONS flag is needed on slow networks; Node's default 250ms per-address connect timeout fails against Neon)
+- CSP is bypassed locally (it only allows the real Firebase auth domain); verify production CSP separately after deploy

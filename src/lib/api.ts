@@ -108,6 +108,29 @@ export const importProfile = (source: { url?: string; github?: string; text?: st
 const POLL_INTERVAL_MS = 2000
 const GENERATE_TIMEOUT_MS = 3 * 60 * 1000 // 3 min — plenty for Haiku 4.5
 
+// A single failed status check (Neon cold start, network blip) must not fail a
+// generation that is still running server-side. Retry transient errors;
+// give up after MAX_POLL_FAILURES in a row. 4xx errors are real — rethrow.
+const MAX_POLL_FAILURES = 3
+
+async function pollGet<T>(url: string, params: Record<string, string>): Promise<T | null> {
+  try {
+    const res = await api.get<T>(url, { params })
+    return res.data
+  } catch (e: unknown) {
+    const status = (e as { response?: { status?: number } }).response?.status
+    if (status && status >= 400 && status < 500) throw e
+    return null // transient — caller counts consecutive failures
+  }
+}
+
+/** Server-provided error message if there is one, else the generic fallback. */
+export function apiErrorMessage(e: unknown, fallback: string): string {
+  const serverMsg = (e as { response?: { data?: { error?: string } } }).response?.data?.error
+  if (serverMsg) return serverMsg
+  return e instanceof Error && !/status code/.test(e.message) ? e.message : fallback
+}
+
 interface GenerationStatusResponse {
   status: 'queued' | 'running' | 'complete' | 'failed'
   error?: string
@@ -128,14 +151,16 @@ export async function generateContent(
 
   // Step 2: poll until complete / failed / timeout
   const startedAt = Date.now()
+  let consecutiveFailures = 0
   while (Date.now() - startedAt < GENERATE_TIMEOUT_MS) {
     await new Promise(r => setTimeout(r, POLL_INTERVAL_MS))
 
-    const statusRes = await api.get<GenerationStatusResponse>(
-      '/get-generation-status',
-      { params: { id: generationId } }
-    )
-    const body = statusRes.data
+    const body = await pollGet<GenerationStatusResponse>('/get-generation-status', { id: generationId })
+    if (!body) {
+      if (++consecutiveFailures >= MAX_POLL_FAILURES) throw new Error('Lost connection while generating — your content may still appear in the workspace shortly.')
+      continue
+    }
+    consecutiveFailures = 0
 
     if (body.status === 'complete' && body.generation && body.pieces) {
       return { data: { generation: body.generation, pieces: body.pieces } }
@@ -180,14 +205,20 @@ export async function regeneratePiece(
 
   // Step 2: poll the piece until regen_status clears or fails
   const startedAt = Date.now()
+  let consecutiveFailures = 0
   while (Date.now() - startedAt < GENERATE_TIMEOUT_MS) {
     await new Promise(r => setTimeout(r, POLL_INTERVAL_MS))
 
-    const statusRes = await api.get<{ piece: ContentPiece & { regen_status: 'running' | 'failed' | null; regen_error: string | null } }>(
+    const body = await pollGet<{ piece: ContentPiece & { regen_status: 'running' | 'failed' | null; regen_error: string | null } }>(
       '/get-piece-status',
-      { params: { id: pieceId } }
+      { id: pieceId }
     )
-    const piece = statusRes.data.piece
+    if (!body) {
+      if (++consecutiveFailures >= MAX_POLL_FAILURES) throw new Error('Lost connection while regenerating — refresh in a moment to see the result.')
+      continue
+    }
+    consecutiveFailures = 0
+    const piece = body.piece
 
     if (piece.regen_status === null) {
       // Success — content has been updated

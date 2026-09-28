@@ -149,3 +149,33 @@ Write:
 
 Return as JSON: { "sections": { "elevator_pitch": "...", "twitter_bio": "...", "linkedin_headline": "...", "email_signature": "...", "github_readme": "...", "one_liner": "..." } }`
 }
+
+/**
+ * Outreach aimed at ONE named company (target imported from its website).
+ * The generic prompt's scenarios (former colleague, agency…) don't fit a
+ * single prospect, so the model ignored the target — this set is built for it.
+ * Labels live in parse-pieces (OUTREACH_TARGETED_LABELS), same order.
+ */
+export function outreachForCompanyPrompt(ctx: string, companyName: string): string {
+  return `You are writing outreach from a freelance developer to ONE specific company: ${companyName}.
+
+Profile (includes a "Target Context" with the company's niche and likely pain point):
+${ctx}
+
+Write 6 outreach messages to ${companyName}, each 60-130 words unless noted:
+1. Cold email to the founder/CEO (with subject line)
+2. LinkedIn DM to the CTO or engineering lead
+3. LinkedIn connection request note (max 280 characters)
+4. Follow-up email one week after no reply (short, adds one new angle)
+5. "Quick demo" email offering a small free mockup or audit that addresses the pain point (with subject line)
+6. Message asking a mutual connection for a warm intro to ${companyName}
+
+Rules:
+- Name ${companyName} and reference the pain point concretely in every message — no [company], [pain point] or [product] placeholders.
+- Connect the pain point to the freelancer's single most relevant project, with a concrete outcome.
+- Only use [brackets] for details that are genuinely unknown, like [First name] or [Mutual connection].
+- Sound like a person, not a sales template. End with one clear, low-friction CTA.
+
+Return as JSON: { "templates": ["message1", "message2", ...], "targeted": true }`
+}
+

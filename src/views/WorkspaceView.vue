@@ -43,6 +43,12 @@ onMounted(async () => {
     content.loadStats(),
     profile.load(),
   ])
+
+  // No tab requested and the default tab is empty → show the first type with content
+  if (!(tab && tabLabels[tab]) && content.piecesByType.length === 0) {
+    const firstWithContent = Object.keys(tabLabels).find(t => content.pieces.some(p => p.type === t))
+    if (firstWithContent) content.activeTab = firstWithContent
+  }
 })
 
 // Keep URL in sync when active tab changes

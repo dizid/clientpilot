@@ -1,5 +1,5 @@
 import { query, withTransaction } from './lib/db.mjs'
-import { buildProfileContext, PROMPTS, Profile, MAX_TOKENS_BY_TYPE } from './lib/prompts.mjs'
+import { buildProfileContext, PROMPTS, Profile, MAX_TOKENS_BY_TYPE, outreachForCompanyPrompt } from './lib/prompts.mjs'
 import { parsePieces } from './lib/parse-pieces.mjs'
 
 /**
@@ -69,6 +69,7 @@ export default async (req: Request) => {
     let profileContext = buildProfileContext(profile, user_name)
 
     // Append target context if target_id provided
+    let companyName: string | null = null
     if (target_id) {
       const targetResult = await query(
         'SELECT * FROM targets WHERE id = $1 AND user_id = $2',
@@ -76,11 +77,15 @@ export default async (req: Request) => {
       )
       if (targetResult.rows.length > 0) {
         const t = targetResult.rows[0]
+        // Manual targets are segments named "<niche> via <platform>"; imported ones are real companies
+        if (t.name && !t.name.includes(' via ')) companyName = t.name
         profileContext += `\nTarget Context:\nTarget: ${t.name}\nNiche: ${t.niche}\nPlatform: ${t.platform}\nKey Pain Point: ${t.pain_point}`
       }
     }
 
-    const prompt = PROMPTS[type](profileContext)
+    const prompt = type === 'outreach_templates' && companyName
+      ? outreachForCompanyPrompt(profileContext, companyName)
+      : PROMPTS[type](profileContext)
     const maxTokens = MAX_TOKENS_BY_TYPE[type] ?? 4096
 
     // Call Claude with long timeout

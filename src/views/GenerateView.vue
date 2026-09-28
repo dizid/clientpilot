@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
-import { generateContent, createCheckout, saveTarget, importTarget } from '@/lib/api'
+import { generateContent, createCheckout, saveTarget, importTarget, apiErrorMessage } from '@/lib/api'
 import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
 
@@ -166,7 +166,7 @@ async function generate(type: string, targetId?: string) {
     toast.add(`${ct?.title ?? type} generated!`, 'success')
   } catch (e: unknown) {
     failed.value.push(type)
-    const msg = e instanceof Error ? e.message : 'Generation failed. Please try again.'
+    const msg = apiErrorMessage(e, 'Generation failed. Please try again.')
     // Show the last error in the banner but don't wipe it if a later success comes in
     error.value = msg
   } finally {
@@ -202,7 +202,9 @@ async function handleUpgrade(priceId: string) {
 }
 
 function viewWorkspace() {
-  router.push('/workspace')
+  // Open the tab of the most recently generated type, not an empty default tab
+  const lastType = completed.value[completed.value.length - 1]
+  router.push(lastType ? { path: '/workspace', query: { tab: lastType } } : '/workspace')
 }
 
 // ── Escape key closes modal ──────────────────────────────────────────────────

@@ -37,6 +37,16 @@ const OUTREACH_LABELS = [
   'Platform Response',
 ]
 
+// Used when the generation targeted one named company (content.targeted === true)
+const OUTREACH_TARGETED_LABELS = [
+  'Cold Email - Founder',
+  'LinkedIn DM - CTO',
+  'Connection Note',
+  'Follow-up',
+  'Quick Demo Offer',
+  'Warm Intro Request',
+]
+
 function humanize(key: string): string {
   return KEY_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
@@ -143,6 +153,7 @@ export function parsePieces(type: string, content: Record<string, unknown>): Pie
       case 'outreach_templates': {
         const templates = content.templates as unknown
         if (!Array.isArray(templates)) return [{ label: 'Content', content: JSON.stringify(content) }]
+        const labels = content.targeted === true ? OUTREACH_TARGETED_LABELS : OUTREACH_LABELS
         // Claude often returns either ["template1", ...] (desired) OR
         // [{name, content}, ...] (unhelpful wrapper). Unwrap both shapes into plain text
         // so the user sees a usable template, not a JSON blob, in the workspace.
@@ -165,7 +176,7 @@ export function parsePieces(type: string, content: Record<string, unknown>): Pie
             text = String(t)
           }
           return {
-            label: OUTREACH_LABELS[i] ?? `Template ${i + 1}`,
+            label: labels[i] ?? `Template ${i + 1}`,
             content: text,
           }
         })
