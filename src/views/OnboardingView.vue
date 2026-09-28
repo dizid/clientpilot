@@ -3,12 +3,18 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProfileStore } from '@/stores/profile'
 import { useAuthStore } from '@/stores/auth'
+import { useToastStore } from '@/stores/toast'
 import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
+import ProfileImport from '@/components/ProfileImport.vue'
 
 const profileStore = useProfileStore()
 const auth = useAuthStore()
+const toast = useToastStore()
 const router = useRouter()
+// 'import' = one-URL AI import (default for new users), 'form' = classic 4-step wizard.
+// null until the profile has loaded, so we don't flash the wrong screen.
+const mode = ref<'import' | 'form' | null>(null)
 const step = ref(1)
 const saving = ref(false)
 const newSkill = ref('')
@@ -193,7 +199,28 @@ onMounted(async () => {
       // ignore
     }
   }
+  // Fresh profile → offer the one-URL import; existing profile/draft → straight to the form
+  const p = profileStore.profile
+  mode.value = !p.headline.trim() && p.projects.length === 0 ? 'import' : 'form'
 })
+
+// ─── Import → save ─────────────────────────────────────────────────────────
+
+/** Save from the import review screen; if anything is still missing, send the user to that form step. */
+function saveFromImport() {
+  touchStep1()
+  touchStep2()
+  touchStep4()
+  const firstInvalid = !step1Valid.value ? 1 : !step2Valid.value ? 2 : !step4Valid.value ? 4 : 0
+  if (firstInvalid === 0) {
+    track('onboarding_complete_via_import')
+    finish()
+    return
+  }
+  toast.add('Almost there — a few fields need a bit more detail.', 'info', 4000)
+  step.value = firstInvalid
+  mode.value = 'form'
+}
 
 // ─── Skills & Tech ─────────────────────────────────────────────────────────
 
@@ -323,6 +350,16 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
   <AppNav />
 
   <div class="pt-20 pb-20 px-4 sm:px-6 max-w-2xl mx-auto">
+
+    <!-- One-URL AI import (default for new users) -->
+    <ProfileImport
+      v-if="mode === 'import'"
+      :saving="saving"
+      @save="saveFromImport"
+      @manual="mode = 'form'"
+    />
+
+    <template v-else-if="mode === 'form'">
 
     <!-- Quick Start Banner -->
     <div class="mb-6 bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 flex items-start gap-3">
@@ -731,9 +768,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
                   placeholder="Live URL (optional)"
                   class="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-text text-sm placeholder-text-3 focus:outline-none focus:border-brand transition"
                 />
-                <p class="mt-1 text-xs text-text-3">
-                  <i class="fa-solid fa-link-slash mr-1 opacity-50"></i>Import from URL — coming soon
-                </p>
+                <button
+                  type="button"
+                  @click="mode = 'import'"
+                  class="mt-1 text-xs text-brand-light hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                >
+                  <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Import all projects from your site
+                </button>
               </div>
               <input
                 v-model="newProject.timeline"
@@ -936,6 +977,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
       </div>
     </Transition>
 
+    </template>
   </div>
 </template>
 

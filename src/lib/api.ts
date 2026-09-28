@@ -82,6 +82,18 @@ export const saveProfile = (profile: UserProfile) =>
 export const getProfile = () =>
   api.get<{ profile: UserProfile | null }>('/get-profile')
 
+// AI profile import — returns a DRAFT (nothing is saved server-side)
+export type ImportedProfile = Omit<UserProfile, 'pricing_model' | 'availability'>
+
+export interface ImportProfileResponse {
+  profile: ImportedProfile
+  sources: string[]
+  warnings: string[]
+}
+
+export const importProfile = (source: { url?: string; github?: string; text?: string }) =>
+  api.post<ImportProfileResponse>('/import-profile', source)
+
 // ── Generation (async enqueue + poll) ──────────────────────────────────────
 //
 // Backend pattern:
