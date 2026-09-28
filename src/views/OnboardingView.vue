@@ -7,6 +7,7 @@ import { useToastStore } from '@/stores/toast'
 import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
 import ProfileImport from '@/components/ProfileImport.vue'
+import { takePendingImportUrl } from '@/lib/pending-import'
 
 const profileStore = useProfileStore()
 const auth = useAuthStore()
@@ -15,6 +16,8 @@ const router = useRouter()
 // 'import' = one-URL AI import (default for new users), 'form' = classic 4-step wizard.
 // null until the profile has loaded, so we don't flash the wrong screen.
 const mode = ref<'import' | 'form' | null>(null)
+// Portfolio URL entered on the landing page (auto-imports on arrival)
+const pendingImportUrl = ref('')
 const step = ref(1)
 const saving = ref(false)
 const newSkill = ref('')
@@ -200,8 +203,10 @@ onMounted(async () => {
     }
   }
   // Fresh profile → offer the one-URL import; existing profile/draft → straight to the form
+  // A URL from the landing page always wins: go straight to the import.
+  pendingImportUrl.value = takePendingImportUrl()
   const p = profileStore.profile
-  mode.value = !p.headline.trim() && p.projects.length === 0 ? 'import' : 'form'
+  mode.value = pendingImportUrl.value || (!p.headline.trim() && p.projects.length === 0) ? 'import' : 'form'
 })
 
 // ─── Import → save ─────────────────────────────────────────────────────────
@@ -331,7 +336,7 @@ async function finish() {
     auth.markProfileSaved()
     track('onboarding_complete')
     clearDraft()
-    router.push('/workspace')
+    router.push({ path: '/generate', query: { welcome: '1' } })
   } finally {
     saving.value = false
   }
@@ -355,6 +360,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
     <ProfileImport
       v-if="mode === 'import'"
       :saving="saving"
+      :initial-url="pendingImportUrl"
       @save="saveFromImport"
       @manual="mode = 'form'"
     />

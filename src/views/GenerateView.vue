@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
-import { generateContent, createCheckout, saveTarget } from '@/lib/api'
+import { generateContent, createCheckout, saveTarget, importTarget } from '@/lib/api'
 import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
 
 const auth = useAuthStore()
 const toast = useToastStore()
 const router = useRouter()
+const route = useRoute()
+
+// Arrived straight from onboarding → show the "first piece" welcome card
+const isWelcome = computed(() => route.query.welcome === '1')
+// Most directly client-winning type; free users spend their one credit here
+const RECOMMENDED_FIRST_TYPE = 'outreach_templates'
 
 // Generation state
 // `generating` is now a Set of types (parallel mode) — kept as a plain object
@@ -30,6 +36,40 @@ const targetNiche = ref('')
 const targetPlatform = ref('')
 const targetPainPoint = ref('')
 const savingTarget = ref(false)
+const targetName = ref('')
+
+// Prospect URL → AI fills niche / platform / pain point
+const NICHE_OPTIONS = ['SaaS Startups', 'E-commerce', 'Agencies', 'Consulting', 'Enterprise', 'Other']
+const prospectUrl = ref('')
+const analyzingProspect = ref(false)
+const prospectError = ref('')
+
+// The AI niche is free text; show it as an extra option if it isn't one of ours
+const nicheOptions = computed(() =>
+  targetNiche.value && !NICHE_OPTIONS.includes(targetNiche.value)
+    ? [targetNiche.value, ...NICHE_OPTIONS]
+    : NICHE_OPTIONS
+)
+
+async function analyzeProspect() {
+  if (!prospectUrl.value.trim()) return
+  analyzingProspect.value = true
+  prospectError.value = ''
+  track('prospect_import_start')
+  try {
+    const { data } = await importTarget(prospectUrl.value.trim())
+    targetName.value = data.target.name
+    targetNiche.value = data.target.niche
+    targetPlatform.value = data.target.platform
+    targetPainPoint.value = data.target.pain_point
+    track('prospect_import_success')
+  } catch (e: unknown) {
+    const apiError = (e as { response?: { data?: { error?: string } } }).response?.data?.error
+    prospectError.value = apiError || 'Could not analyze that website — fill in the fields yourself.'
+  } finally {
+    analyzingProspect.value = false
+  }
+}
 
 const contentTypes = [
   { type: 'linkedin_posts', icon: 'fa-brands fa-linkedin', title: 'LinkedIn Posts', time: '~30 sec' },
@@ -71,7 +111,7 @@ async function confirmTarget() {
     savingTarget.value = true
     try {
       const { data } = await saveTarget({
-        name: `${targetNiche.value || 'General'} via ${targetPlatform.value || 'Mixed'}`,
+        name: targetName.value || `${targetNiche.value || 'General'} via ${targetPlatform.value || 'Mixed'}`,
         niche: targetNiche.value || 'General',
         platform: targetPlatform.value || 'Mixed',
         pain_point: targetPainPoint.value || ''
@@ -208,8 +248,28 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
       </div>
     </div>
 
-    <!-- Generate All button -->
-    <div v-if="auth.canGenerate || auth.isPro" class="text-center mb-8 space-y-2">
+    <!-- Welcome: first piece right after onboarding -->
+    <div
+      v-if="isWelcome && (auth.canGenerate || auth.isPro) && completed.length === 0 && !anyGenerating"
+      class="bg-brand/10 border border-brand/40 rounded-2xl p-6 text-center mb-8"
+    >
+      <h2 class="text-xl font-bold mb-1">
+        <i class="fa-solid fa-circle-check text-success mr-2"></i>Your profile is ready
+      </h2>
+      <p class="text-sm text-text-2 mb-5">
+        Let's write your first client outreach — personalized from your projects.
+        <span v-if="!auth.isPro" class="block text-xs text-text-3 mt-1">This uses your free generation.</span>
+      </p>
+      <button
+        @click="startGenerate(RECOMMENDED_FIRST_TYPE)"
+        class="px-8 py-4 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl cursor-pointer border-0 transition shadow-lg shadow-brand/20"
+      >
+        <i class="fa-solid fa-envelope-open-text mr-2"></i>Write my first outreach
+      </button>
+    </div>
+
+    <!-- Generate All button (Pro only — free tier has a single generation) -->
+    <div v-if="auth.isPro" class="text-center mb-8 space-y-2">
       <div class="flex items-center justify-center gap-3">
         <button
           @click="startGenerateAll"
@@ -330,6 +390,35 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
           <!-- Fields -->
           <div class="space-y-4 mb-6">
+            <!-- Prospect URL (AI fills the fields below) -->
+            <div>
+              <label class="block text-sm font-medium text-text-2 mb-1.5">
+                Their website <span class="text-xs text-text-3 font-normal">— we'll fill in the rest</span>
+              </label>
+              <form @submit.prevent="analyzeProspect" class="flex gap-2">
+                <input
+                  v-model="prospectUrl"
+                  type="text"
+                  inputmode="url"
+                  autocapitalize="off"
+                  placeholder="theircompany.com"
+                  class="flex-1 min-w-0 bg-surface-2 border border-border rounded-lg px-3 py-2.5 text-text text-sm placeholder-text-3 focus:outline-none focus:border-brand transition"
+                />
+                <button
+                  type="submit"
+                  :disabled="analyzingProspect || !prospectUrl.trim()"
+                  class="px-4 py-2.5 bg-brand/20 hover:bg-brand/30 text-brand-light text-sm font-medium rounded-lg cursor-pointer border-0 transition disabled:opacity-40 whitespace-nowrap"
+                >
+                  <i :class="analyzingProspect ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-wand-magic-sparkles'" class="mr-1"></i>
+                  {{ analyzingProspect ? 'Reading…' : 'Analyze' }}
+                </button>
+              </form>
+              <p v-if="prospectError" class="mt-1.5 text-xs text-danger">{{ prospectError }}</p>
+              <p v-else-if="targetName" class="mt-1.5 text-xs text-success">
+                <i class="fa-solid fa-circle-check mr-1"></i>Targeting {{ targetName }} — edit anything below
+              </p>
+            </div>
+
             <!-- Niche -->
             <div>
               <label class="block text-sm font-medium text-text-2 mb-1.5">Niche</label>
@@ -338,12 +427,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
                 class="w-full bg-surface-2 border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:outline-none focus:border-brand transition appearance-none cursor-pointer"
               >
                 <option value="">— Select niche —</option>
-                <option value="SaaS Startups">SaaS Startups</option>
-                <option value="E-commerce">E-commerce</option>
-                <option value="Agencies">Agencies</option>
-                <option value="Consulting">Consulting</option>
-                <option value="Enterprise">Enterprise</option>
-                <option value="Other">Other</option>
+                <option v-for="n in nicheOptions" :key="n" :value="n">{{ n }}</option>
               </select>
             </div>
 

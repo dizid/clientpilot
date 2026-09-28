@@ -1,7 +1,7 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { validate, requireString, optionalString } from './lib/validate.mjs'
-import { safeError } from './lib/errors.mjs'
+import { safeError, errorStatus } from './lib/errors.mjs'
 
 export default async (req: Request) => {
   if (req.method !== 'POST') {
@@ -76,6 +76,6 @@ export default async (req: Request) => {
 
     return Response.json({ success: true })
   } catch (e: unknown) {
-    return Response.json({ error: safeError(e, 'Failed to save profile') }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Failed to save profile') }, { status: errorStatus(e) })
   }
 }

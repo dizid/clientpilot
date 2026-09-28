@@ -47,6 +47,7 @@ interface PieceRow {
 
 interface TargetRow {
   id: string
+  name: string
   niche: string
   platform: string
   pain_point: string
@@ -102,7 +103,7 @@ export default async (req: Request) => {
     const profileContext = buildProfileContext(profile, user_name)
 
     const targetSection = target
-      ? `Target Context:\nNiche: ${target.niche}\nPlatform: ${target.platform}\nKey Pain Point: ${target.pain_point}\n`
+      ? `Target Context:\nTarget: ${target.name}\nNiche: ${target.niche}\nPlatform: ${target.platform}\nKey Pain Point: ${target.pain_point}\n`
       : ''
     const feedbackSection = feedback ? `User feedback: ${feedback}\n` : ''
 

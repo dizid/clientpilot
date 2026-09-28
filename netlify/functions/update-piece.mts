@@ -1,7 +1,7 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { validate, requireUUID, requireOneOf, optionalString } from './lib/validate.mjs'
-import { safeError } from './lib/errors.mjs'
+import { safeError, errorStatus } from './lib/errors.mjs'
 
 const VALID_STATUSES = ['draft', 'used', 'replied'] as const
 type Status = typeof VALID_STATUSES[number]
@@ -74,6 +74,6 @@ export default async (req: Request) => {
 
     return Response.json({ piece: result.rows[0] })
   } catch (e: unknown) {
-    return Response.json({ error: safeError(e, 'Update failed') }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Update failed') }, { status: errorStatus(e) })
   }
 }

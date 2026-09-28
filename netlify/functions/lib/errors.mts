@@ -15,3 +15,16 @@ export function safeError(e: unknown, fallback: string): string {
   }
   return fallback
 }
+
+/** Thrown when a request has no valid Firebase login — maps to HTTP 401. */
+export class AuthError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'AuthError'
+  }
+}
+
+/** HTTP status for an error caught in a function's top-level catch. */
+export function errorStatus(e: unknown): number {
+  return e instanceof AuthError ? 401 : 500
+}

@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, type User } from 'firebase/auth'
+import { getAuth, connectAuthEmulator, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, type User } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -9,6 +9,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
+
+// Local E2E tests only: point Auth at the Firebase emulator. Never set in production.
+const authEmulatorHost = import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_HOST
+if (authEmulatorHost) {
+  connectAuthEmulator(auth, `http://${authEmulatorHost}`, { disableWarnings: true })
+}
 
 const googleProvider = new GoogleAuthProvider()
 

@@ -202,6 +202,10 @@ export async function regeneratePiece(
   throw new Error('Regeneration timed out after 3 minutes. Please try again.')
 }
 
+// AI prospect analysis — returns a DRAFT target (nothing is saved)
+export const importTarget = (url: string) =>
+  api.post<{ target: Omit<TargetContext, 'id'> }>('/import-target', { url })
+
 export const saveTarget = (target: Omit<TargetContext, 'id'>) =>
   api.post<{ target: TargetContext }>('/save-target', target)
 

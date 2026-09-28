@@ -1,7 +1,7 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { validate, requireString, optionalString } from './lib/validate.mjs'
-import { safeError } from './lib/errors.mjs'
+import { safeError, errorStatus } from './lib/errors.mjs'
 
 interface SaveTargetBody {
   name: string
@@ -40,6 +40,6 @@ export default async (req: Request) => {
 
     return Response.json({ target: result.rows[0] })
   } catch (e: unknown) {
-    return Response.json({ error: safeError(e, 'Failed to save target') }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Failed to save target') }, { status: errorStatus(e) })
   }
 }

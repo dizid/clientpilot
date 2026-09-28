@@ -1,7 +1,8 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { validate, requireUUID, optionalString } from './lib/validate.mjs'
-import { safeError } from './lib/errors.mjs'
+import { safeError, errorStatus } from './lib/errors.mjs'
+import { checkRateLimit, RATE_LIMIT_MESSAGE } from './lib/rate-limit.mjs'
 
 /**
  * Sync enqueue for single-piece regeneration.
@@ -42,6 +43,10 @@ export default async (req: Request) => {
     )
     if (validationError) {
       return Response.json({ error: validationError }, { status: 400 })
+    }
+
+    if (!(await checkRateLimit(user.id, 'regenerate'))) {
+      return Response.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 })
     }
 
     // Verify ownership + check not already running
@@ -107,7 +112,7 @@ export default async (req: Request) => {
   } catch (e: unknown) {
     return Response.json(
       { error: safeError(e, 'Regeneration failed') },
-      { status: 500 }
+      { status: errorStatus(e) }
     )
   }
 }

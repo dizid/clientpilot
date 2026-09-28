@@ -1,10 +1,9 @@
-import { lookup as dnsLookup, type LookupAddress } from 'node:dns'
-import { isIP, type LookupFunction } from 'node:net'
-import http, { type IncomingHttpHeaders } from 'node:http'
-import https from 'node:https'
 import { authenticateRequest } from './lib/auth.mjs'
-import { validate, optionalString } from './lib/validate.mjs'
-import { safeError } from './lib/errors.mjs'
+import { validate, optionalString, cleanString, cleanStringArray, cleanHttpUrl } from './lib/validate.mjs'
+import { normalizeUrl, fetchPage, findSubpages, htmlToText, formatPageSection, extractSocialLinks } from './lib/web-fetch.mjs'
+import { callClaudeJson } from './lib/claude-json.mjs'
+import { safeError, errorStatus } from './lib/errors.mjs'
+import { checkRateLimit, RATE_LIMIT_MESSAGE } from './lib/rate-limit.mjs'
 
 /**
  * Import a freelancer profile from a portfolio URL, a GitHub username and/or
@@ -20,28 +19,18 @@ import { safeError } from './lib/errors.mjs'
  * budget is left (TOTAL_BUDGET_MS).
  */
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY
-const CLAUDE_MODEL = process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001'
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN // optional — raises GitHub API rate limit
 
 const TOTAL_BUDGET_MS = 23_000
 const MAIN_PAGE_TIMEOUT_MS = 6_000
 const SUBPAGE_TIMEOUT_MS = 4_000
 const MIN_CLAUDE_BUDGET_MS = 8_000
-const MAX_HTML_BYTES = 1_500_000
-const MAX_REDIRECTS = 3
 const MAX_SUBPAGES = 3
 const MAX_SOURCE_CHARS = 24_000
 const MAX_PASTED_CHARS = 15_000
 
 // Must match the <option> values in OnboardingView.vue
 const TARGET_MARKETS = ['eu', 'us', 'global', 'startups']
-
-// Best-effort per-instance rate limit (resets on cold start). Keeps a single
-// user from hammering the endpoint; not a hard global guarantee.
-const RATE_LIMIT = 10
-const RATE_WINDOW_MS = 60 * 60 * 1000
-const recentImports = new Map<string, number[]>()
 
 // Subpages worth following from the portfolio home page
 const SUBPAGE_PATTERN = /\/(about|work|projects?|portfolio|case-stud(y|ies)|resume|cv|services)(\/|$)/i
@@ -93,8 +82,8 @@ export default async (req: Request) => {
       return Response.json({ error: 'Give us a URL, a GitHub username or some text to import from.' }, { status: 400 })
     }
 
-    if (!checkRateLimit(user.id)) {
-      return Response.json({ error: 'Too many imports — please try again in an hour.' }, { status: 429 })
+    if (!(await checkRateLimit(user.id, 'import_profile'))) {
+      return Response.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 })
     }
 
     // ── Gather sources ────────────────────────────────────────────────────
@@ -126,7 +115,7 @@ export default async (req: Request) => {
         // Portfolio links to a GitHub profile? Use it — also rescues JS-only sites.
         if (!githubUser && foundLinks.github) githubUser = parseGithubUsername(foundLinks.github)
 
-        const subpageUrls = findSubpages(mainPage.html, new URL(mainPage.finalUrl))
+        const subpageUrls = findSubpages(mainPage.html, new URL(mainPage.finalUrl), SUBPAGE_PATTERN, MAX_SUBPAGES)
         const subpages = await Promise.all(subpageUrls.map(u => fetchPage(u, SUBPAGE_TIMEOUT_MS)))
         for (const page of subpages) {
           if (!page) continue
@@ -170,241 +159,8 @@ export default async (req: Request) => {
 
     return Response.json({ profile, sources, warnings })
   } catch (e: unknown) {
-    return Response.json({ error: safeError(e, 'Import failed — please try again or fill in the form manually.') }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Import failed — please try again or fill in the form manually.') }, { status: errorStatus(e) })
   }
-}
-
-// ─── Rate limit ──────────────────────────────────────────────────────────────
-
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now()
-  const recent = (recentImports.get(userId) || []).filter(t => now - t < RATE_WINDOW_MS)
-  if (recent.length >= RATE_LIMIT) return false
-  recent.push(now)
-  recentImports.set(userId, recent)
-  return true
-}
-
-// ─── URL safety (SSRF guard) ─────────────────────────────────────────────────
-
-function normalizeUrl(input: string): URL | null {
-  try {
-    const withScheme = /^https?:\/\//i.test(input) ? input : `https://${input}`
-    const url = new URL(withScheme)
-    if (!['http:', 'https:'].includes(url.protocol)) return null
-    if (url.username || url.password) return null
-    if (url.port && !['80', '443'].includes(url.port)) return null
-    if (!url.hostname.includes('.')) return null
-    url.hash = ''
-    return url
-  } catch {
-    return null
-  }
-}
-
-function isPrivateIp(ip: string): boolean {
-  if (isIP(ip) === 4) {
-    const [a, b] = ip.split('.').map(Number)
-    return (
-      a === 0 || a === 10 || a === 127 || a >= 224 ||
-      (a === 100 && b >= 64 && b <= 127) ||
-      (a === 169 && b === 254) ||
-      (a === 172 && b >= 16 && b <= 31) ||
-      (a === 192 && b === 168) ||
-      (a === 198 && (b === 18 || b === 19))
-    )
-  }
-  const v6 = ip.toLowerCase()
-  if (v6.startsWith('::ffff:')) {
-    const mapped = v6.slice(7)
-    return isIP(mapped) === 4 ? isPrivateIp(mapped) : true
-  }
-  return (
-    v6 === '::' || v6 === '::1' ||
-    v6.startsWith('fc') || v6.startsWith('fd') ||
-    v6.startsWith('fe8') || v6.startsWith('fe9') || v6.startsWith('fea') || v6.startsWith('feb')
-  )
-}
-
-/**
- * DNS lookup used by the actual socket connection. Rejects if ANY resolved
- * address is private, so the IP we validate is the IP we connect to — no
- * check-then-fetch gap for DNS rebinding to exploit.
- */
-const safeLookup: LookupFunction = (hostname, options, callback) => {
-  dnsLookup(hostname, { ...options, all: true }, (err, addresses) => {
-    if (err) return callback(err, '', 4)
-    const list = addresses as LookupAddress[]
-    if (list.length === 0 || list.some(a => isPrivateIp(a.address))) {
-      return callback(new Error(`Blocked non-public address for ${hostname}`), '', 4)
-    }
-    if (options.all) return (callback as unknown as (e: null, a: LookupAddress[]) => void)(null, list)
-    callback(null, list[0].address, list[0].family)
-  })
-}
-
-// ─── Page fetching ───────────────────────────────────────────────────────────
-
-interface RawResponse {
-  status: number
-  headers: IncomingHttpHeaders
-  body: string
-}
-
-/** One HTTP(S) GET through safeLookup, no redirect following, body capped at MAX_HTML_BYTES. */
-function requestOnce(url: URL, signal: AbortSignal): Promise<RawResponse> {
-  return new Promise((resolve, reject) => {
-    // IP literals skip DNS, so validate them directly
-    const literal = url.hostname.replace(/^\[|\]$/g, '')
-    if (isIP(literal) && isPrivateIp(literal)) return reject(new Error('Blocked private IP'))
-
-    const client = url.protocol === 'https:' ? https : http
-    const req = client.request(url, {
-      method: 'GET',
-      lookup: safeLookup,
-      signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ClientPilotBot/1.0; +https://clientpilot.dev)',
-        'Accept': 'text/html,application/xhtml+xml'
-      }
-    }, res => {
-      const status = res.statusCode ?? 0
-      const contentType = String(res.headers['content-type'] || '')
-      // Redirects and non-HTML: don't bother reading the body
-      if (status >= 300 && status < 400 || !contentType.includes('html')) {
-        res.destroy()
-        return resolve({ status, headers: res.headers, body: '' })
-      }
-      const chunks: Buffer[] = []
-      let total = 0
-      res.on('data', (chunk: Buffer) => {
-        chunks.push(chunk)
-        total += chunk.length
-        if (total >= MAX_HTML_BYTES) res.destroy()
-      })
-      const finish = () => resolve({ status, headers: res.headers, body: Buffer.concat(chunks).subarray(0, MAX_HTML_BYTES).toString('utf8') })
-      res.on('end', finish)
-      res.on('close', finish) // fires after destroy() at the size cap
-      res.on('error', reject)
-    })
-    req.on('error', reject)
-    req.end()
-  })
-}
-
-/** Fetch an HTML page with per-hop SSRF checks, size cap and timeout. Returns null on any failure. */
-async function fetchPage(startUrl: URL, timeoutMs: number): Promise<{ finalUrl: string; html: string } | null> {
-  const signal = AbortSignal.timeout(timeoutMs)
-  try {
-    let url = startUrl
-    for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-      const res = await requestOnce(url, signal)
-
-      if (res.status >= 300 && res.status < 400) {
-        const location = res.headers.location
-        if (!location) return null
-        const next = normalizeUrl(new URL(location, url).toString())
-        if (!next) return null
-        url = next
-        continue
-      }
-
-      if (res.status < 200 || res.status >= 300 || !res.body) return null
-      return { finalUrl: url.toString(), html: res.body }
-    }
-    return null
-  } catch {
-    return null
-  }
-}
-
-/** Same-site links that look like about/projects/portfolio pages. */
-function findSubpages(html: string, base: URL): URL[] {
-  const found = new Map<string, URL>()
-  for (const match of html.matchAll(/<a\b[^>]*\bhref\s*=\s*["']([^"'#]+)["']/gi)) {
-    try {
-      const u = new URL(match[1], base)
-      u.hash = ''
-      u.search = ''
-      if (u.hostname !== base.hostname) continue
-      if (u.pathname === base.pathname) continue
-      if (!SUBPAGE_PATTERN.test(u.pathname)) continue
-      found.set(u.toString(), u)
-      if (found.size >= MAX_SUBPAGES) break
-    } catch {
-      // ignore malformed hrefs
-    }
-  }
-  return [...found.values()]
-}
-
-// ─── HTML → text ─────────────────────────────────────────────────────────────
-
-function decodeEntities(s: string): string {
-  return s
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
-}
-
-function htmlToText(html: string): string {
-  return decodeEntities(
-    html
-      .replace(/<(script|style|noscript|svg|template)\b[\s\S]*?<\/\1>/gi, ' ')
-      .replace(/<!--[\s\S]*?-->/g, ' ')
-      .replace(/<(br|\/p|\/div|\/li|\/h[1-6]|\/section|\/article)\b[^>]*>/gi, '\n')
-      .replace(/<[^>]+>/g, ' ')
-  )
-    .replace(/[ \t]+/g, ' ')
-    .replace(/\n\s*\n+/g, '\n')
-    .trim()
-}
-
-/** Title, meta/OG tags and JSON-LD — often the only content on JS-rendered sites. */
-function extractMeta(html: string): string {
-  const parts: string[] = []
-  const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]
-  if (title) parts.push(`Title: ${decodeEntities(title.trim())}`)
-
-  for (const m of html.matchAll(/<meta\b[^>]*>/gi)) {
-    const tag = m[0]
-    const key = tag.match(/\b(?:name|property)\s*=\s*["']([^"']+)["']/i)?.[1]?.toLowerCase()
-    const content = tag.match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1]
-    if (key && content && /^(description|keywords|author|og:title|og:description|twitter:description)$/.test(key)) {
-      parts.push(`${key}: ${decodeEntities(content)}`)
-    }
-  }
-
-  for (const m of html.matchAll(/<script\b[^>]*type\s*=\s*["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
-    parts.push(`JSON-LD: ${m[1].trim().slice(0, 3000)}`)
-  }
-  return parts.join('\n')
-}
-
-function formatPageSection(url: string, html: string): string {
-  return `=== PAGE: ${url} ===\n${extractMeta(html)}\n\n${htmlToText(html).slice(0, 10_000)}`
-}
-
-/** Pull social profile links straight from anchors — more reliable than asking the model. */
-function extractSocialLinks(html: string): Record<string, string> {
-  const links: Record<string, string> = {}
-  const patterns: Record<string, RegExp> = {
-    github: /^https?:\/\/(www\.)?github\.com\/[A-Za-z0-9-]+\/?$/i,
-    linkedin: /^https?:\/\/([a-z]+\.)?linkedin\.com\/in\/[^/?#]+\/?$/i,
-    twitter: /^https?:\/\/(www\.)?(twitter|x)\.com\/[A-Za-z0-9_]+\/?$/i,
-    devto: /^https?:\/\/(www\.)?dev\.to\/[A-Za-z0-9_-]+\/?$/i
-  }
-  for (const match of html.matchAll(/\bhref\s*=\s*["'](https?:\/\/[^"']+)["']/gi)) {
-    const href = match[1]
-    for (const [key, re] of Object.entries(patterns)) {
-      if (!links[key] && re.test(href)) links[key] = href.replace(/\/$/, '')
-    }
-  }
-  return links
 }
 
 // ─── GitHub ──────────────────────────────────────────────────────────────────
@@ -486,66 +242,8 @@ SOURCES:
 ${sourceText}`
 }
 
-async function extractProfile(sourceText: string, timeoutMs: number): Promise<Record<string, unknown>> {
-  if (!ANTHROPIC_API_KEY) throw new Error('Anthropic API key is not configured')
-
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), timeoutMs)
-  let response: Response
-  try {
-    response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: CLAUDE_MODEL,
-        max_tokens: 2500,
-        messages: [{ role: 'user', content: buildExtractionPrompt(sourceText) }]
-      }),
-      signal: controller.signal
-    })
-  } finally {
-    clearTimeout(timer)
-  }
-
-  if (!response.ok) {
-    console.error('Anthropic API error', response.status, await response.text())
-    throw new Error(`Anthropic service returned ${response.status} — please try again.`)
-  }
-
-  const data = await response.json() as { content: Array<{ text: string }> }
-  const jsonMatch = data.content[0]?.text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error('Anthropic returned an unreadable profile — please try again.')
-  return JSON.parse(jsonMatch[0])
-}
-
-// ─── Sanitize (same limits as save-profile) ──────────────────────────────────
-
-function cleanString(v: unknown, max: number): string {
-  return typeof v === 'string' ? v.trim().slice(0, max) : ''
-}
-
-function cleanStringArray(v: unknown, maxItems: number, maxLen: number): string[] {
-  if (!Array.isArray(v)) return []
-  const seen = new Set<string>()
-  const out: string[] = []
-  for (const item of v) {
-    const s = cleanString(item, maxLen)
-    if (s && !seen.has(s.toLowerCase())) {
-      seen.add(s.toLowerCase())
-      out.push(s)
-    }
-    if (out.length >= maxItems) break
-  }
-  return out
-}
-
-function cleanHttpUrl(v: unknown): string {
-  const s = cleanString(v, 500)
-  return /^https?:\/\/\S+$/i.test(s) ? s : ''
+function extractProfile(sourceText: string, timeoutMs: number): Promise<Record<string, unknown>> {
+  return callClaudeJson(buildExtractionPrompt(sourceText), 2500, timeoutMs)
 }
 
 function sanitizeProfile(raw: Record<string, unknown>, foundLinks: Record<string, string>): ImportedProfile {

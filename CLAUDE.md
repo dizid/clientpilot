@@ -25,8 +25,9 @@ All IDs are UUID (`gen_random_uuid()`). Tables:
 - **generations** — `id`, `user_id` FK, `type`, `content` JSONB, `target_id` FK (nullable), `created_at`
 - **targets** — `id`, `user_id` FK, `name`, `niche`, `platform`, `pain_point`, `created_at`
 - **pieces** — `id`, `user_id` FK, `generation_id` FK, `type`, `label`, `content` TEXT, `status` (draft/used/replied), `updated_at`, `created_at`
+- **rate_limit_events** — `id` BIGSERIAL, `user_id` FK (cascade), `action`, `created_at` — durable per-user rate limits (`lib/rate-limit.mts`), rows older than 1 day pruned automatically
 
-Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`
+Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`, `idx_rate_limit_user_action_time`
 
 ## Architecture
 
@@ -40,11 +41,14 @@ Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`
 - **AI:** Anthropic Claude API (`claude-sonnet-4-20250514`) generates content, responses parsed into individual pieces
 - **Content types:** `linkedin_posts` (10), `outreach_templates` (9), `devto_article` (1), `platform_profile` (5), `portfolio_page` (7), `elevator_pitch` (6)
 - **Piece lifecycle:** Generated → individual pieces stored → edit/regenerate/status track → stats aggregation
+- **Import (no forms):** `import-profile` (portfolio URL / GitHub / pasted CV → draft profile) and `import-target` (prospect URL → niche/platform/pain point). Both return drafts only; URL fetching goes through `lib/web-fetch.mts` (SSRF guard runs inside the socket DNS lookup — keep using it for any user-supplied URL)
+- **Rate limits:** `checkRateLimit(userId, action)` on generate (30/h), regenerate (60/h), import_profile (10/h), import_target (20/h)
 - **Validation:** Shared `lib/validate.mts` (requireString, requireUUID, requireOneOf, optionalString) used by all mutating endpoints
 - **Payments:** Stripe Checkout for Pro ($9/mo subscription) and Lifetime ($69 one-time), webhook handles plan updates
 
 ### Key Patterns
-- All functions: `export default async (req: Request) => { ... }` with `authenticateRequest(req)` guard
+- All functions: `export default async (req: Request) => { ... }` with `authenticateRequest(req)` guard; top-level catch returns `{ status: errorStatus(e) }` (401 for `AuthError`, else 500)
+- Security headers + CSP live in `netlify.toml`; the CSP hash covers the inline gtag script in `index.html` — recompute if that script changes
 - DB: `query(sql, params)` from shared pool, parameterized queries only
 - Imports use `.mjs` extension in functions (esbuild resolves `.mts` → `.mjs`)
 - Frontend API layer: Axios with Firebase token interceptor at `/.netlify/functions`

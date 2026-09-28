@@ -3,9 +3,21 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { track } from '@/lib/analytics'
+import { savePendingImportUrl } from '@/lib/pending-import'
 
 const router = useRouter()
 const auth = useAuthStore()
+
+// Hero: paste portfolio URL → sign in → onboarding auto-imports it
+const heroUrl = ref('')
+
+function startWithUrl() {
+  const url = heroUrl.value.trim()
+  if (!url) return getStarted('hero_empty_url')
+  track('hero_url_submit')
+  savePendingImportUrl(url)
+  router.push(auth.isLoggedIn ? '/onboarding' : { path: '/login', query: { redirect: '/onboarding' } })
+}
 
 function getStarted(source: string = 'unknown') {
   track('cta_click', { source })
@@ -175,26 +187,38 @@ function toggleFaq(index: number) {
           <span class="text-gradient">Let AI Bring Them to You.</span>
         </h1>
 
-        <p class="text-lg sm:text-xl text-text-2 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Enter your skills and projects. Get AI-generated LinkedIn posts, outreach templates,
-          Dev.to articles, and freelance platform profiles — ready to publish.
+        <p class="text-lg sm:text-xl text-text-2 max-w-2xl mx-auto mb-8 leading-relaxed">
+          Paste your portfolio link. We read your projects and skills, then write LinkedIn posts,
+          outreach templates and platform profiles — ready to publish. No forms.
         </p>
 
-        <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <form @submit.prevent="startWithUrl" class="max-w-xl mx-auto mb-4 flex flex-col sm:flex-row gap-3">
+          <div class="flex-1 flex items-center gap-2 bg-surface border border-border-2 rounded-xl px-4 py-3.5 focus-within:border-brand transition">
+            <i class="fa-solid fa-globe text-text-3 shrink-0"></i>
+            <input
+              v-model="heroUrl"
+              type="text"
+              inputmode="url"
+              autocapitalize="off"
+              aria-label="Your portfolio or GitHub URL"
+              placeholder="yourportfolio.com"
+              class="flex-1 bg-transparent text-text placeholder-text-3 focus:outline-none min-w-0 text-base"
+            />
+          </div>
           <button
-            @click="getStarted('hero')"
-            class="btn-glow px-8 py-4 text-base font-bold bg-brand hover:bg-brand-dark text-white rounded-xl cursor-pointer border-0 transition shadow-lg shadow-brand/20"
+            type="submit"
+            class="btn-glow px-6 py-3.5 text-base font-bold bg-brand hover:bg-brand-dark text-white rounded-xl cursor-pointer border-0 transition shadow-lg shadow-brand/20 whitespace-nowrap"
           >
-            <i class="fa-solid fa-rocket mr-2"></i>
-            Start Free — No Credit Card
+            <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Build my profile
           </button>
-          <a
-            href="#demo"
-            class="px-8 py-4 text-base font-semibold bg-transparent border border-border-2 text-text hover:border-brand rounded-xl no-underline transition text-center"
-          >
-            See It In Action
-          </a>
-        </div>
+        </form>
+
+        <p class="text-sm text-text-3 mb-12">
+          Free, no credit card ·
+          <button type="button" @click="getStarted('hero_no_portfolio')" class="text-brand-light hover:underline bg-transparent border-0 p-0 cursor-pointer text-sm">No portfolio? Start anyway</button>
+          ·
+          <a href="#demo" class="text-brand-light hover:underline no-underline">See it in action</a>
+        </p>
 
         <p class="text-sm text-text-3">
           Built by a dev who shipped 20+ products and landed freelance clients with this exact system.

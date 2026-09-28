@@ -76,7 +76,7 @@ export default async (req: Request) => {
       )
       if (targetResult.rows.length > 0) {
         const t = targetResult.rows[0]
-        profileContext += `\nTarget Context:\nNiche: ${t.niche}\nPlatform: ${t.platform}\nKey Pain Point: ${t.pain_point}`
+        profileContext += `\nTarget Context:\nTarget: ${t.name}\nNiche: ${t.niche}\nPlatform: ${t.platform}\nKey Pain Point: ${t.pain_point}`
       }
     }
 

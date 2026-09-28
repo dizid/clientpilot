@@ -1,7 +1,7 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { requireUUID, validate } from './lib/validate.mjs'
-import { safeError } from './lib/errors.mjs'
+import { safeError, errorStatus } from './lib/errors.mjs'
 
 /**
  * Polling endpoint for single-piece regeneration.
@@ -56,6 +56,6 @@ export default async (req: Request) => {
 
     return Response.json({ piece })
   } catch (e: unknown) {
-    return Response.json({ error: safeError(e, 'Status check failed') }, { status: 500 })
+    return Response.json({ error: safeError(e, 'Status check failed') }, { status: errorStatus(e) })
   }
 }

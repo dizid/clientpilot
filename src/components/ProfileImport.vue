@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useProfileStore } from '@/stores/profile'
 import { importProfile, type ImportedProfile } from '@/lib/api'
 import { track } from '@/lib/analytics'
@@ -14,7 +14,8 @@ import { track } from '@/lib/analytics'
  * classic 4-step form.
  */
 
-defineProps<{ saving: boolean }>()
+// initialUrl: set when the user pasted a URL on the landing page — import starts right away
+const props = defineProps<{ saving: boolean; initialUrl?: string }>()
 const emit = defineEmits<{ save: []; manual: [] }>()
 
 const profileStore = useProfileStore()
@@ -85,6 +86,13 @@ function stopLoadingMessages() {
 }
 
 onUnmounted(stopLoadingMessages)
+
+onMounted(() => {
+  if (props.initialUrl) {
+    url.value = props.initialUrl
+    runImport()
+  }
+})
 
 // ─── Import ────────────────────────────────────────────────────────────────
 
@@ -414,7 +422,7 @@ function chipClass(selected: boolean): string {
 
     <button
       @click="emit('save')"
-      :disabled="!readyToSave || saving"
+      :disabled="!readyToSave || props.saving"
       class="w-full py-3.5 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl cursor-pointer border-0 transition disabled:opacity-40 disabled:cursor-not-allowed"
     >
       <i v-if="saving" class="fa-solid fa-spinner fa-spin mr-2"></i>

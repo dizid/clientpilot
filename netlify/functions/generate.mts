@@ -2,7 +2,8 @@ import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { PROMPTS } from './lib/prompts.mjs'
 import { validate, requireOneOf, requireUUID } from './lib/validate.mjs'
-import { safeError } from './lib/errors.mjs'
+import { safeError, errorStatus } from './lib/errors.mjs'
+import { checkRateLimit, RATE_LIMIT_MESSAGE } from './lib/rate-limit.mjs'
 
 /**
  * Sync enqueue endpoint.
@@ -47,6 +48,10 @@ export default async (req: Request) => {
     )
     if (profileCheck.rows.length === 0) {
       return Response.json({ error: 'Please set up your profile first' }, { status: 400 })
+    }
+
+    if (!(await checkRateLimit(user.id, 'generate'))) {
+      return Response.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 })
     }
 
     // Atomic free-tier limit: increment the counter NOW (at enqueue time) so
@@ -121,7 +126,7 @@ export default async (req: Request) => {
   } catch (e: unknown) {
     return Response.json(
       { error: safeError(e, 'Generation failed') },
-      { status: 500 }
+      { status: errorStatus(e) }
     )
   }
 }

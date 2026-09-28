@@ -1,5 +1,6 @@
 import admin from 'firebase-admin'
 import { query } from './db.mjs'
+import { AuthError } from './errors.mjs'
 
 // Initialize Firebase Admin (only once)
 if (!admin.apps.length) {
@@ -15,6 +16,7 @@ export interface AuthUser {
   name: string
   plan: string
   generations_used: number
+  stripe_customer_id: string | null
 }
 
 /**
@@ -24,11 +26,16 @@ export interface AuthUser {
 export async function authenticateRequest(req: Request): Promise<AuthUser> {
   const authHeader = req.headers.get('Authorization')
   if (!authHeader?.startsWith('Bearer ')) {
-    throw new Error('Missing authorization token')
+    throw new AuthError('Missing authorization token')
   }
 
   const token = authHeader.split('Bearer ')[1]
-  const decoded = await admin.auth().verifyIdToken(token)
+  let decoded: admin.auth.DecodedIdToken
+  try {
+    decoded = await admin.auth().verifyIdToken(token)
+  } catch {
+    throw new AuthError('Invalid token — please sign in again')
+  }
 
   // Upsert user in database
   const result = await query(
@@ -36,7 +43,7 @@ export async function authenticateRequest(req: Request): Promise<AuthUser> {
      VALUES ($1, $2, $3)
      ON CONFLICT (firebase_uid)
      DO UPDATE SET email = EXCLUDED.email, name = EXCLUDED.name, updated_at = NOW()
-     RETURNING id, firebase_uid, email, name, plan, generations_used`,
+     RETURNING id, firebase_uid, email, name, plan, generations_used, stripe_customer_id`,
     [decoded.uid, decoded.email, decoded.name || '']
   )
 
