@@ -1,0 +1,23 @@
+# ClientPilot
+
+> ClientPilot (https://clientpilot.dev) turns a freelance developer's profile into ready-to-publish client acquisition content: LinkedIn posts, cold outreach emails, a Dev.to article, freelance platform profiles, portfolio page copy and elevator pitches. Made by Dizid (https://dizid.com), Marc de Ruijter.
+
+## What it does
+- You sign in with Google and give it your portfolio URL, GitHub profile or a pasted CV; it drafts your profile (skills, stack, projects, target market) for you to check.
+- One generation produces six content types from that profile: LinkedIn posts (10), outreach email templates, a Dev.to case-study article, platform profiles (Toptal, Arc.dev, freelance.nl and others), portfolio /hire page copy, and elevator pitches (30-second pitch, X bio, LinkedIn headline, GitHub README).
+- Target context: describe an ideal client (startup, agency, a niche, or paste the prospect's website) and the messaging, pain points and positioning are tailored to that client. Several targets can share one profile.
+- Every piece is editable inline, can be regenerated on its own, copied, and tracked as draft, used or replied.
+- Content is generated with Anthropic's Claude.
+
+## Pricing
+- Free: 1 preview generation, see all content types, limited copy/export.
+- Pro: $9 per month. Unlimited generations, all content types, full copy/export, weekly content refresh. Cancel anytime from Settings; refund on request within 7 days of purchase.
+- Lifetime: $69 one-time payment. Everything in Pro, lifetime updates, priority support.
+
+## Who it is for
+- Freelance and indie developers who want a steady stream of client-facing content without writing it from scratch each week.
+- Not an API or auto-poster yet: you copy the content and publish it yourself (LinkedIn and Dev.to publishing integrations are on the roadmap).
+
+## Links
+- Home and sign-up: https://clientpilot.dev/
+- Maker: https://dizid.com

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /onboarding
+Disallow: /workspace
+Disallow: /generate
+Disallow: /settings
+Disallow: /.netlify/
+
+Sitemap: https://clientpilot.dev/sitemap.xml

@@ -6,7 +6,7 @@ AI-powered freelance client acquisition platform — generates personalized outr
 
 - **Netlify site ID:** `bb78ccb7-9663-4b41-bcd8-b3c2d6a23029`
 - **Netlify site name:** `clientpilot-app`
-- **Production URL:** https://clientpilot-app.netlify.app
+- **Production URL:** https://clientpilot.dev (the old https://clientpilot-app.netlify.app 301-redirects there via netlify.toml)
 - **GitHub repo:** `dizid/clientpilot`
 - **Neon project ID:** `flat-meadow-93593842`
 - **Neon database:** `neondb`

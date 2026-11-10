@@ -36,6 +36,14 @@
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'sha256-SdceSYSGHGhGIlISua+67S0j9UfCMztgXUR6UnY9FvE=' https://www.googletagmanager.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.googleapis.com https://clientpilot-dizid.firebaseapp.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-src https://clientpilot-dizid.firebaseapp.com https://accounts.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 
+# One home for search engines: the old Netlify address forwards to the real domain
+# (deploy previews use other subdomains, so they are not affected)
+[[redirects]]
+  from = "https://clientpilot-app.netlify.app/*"
+  to = "https://clientpilot.dev/:splat"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
