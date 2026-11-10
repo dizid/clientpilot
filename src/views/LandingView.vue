@@ -226,12 +226,12 @@ function toggleFaq(index: number) {
       </div>
     </section>
 
-    <!-- ─── Social Proof Bar ──────────────────────────────────── -->
+    <!-- ─── Facts Bar (only true, checkable claims) ──────────────────────────────────── -->
     <section class="py-5 px-4 sm:px-6 border-y border-border bg-surface/30">
       <div class="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 text-sm text-text-3">
         <div class="flex items-center gap-2">
-          <i class="fa-solid fa-users text-brand/60 text-base"></i>
-          <span>500+ freelancers using ClientPilot</span>
+          <i class="fa-solid fa-gift text-brand/60 text-base"></i>
+          <span>Free preview, no card needed</span>
         </div>
         <div class="hidden sm:block w-px h-4 bg-border-2"></div>
         <div class="flex items-center gap-2">
@@ -240,8 +240,8 @@ function toggleFaq(index: number) {
         </div>
         <div class="hidden sm:block w-px h-4 bg-border-2"></div>
         <div class="flex items-center gap-2">
-          <i class="fa-solid fa-earth-europe text-brand/60 text-base"></i>
-          <span>Used by devs from 20+ countries</span>
+          <i class="fa-solid fa-pen-to-square text-brand/60 text-base"></i>
+          <span>Every piece editable, one click to regenerate</span>
         </div>
       </div>
     </section>
