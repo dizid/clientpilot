@@ -20,7 +20,7 @@ const showPage = computed(
   <div class="min-h-screen bg-bg">
     <router-view v-if="showPage" />
     <div v-else class="min-h-screen flex items-center justify-center">
-      <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand"></i>
+      <i class="fa-solid fa-circle-notch fa-spin text-3xl text-brand-light"></i>
     </div>
     <ToastContainer />
   </div>

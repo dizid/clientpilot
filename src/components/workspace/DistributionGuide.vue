@@ -117,7 +117,7 @@ const guide = computed<GuideContent | null>(() => guides[props.contentType] ?? n
       @click="toggle"
     >
       <span class="font-semibold text-sm">
-        <i class="fa-solid fa-compass text-brand mr-2"></i>
+        <i class="fa-solid fa-compass text-brand-light mr-2"></i>
         What to Do Next
       </span>
       <i

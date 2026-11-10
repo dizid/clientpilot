@@ -28,8 +28,8 @@ function isActive(path: string) {
   <nav class="fixed top-0 inset-x-0 z-50 border-b border-border bg-bg/90 backdrop-blur-lg">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
       <router-link to="/workspace" class="flex items-center gap-2 text-lg font-bold text-text no-underline">
-        <i class="fa-solid fa-rocket text-brand"></i>
-        <span>Client<span class="text-brand">Pilot</span></span>
+        <i class="fa-solid fa-rocket text-brand-light"></i>
+        <span>Client<span class="text-brand-light">Pilot</span></span>
       </router-link>
 
       <!-- Desktop nav -->

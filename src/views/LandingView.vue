@@ -155,8 +155,8 @@ function toggleFaq(index: number) {
     <nav class="fixed top-0 inset-x-0 z-50 border-b border-border bg-bg/80 backdrop-blur-lg">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         <div class="flex items-center gap-2 text-lg font-bold">
-          <i class="fa-solid fa-rocket text-brand"></i>
-          <span>Client<span class="text-brand">Pilot</span></span>
+          <i class="fa-solid fa-rocket text-brand-light"></i>
+          <span>Client<span class="text-brand-light">Pilot</span></span>
         </div>
         <div class="flex items-center gap-4 sm:gap-6">
           <a href="#features" class="text-sm text-text-2 hover:text-text no-underline transition hidden sm:block">Features</a>
@@ -230,17 +230,17 @@ function toggleFaq(index: number) {
     <section class="py-5 px-4 sm:px-6 border-y border-border bg-surface/30">
       <div class="max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10 text-sm text-text-3">
         <div class="flex items-center gap-2">
-          <i class="fa-solid fa-gift text-brand/60 text-base"></i>
+          <i class="fa-solid fa-gift text-brand-light/60 text-base"></i>
           <span>Free preview, no card needed</span>
         </div>
         <div class="hidden sm:block w-px h-4 bg-border-2"></div>
         <div class="flex items-center gap-2">
-          <i class="fa-solid fa-layer-group text-brand/60 text-base"></i>
+          <i class="fa-solid fa-layer-group text-brand-light/60 text-base"></i>
           <span>6 content types generated in one click</span>
         </div>
         <div class="hidden sm:block w-px h-4 bg-border-2"></div>
         <div class="flex items-center gap-2">
-          <i class="fa-solid fa-pen-to-square text-brand/60 text-base"></i>
+          <i class="fa-solid fa-pen-to-square text-brand-light/60 text-base"></i>
           <span>Every piece editable, one click to regenerate</span>
         </div>
       </div>
@@ -259,7 +259,7 @@ function toggleFaq(index: number) {
 
         <div v-for="step in steps" :key="step.num" class="text-center relative">
           <div
-            class="w-12 h-12 rounded-full border-2 border-brand/30 bg-brand/10 text-brand font-bold text-lg flex items-center justify-center mx-auto mb-4"
+            class="w-12 h-12 rounded-full border-2 border-brand/30 bg-brand/10 text-brand-light font-bold text-lg flex items-center justify-center mx-auto mb-4"
             style="animation: pulse-glow 3s ease-in-out infinite"
           >
             {{ step.num }}
@@ -422,7 +422,7 @@ function toggleFaq(index: number) {
           <!-- Mock preview -->
           <div class="bg-surface-2 rounded-lg p-3 border border-border mt-auto">
             <div v-if="feature.badge" class="mb-2">
-              <span class="px-2 py-0.5 bg-brand/15 text-brand-light text-xs rounded font-medium">
+              <span class="px-2 py-0.5 bg-brand/15 text-indigo-300 text-xs rounded font-medium">
                 {{ feature.badge }}
               </span>
             </div>
@@ -595,8 +595,8 @@ function toggleFaq(index: number) {
 
           <!-- Brand -->
           <div class="flex items-center gap-2 text-base font-semibold">
-            <i class="fa-solid fa-rocket text-brand"></i>
-            <span>Client<span class="text-brand">Pilot</span></span>
+            <i class="fa-solid fa-rocket text-brand-light"></i>
+            <span>Client<span class="text-brand-light">Pilot</span></span>
           </div>
 
           <!-- Links -->
@@ -617,11 +617,11 @@ function toggleFaq(index: number) {
 
         <div class="mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-text-3">
           <p>
-            Built by <a href="https://dizid.com" target="_blank" class="text-brand hover:text-brand-light no-underline">Dizid</a>
+            Built by <a href="https://dizid.com" target="_blank" class="text-brand-light hover:text-brand-light no-underline">Dizid</a>
             &mdash; Web development that ships.
           </p>
           <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-2 rounded-full border border-border">
-            <i class="fa-solid fa-microchip text-brand/60 text-xs"></i>
+            <i class="fa-solid fa-microchip text-brand-light/60 text-xs"></i>
             <span>Built with Claude AI</span>
           </div>
         </div>

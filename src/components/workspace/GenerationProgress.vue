@@ -34,7 +34,7 @@ defineProps<{
 
           <!-- Generating: pulsing brand spinner -->
           <template v-else-if="item.status === 'generating'">
-            <i class="fa-solid fa-circle-notch fa-spin text-brand"></i>
+            <i class="fa-solid fa-circle-notch fa-spin text-brand-light"></i>
           </template>
 
           <!-- Done: green check -->
@@ -70,7 +70,7 @@ defineProps<{
           class="text-xs transition-colors duration-300"
           :class="{
             'text-text-3': item.status === 'pending',
-            'text-brand animate-pulse': item.status === 'generating',
+            'text-brand-light animate-pulse': item.status === 'generating',
             'text-success': item.status === 'done',
             'text-danger': item.status === 'failed'
           }"

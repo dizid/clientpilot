@@ -24,7 +24,7 @@
   /* Text */
   --color-text: #f9fafb;
   --color-text-2: #9ca3af;
-  --color-text-3: #6b7280;
+  --color-text-3: #8f96a3; /* was #6b7280: now 4.6-5.9:1 on bg, surface and surface-2 (WCAG AA) */
 
   /* Borders */
   --color-border: #1f2937;

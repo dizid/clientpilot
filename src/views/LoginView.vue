@@ -32,8 +32,8 @@ async function handleGoogleLogin() {
       <!-- Logo -->
       <div class="text-center mb-10">
         <router-link to="/" class="inline-flex items-center gap-2 text-2xl font-bold no-underline text-text">
-          <i class="fa-solid fa-rocket text-brand"></i>
-          Client<span class="text-brand">Pilot</span>
+          <i class="fa-solid fa-rocket text-brand-light"></i>
+          Client<span class="text-brand-light">Pilot</span>
         </router-link>
         <p class="text-text-2 mt-2">Sign in to start getting clients</p>
       </div>

@@ -360,7 +360,7 @@ function chipClass(selected: boolean): string {
           <span
             v-for="(s, i) in profileStore.profile.skills"
             :key="s"
-            class="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 bg-brand/15 text-brand-light rounded-full text-xs"
+            class="inline-flex items-center gap-1 pl-2.5 pr-1 py-1 bg-brand/15 text-indigo-300 rounded-full text-xs"
           >
             {{ s }}
             <button @click="removeSkill(i)" :aria-label="`Remove ${s}`" class="px-1 bg-transparent border-0 text-current opacity-60 hover:opacity-100 cursor-pointer">&times;</button>

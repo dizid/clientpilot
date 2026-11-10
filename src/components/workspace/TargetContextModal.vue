@@ -142,7 +142,7 @@ function isNewFormValid() {
 
             <!-- Loading -->
             <div v-if="loadingTargets" class="flex justify-center py-6">
-              <i class="fa-solid fa-circle-notch fa-spin text-brand text-xl"></i>
+              <i class="fa-solid fa-circle-notch fa-spin text-brand-light text-xl"></i>
             </div>
 
             <template v-else>

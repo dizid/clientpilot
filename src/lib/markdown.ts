@@ -18,7 +18,7 @@ export function renderMarkdown(text: string): string {
     // Links — block javascript: URLs
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, url) => {
       const safeUrl = /^javascript:/i.test(url) ? '#' : url
-      return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="text-brand hover:text-brand-light underline">${label}</a>`
+      return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="text-brand-light hover:text-brand-light underline">${label}</a>`
     })
     // Paragraph breaks
     .replace(/\n\n/g, '</p><p class="mb-4">')

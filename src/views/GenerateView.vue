@@ -224,7 +224,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
     <!-- Header -->
     <div class="text-center mb-10">
       <h1 class="text-3xl font-bold mb-2">
-        <i class="fa-solid fa-wand-magic-sparkles text-brand mr-2"></i>
+        <i class="fa-solid fa-wand-magic-sparkles text-brand-light mr-2"></i>
         Generate Content
       </h1>
       <p class="text-text-2">AI creates tailored content from your profile. Generate one at a time or all at once.</p>

@@ -590,7 +590,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
               class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand/10 text-brand-light rounded-full text-xs font-medium border border-brand/20"
             >
               {{ skill }}
-              <button @click="removeSkill(i)" class="text-brand/50 hover:text-danger cursor-pointer bg-transparent border-0 text-xs leading-none">&times;</button>
+              <button @click="removeSkill(i)" class="text-brand-light/50 hover:text-danger cursor-pointer bg-transparent border-0 text-xs leading-none">&times;</button>
             </span>
           </div>
           <p v-if="touched.skills && errors.skills" class="mt-1 text-xs text-danger">{{ errors.skills }}</p>
@@ -695,7 +695,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <div class="flex items-center gap-2 mb-1">
-                  <i class="fa-solid fa-folder text-brand text-xs shrink-0"></i>
+                  <i class="fa-solid fa-folder text-brand-light text-xs shrink-0"></i>
                   <h4 class="font-semibold text-sm truncate">{{ project.name }}</h4>
                 </div>
                 <p v-if="project.description" class="text-xs text-text-3 line-clamp-2 mb-2">{{ project.description }}</p>

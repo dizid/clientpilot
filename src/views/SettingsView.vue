@@ -100,7 +100,7 @@ async function handleUpgrade(priceId: string) {
             {{ profileCompleteness }}% complete
           </span>
         </div>
-        <router-link to="/onboarding" class="text-sm text-brand hover:text-brand-light no-underline font-medium">
+        <router-link to="/onboarding" class="text-sm text-brand-light hover:text-brand-light no-underline font-medium">
           <i class="fa-solid fa-pen mr-1"></i> Edit Profile
         </router-link>
       </div>
@@ -111,7 +111,7 @@ async function handleUpgrade(priceId: string) {
         <p><span class="text-text-3">Projects:</span> {{ profileStore.profile.projects.length }} added</p>
       </div>
       <p v-else class="text-sm text-text-3">
-        <router-link to="/onboarding" class="text-brand no-underline">Set up your profile</router-link> to start generating content.
+        <router-link to="/onboarding" class="text-brand-light no-underline">Set up your profile</router-link> to start generating content.
       </p>
     </div>
   </div>

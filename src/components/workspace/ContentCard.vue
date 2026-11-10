@@ -98,7 +98,7 @@ async function confirmDelete() {
       </span>
       <div class="flex items-center gap-2">
         <!-- Saving spinner -->
-        <i v-if="isSaving" class="fa-solid fa-circle-notch fa-spin text-brand text-xs"></i>
+        <i v-if="isSaving" class="fa-solid fa-circle-notch fa-spin text-brand-light text-xs"></i>
 
         <!-- Status badge / selector -->
         <select
