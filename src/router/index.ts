@@ -1,11 +1,12 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createMemoryHistory, createWebHistory } from 'vue-router'
 import { watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { trackPageView } from '@/lib/analytics'
 import LandingView from '@/views/LandingView.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
+  // Memory history during the build-time prerender (src/entry-server.ts runs in Node)
+  history: import.meta.env.SSR ? createMemoryHistory() : createWebHistory(),
   routes: [
     { path: '/', name: 'landing', component: LandingView },
     { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue') },

@@ -8,14 +8,15 @@ declare global {
   }
 }
 
+// typeof window guard: these also run during the build-time prerender (Node, no window)
 export function track(event: string, params?: Record<string, unknown>) {
-  if (typeof window.gtag === 'function') {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', event, params)
   }
 }
 
 export function trackPageView(path: string) {
-  if (typeof window.gtag === 'function') {
+  if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
     window.gtag('event', 'page_view', { page_path: path })
   }
 }

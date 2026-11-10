@@ -16,6 +16,11 @@ AI-powered freelance client acquisition platform — generates personalized outr
 - **Stripe product IDs (LIVE):** Pro `prod_UIRvS6cB4lWbzM`, Lifetime `prod_UIRwCCNZUq3vx6`
 - **Stripe webhook (LIVE):** `we_1TJr2K8gBja0qkMxLfDqp29A` → `https://clientpilot.dev/.netlify/functions/stripe-webhook`
 
+## Prerendered landing page (since 2026-11-10, T-0179)
+`npm run build` also builds `src/entry-server.ts` with `vite build --ssr` (into `dist-ssr/`, gitignored) and runs `scripts/prerender.mjs`: it saves the untouched SPA shell as `dist/app-shell.html` (homepage canonical removed) and writes the rendered landing page into `dist/index.html` with `data-ssg-route="/"`. `netlify.toml`'s SPA fallback serves `app-shell.html`, so /login, /workspace etc. never show the landing HTML. `src/main.ts` hydrates (createSSRApp) only when `data-ssg-route` matches the path. The prerender fails the build if the landing page renders without an `<h1>`.
+- Code that runs while rendering the landing page must not touch `window`/`localStorage` at render time (do it in `onMounted` or guard with `typeof window`); the router uses memory history in SSR.
+- `App.vue` shows public routes without waiting for Firebase's login check (only `meta.requiresAuth` routes keep the spinner); before this the landing page was a spinner until Firebase answered.
+
 ## Database Schema
 
 All IDs are UUID (`gen_random_uuid()`). Tables:

@@ -44,7 +44,9 @@
   status = 301
   force = true
 
+# SPA fallback: the plain app shell. index.html is the prerendered landing page
+# (scripts/prerender.mjs), which must not show up on /login, /workspace, ...
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/app-shell.html"
   status = 200
