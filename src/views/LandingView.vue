@@ -138,7 +138,7 @@ const faqs = ref<FaqItem[]>([
   },
   {
     q: 'Can I cancel my subscription?',
-    a: 'Yes, anytime. Cancel from the Settings page — no hoops, no retention flows. You keep access until the end of your billing period. If you want a refund within 7 days of purchase, just email us.',
+    a: 'Yes, anytime. Email dev@dizid.com and we cancel it, no hoops, no retention flows. You keep access until the end of your billing period. If you want a refund within 7 days of purchase, email the same address.',
     open: false,
   },
 ])

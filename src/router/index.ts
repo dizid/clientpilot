@@ -9,6 +9,9 @@ const router = createRouter({
   history: import.meta.env.SSR ? createMemoryHistory() : createWebHistory(),
   routes: [
     { path: '/', name: 'landing', component: LandingView },
+    // Public legal pages (linked from the landing footer and the login card; prerendered)
+    { path: '/privacy', name: 'privacy', component: () => import('@/views/PrivacyView.vue') },
+    { path: '/terms', name: 'terms', component: () => import('@/views/TermsView.vue') },
     { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue') },
     {
       path: '/onboarding',
