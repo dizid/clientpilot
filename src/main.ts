@@ -30,7 +30,7 @@ app.use(router)
 reloadOnStaleChunks(router)
 if (hydrate) {
   // Hydration needs the route resolved first, so the first render matches the HTML.
-  // Only the public landing page is prerendered, so this never waits for a login check.
+  // Only public pages (landing, privacy, terms) are prerendered, so this never waits for a login check.
   router.isReady().then(() => app.mount('#app'))
 } else {
   app.mount('#app')

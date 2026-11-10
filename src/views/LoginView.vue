@@ -60,7 +60,8 @@ async function handleGoogleLogin() {
         </div>
 
         <p class="text-xs text-text-3 text-center mt-6">
-          By signing in you agree to our terms. We only use your email and name.
+          By signing in you agree to our <a href="/terms" class="text-text-2 hover:text-text">Terms</a>.
+          How we use your data: <a href="/privacy" class="text-text-2 hover:text-text">Privacy Policy</a>.
         </p>
       </div>
     </div>
