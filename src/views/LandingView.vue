@@ -176,7 +176,7 @@ function toggleFaq(index: number) {
       <!-- Background glow -->
       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-brand/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div class="relative max-w-4xl mx-auto" style="animation: fade-up 0.8s ease both">
+      <div class="relative max-w-4xl mx-auto" style="animation: rise-up 0.8s ease both">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-brand/10 border border-brand/20 rounded-full text-brand-light text-sm font-medium mb-8">
           <i class="fa-solid fa-sparkles"></i>
           AI-powered client acquisition for freelance devs

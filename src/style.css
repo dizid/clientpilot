@@ -85,6 +85,13 @@ body {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+/* Hero entrance: the same slide-up as fade-up, but without starting transparent. Phones
+   only count the headline as shown (LCP) once it's fully visible, so fading it in from
+   opacity 0 added the whole 0.8 s fade to the landing page's load time. */
+@keyframes rise-up {
+  from { transform: translateY(20px); }
+  to { transform: translateY(0); }
+}
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
