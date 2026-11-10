@@ -608,7 +608,7 @@ function toggleFaq(index: number) {
             <a href="https://github.com/dizid/clientpilot" target="_blank" rel="noopener noreferrer" class="hover:text-text no-underline transition">
               <i class="fa-brands fa-github mr-1"></i>GitHub
             </a>
-            <a href="https://twitter.com/diziddev" target="_blank" rel="noopener noreferrer" class="hover:text-text no-underline transition">
+            <a href="https://x.com/dizid" target="_blank" rel="noopener noreferrer" class="hover:text-text no-underline transition">
               <i class="fa-brands fa-x-twitter mr-1"></i>Twitter
             </a>
           </nav>
