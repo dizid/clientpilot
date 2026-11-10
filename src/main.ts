@@ -14,6 +14,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css'
 import './style.css'
 import App from './App.vue'
 import router from './router'
+import { reloadOnStaleChunks } from './lib/stale-chunk-reload'
 
 // The landing page is prerendered at build time (scripts/prerender.mjs) for crawlers that
 // don't run JavaScript. When this HTML was prerendered for this exact path, hydrate it
@@ -25,6 +26,8 @@ const hydrate = renderedFor === path
 const app = hydrate ? createSSRApp(App) : createApp(App)
 app.use(createPinia())
 app.use(router)
+// Tabs still open from before a deploy: reload the target page instead of a dead tap
+reloadOnStaleChunks(router)
 if (hydrate) {
   // Hydration needs the route resolved first, so the first render matches the HTML.
   // Only the public landing page is prerendered, so this never waits for a login check.
