@@ -165,7 +165,7 @@ ${ctx}
 Write 6 outreach messages to ${companyName}, each 60-130 words unless noted:
 1. Cold email to the founder/CEO (with subject line)
 2. LinkedIn DM to the CTO or engineering lead
-3. LinkedIn connection request note (max 280 characters)
+3. LinkedIn connection request note: at most 200 characters including spaces, ideally 150-190 (LinkedIn's limit for invitation notes; a longer note can't be sent)
 4. Follow-up email one week after no reply (short, adds one new angle)
 5. "Quick demo" email offering a small free mockup or audit that addresses the pain point (with subject line)
 6. Message asking a mutual connection for a warm intro to ${companyName}
