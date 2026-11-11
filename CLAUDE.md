@@ -21,6 +21,13 @@ AI-powered freelance client acquisition platform — generates personalized outr
 - Code that runs while rendering the landing page must not touch `window`/`localStorage` at render time (do it in `onMounted` or guard with `typeof window`); the router uses memory history in SSR.
 - `App.vue` shows public routes without waiting for Firebase's login check (only `meta.requiresAuth` routes keep the spinner); before this the landing page was a spinner until Firebase answered.
 
+## Blog (since 2026-11-11, T-0352)
+Posts live in code, no database: one file per post in `src/content/posts/<slug>.ts` (shape in `types.ts`; registry `index.ts` picks up every file). `/blog` and `/blog/<slug>` are prerendered to `dist/blog.html` and `dist/blog/<slug>.html` (no trailing-slash redirect on Netlify) with their own title, description, canonical and BlogPosting JSON-LD.
+- To add a post: add the file, add its URL to `public/sitemap.xml` and a line to `public/llms.txt`, build. The prerender stops the build if the post uses a tag outside the allowed list, has style/class attributes, a description outside 120-170 characters, no https sources, or is missing from the sitemap.
+- Every fee, number or rule in a post links to the page it came from (`sources`) and the post shows its `checked` date. No invented stats.
+- IndexNow key file: `public/3a21ab3ea1ff0c44abe9a7620a6dd10f.txt`. After a post goes live: POST `https://api.indexnow.org/indexnow` with host `clientpilot.dev`, that key and the new URLs.
+- Footer link "Blog" on the landing page; posts end with a small "See how it works" box linking `/`.
+
 ## Database Schema
 
 All IDs are UUID (`gen_random_uuid()`). Tables:
