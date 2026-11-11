@@ -23,6 +23,8 @@ export default async (req: Request) => {
     return Response.json({ error: safeError(e, 'Webhook verification failed') }, { status: 400 })
   }
 
+  // Subscription events below never touch a Lifetime plan: a $69 buyer may still have an old
+  // Pro subscription whose late events (final failed retry, deletion) arrive after the purchase.
   switch (event.type) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
@@ -50,7 +52,7 @@ export default async (req: Request) => {
       const customerId = subscription.customer as string
 
       await query(
-        "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1",
+        "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1 AND plan IS DISTINCT FROM 'lifetime'",
         [customerId]
       )
       break
@@ -62,7 +64,7 @@ export default async (req: Request) => {
       const customerId = invoice.customer as string
       if (customerId) {
         await query(
-          "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1",
+          "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1 AND plan IS DISTINCT FROM 'lifetime'",
           [customerId]
         )
       }
@@ -75,12 +77,12 @@ export default async (req: Request) => {
       const customerId = subscription.customer as string
       if (subscription.status === 'active') {
         await query(
-          "UPDATE users SET plan = 'pro', updated_at = NOW() WHERE stripe_customer_id = $1",
+          "UPDATE users SET plan = 'pro', updated_at = NOW() WHERE stripe_customer_id = $1 AND plan IS DISTINCT FROM 'lifetime'",
           [customerId]
         )
       } else if (subscription.status === 'past_due' || subscription.status === 'canceled' || subscription.status === 'unpaid') {
         await query(
-          "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1",
+          "UPDATE users SET plan = 'free', updated_at = NOW() WHERE stripe_customer_id = $1 AND plan IS DISTINCT FROM 'lifetime'",
           [customerId]
         )
       }
