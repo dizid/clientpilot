@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User } from 'firebase/auth'
+import { isChunkLoadError, reloadOnce } from '@/lib/stale-chunk-reload'
 
 // Firebase and the API client load on first use instead of with the landing page. On phones,
 // Firebase's Google sign-in setup also downloads Google's hidden sign-in frame (~140 KB), so
@@ -24,7 +25,17 @@ export const useAuthStore = defineStore('auth', () => {
   async function init() {
     if (initStarted) return
     initStarted = true
-    const { onAuthChange } = await loadFirebase()
+    let onAuthChange: Awaited<ReturnType<typeof loadFirebase>>['onAuthChange']
+    try {
+      ;({ onAuthChange } = await loadFirebase())
+    } catch (error) {
+      // A tab left open across a deploy asks for a Firebase file that no longer exists:
+      // load the page once more (fresh HTML, current files), like stale page chunks.
+      if (isChunkLoadError(error) && reloadOnce(window.location.href)) return
+      // Otherwise stop waiting, so pages behind login don't spin forever (they go to /login).
+      loading.value = false
+      return
+    }
     onAuthChange(async (firebaseUser) => {
       user.value = firebaseUser
       if (firebaseUser) {
