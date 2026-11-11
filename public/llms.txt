@@ -30,6 +30,7 @@
 - Upwork proposals for developers: what the client sees first, how Connects and boosted proposals work, cover letter and screening questions, a short dev example, and why moving off-platform early breaks the Terms of Service: https://clientpilot.dev/blog/upwork-proposal-developer
 - Client won't pay? How to chase a late freelance invoice: what to put on the invoice, a reminder schedule with three templates, pausing work and handling client accounts, and the late-payment rules in the EU (Directive 2011/7/EU), the Netherlands, the UK and New York City: https://clientpilot.dev/blog/freelance-invoice-late-payment
 - Freelance developer case study: what buyers need to see, a template with a made-up example, showing results under an NDA, getting the client's OK and a quote, then publishing on your own site, cross-posting to Dev.to with a canonical URL, and Upwork portfolio and LinkedIn Featured/Projects rules: https://clientpilot.dev/blog/freelance-developer-case-study
+- How Toptal, Arc.dev and Lemon.io screen freelance developers: each screening step as the platforms describe it (Toptal's five steps and pass rates, Arc's communication test and domain interview, Lemon.io's AI or human call, quiz, recruiter call and live technical interview), how to prepare for each, a side-by-side table and a what-to-have-ready checklist: https://clientpilot.dev/blog/freelance-developer-vetting-toptal-arc-lemon
 
 ## Links
 - Home and sign-up: https://clientpilot.dev/
