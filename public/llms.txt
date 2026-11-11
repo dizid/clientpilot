@@ -24,6 +24,7 @@
 - Freelance platform fees for developers compared (2026) (Upwork, Fiverr, Contra, Malt, Toptal, Arc, Freelancer.com, PeoplePerHour, Braintrust, Lemon.io; free channels; a 30-day plan): https://clientpilot.dev/blog/freelance-platform-fees-compared
 - Cold email for freelance developers: template and rules (example email, two follow-ups, Gmail and Yahoo sender requirements, CAN-SPAM, UK PECR, GDPR and national rules): https://clientpilot.dev/blog/cold-email-freelance-developer
 - LinkedIn outreach for freelance developers: a 3-step plan (profile basics, connection note vs InMail vs message, LinkedIn's own invitation limits and automation rules, three example messages): https://clientpilot.dev/blog/linkedin-outreach-freelance-developer
+- Freelance follow-up emails: when, how often, templates (timing by situation, what each follow-up should add, four templates incl. a breakup email, a tracking sheet, CAN-SPAM, PECR, GDPR and Gmail/Yahoo notes): https://clientpilot.dev/blog/freelance-follow-up-email
 
 ## Links
 - Home and sign-up: https://clientpilot.dev/
