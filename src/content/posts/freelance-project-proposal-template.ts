@@ -30,7 +30,7 @@ const post: BlogPost = {
 
 <h2>How long should it be?</h2>
 <p><strong>Rule of thumb:</strong> one page for a small job, two to three for a larger one, and nothing that needs a table of contents. The reader should be able to finish it in under five minutes. If a section keeps growing, move the detail to an appendix and keep the main text short.</p>
-<p>Upwork's own guide on cover letters points the same way. It tells freelancers to aim for 200 to 300 words or fewer and to tailor every letter to the job, because clients often review many proposals back to back (<a href="https://www.upwork.com/resources/cover-letter-tips" target="_blank" rel="noopener noreferrer">Upwork cover letter guide</a>). A cover letter on a marketplace is shorter than a proposal for a paid project, but the principle carries over: specific beats long.</p>
+<p>Upwork's own guide on cover letters points the same way. It tells freelancers to aim for 200 to 300 words or fewer and to tailor every letter to the job, because clients often review many proposals back to back (<a href="https://www.upwork.com/resources/cover-letter-tips" target="_blank" rel="noopener noreferrer">Upwork cover letter guide</a>). A cover letter on a marketplace is shorter than a proposal for a paid project, but the principle carries over: specific beats long. For writing on Upwork itself, see our <a href="/blog/upwork-proposal-developer">Upwork proposal guide for developers</a>.</p>
 
 <h2>Scope: say what you will not do</h2>
 <p>Most arguments about scope start with something that was never written down. Two habits prevent most of them.</p>
