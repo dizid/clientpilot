@@ -26,6 +26,7 @@
 - LinkedIn outreach for freelance developers: a 3-step plan (profile basics, connection note vs InMail vs message, LinkedIn's own invitation limits and automation rules, three example messages): https://clientpilot.dev/blog/linkedin-outreach-freelance-developer
 - Freelance follow-up emails: when, how often, templates (timing by situation, what each follow-up should add, four templates incl. a breakup email, a tracking sheet, CAN-SPAM, PECR, GDPR and Gmail/Yahoo notes): https://clientpilot.dev/blog/freelance-follow-up-email
 - Freelance developer contract: the clauses that protect you (scope and exclusions, change requests, deposits and payment terms, acceptance, IP assignment on full payment under US copyright law, reuse license for your own code, open source, confidentiality, GDPR Article 28 processor terms, warranty, liability cap, termination, handover) and New York City's and New York State's written-contract rules: https://clientpilot.dev/blog/freelance-developer-contract-clauses
+- Freelance project proposal: structure, length, scope and out-of-scope wording, price options, expiry date, and a copy-paste template for a web development job: https://clientpilot.dev/blog/freelance-project-proposal-template
 
 ## Links
 - Home and sign-up: https://clientpilot.dev/
