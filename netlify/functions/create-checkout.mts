@@ -28,6 +28,15 @@ export default async (req: Request) => {
       return Response.json({ error: validationError }, { status: 400 })
     }
 
+    // Already paying: never open a second checkout (e.g. right after a purchase, before the
+    // app has seen the webhook's plan change, the upgrade buttons can still be on screen).
+    if (user.plan === 'pro' || user.plan === 'lifetime') {
+      return Response.json(
+        { error: `You already have ClientPilot ${user.plan === 'lifetime' ? 'Lifetime' : 'Pro'}`, alreadyPro: true },
+        { status: 409 }
+      )
+    }
+
     // Get or create Stripe customer
     let customerId = user.stripe_customer_id as string | null
 

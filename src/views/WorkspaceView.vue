@@ -26,10 +26,20 @@ const tabLabels: Record<string, string> = {
   elevator_pitch: 'Elevator Pitch & Bios',
 }
 
+// Back from Stripe: the webhook that switches the plan can land a few seconds after the
+// redirect. Re-check every 2 s (max 20 s) so the Pro badge shows and the upgrade box goes away.
+async function waitForPaidPlan() {
+  for (let attempt = 0; attempt < 10 && !auth.isPro; attempt++) {
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+    await auth.refreshPlan()
+  }
+}
+
 onMounted(async () => {
   // Track checkout success if redirected from Stripe
   if (route.query.checkout === 'success') {
     track('checkout_success')
+    waitForPaidPlan()
   }
 
   // Sync active tab from URL query param
