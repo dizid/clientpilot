@@ -130,6 +130,8 @@ onMounted(() => {
   padding: 0.5rem 0.75rem;
   text-align: left;
   vertical-align: top;
+  /* Readable columns on phones; the table scrolls sideways instead of squeezing. */
+  min-width: 8.5rem;
 }
 .post-body :deep(th) {
   color: var(--color-text);

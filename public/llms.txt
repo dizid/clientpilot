@@ -20,6 +20,7 @@
 
 ## Blog (guides for freelance developers)
 - Index: https://clientpilot.dev/blog
+- Freelance platform fees for developers compared (2026) (Upwork, Fiverr, Contra, Malt, Toptal, Arc, Freelancer.com, PeoplePerHour, Braintrust, Lemon.io; free channels; a 30-day plan): https://clientpilot.dev/blog/freelance-platform-fees-compared
 - Cold email for freelance developers: template and rules (example email, two follow-ups, Gmail and Yahoo sender requirements, CAN-SPAM, UK PECR, GDPR and national rules): https://clientpilot.dev/blog/cold-email-freelance-developer
 
 ## Links
