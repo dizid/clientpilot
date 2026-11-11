@@ -20,6 +20,7 @@
 
 ## Blog (guides for freelance developers)
 - Index: https://clientpilot.dev/blog
+- How to set your freelance developer rate (with 2026 data) (Arc, Upwork, Malt and US BLS figures with their limits; hourly vs day rate vs fixed price; floor-rate calculation incl. platform fees; raising your rate): https://clientpilot.dev/blog/freelance-developer-rates
 - Freelance platform fees for developers compared (2026) (Upwork, Fiverr, Contra, Malt, Toptal, Arc, Freelancer.com, PeoplePerHour, Braintrust, Lemon.io; free channels; a 30-day plan): https://clientpilot.dev/blog/freelance-platform-fees-compared
 - Cold email for freelance developers: template and rules (example email, two follow-ups, Gmail and Yahoo sender requirements, CAN-SPAM, UK PECR, GDPR and national rules): https://clientpilot.dev/blog/cold-email-freelance-developer
 
