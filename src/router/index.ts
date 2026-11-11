@@ -1,7 +1,7 @@
 import { createRouter, createMemoryHistory, createWebHistory } from 'vue-router'
 import { watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { trackPageView } from '@/lib/analytics'
+import { track, trackPageView } from '@/lib/analytics'
 import LandingView from '@/views/LandingView.vue'
 
 const router = createRouter({
@@ -87,6 +87,9 @@ router.beforeEach(async (to) => {
   // Force users without a profile through onboarding before they can hit /generate etc.
   // Exception: a buyer from the pricing buttons may pay first (Stripe returns them to the app).
   if (!auth.hasProfile && to.name !== 'onboarding' && to.name !== 'upgrade') {
+    // Paid before setting up a profile (pricing button -> /upgrade): Stripe returns them to
+    // /dashboard?checkout=success, but WorkspaceView, which counts the purchase, never runs for them.
+    if (to.query.checkout === 'success') track('checkout_success')
     return { name: 'onboarding' }
   }
 })
