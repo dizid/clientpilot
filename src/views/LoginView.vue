@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { track } from '@/lib/analytics'
@@ -9,6 +9,9 @@ const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
 const error = ref('')
+
+// Load Firebase (on phones also Google's sign-in frame) before the tap, so the popup isn't blocked
+onMounted(() => auth.init())
 
 async function handleGoogleLogin() {
   loading.value = true

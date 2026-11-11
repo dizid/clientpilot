@@ -55,6 +55,8 @@ router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return
 
   const auth = useAuthStore()
+  // Pages behind login need the login check now (public pages start it when idle, App.vue)
+  auth.init()
 
   // Wait for the initial Firebase auth check before deciding (avoids a flash of /login).
   if (auth.loading) {

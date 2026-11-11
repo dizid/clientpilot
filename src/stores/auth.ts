@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { signInWithGoogle, logOut, onAuthChange } from '@/lib/firebase'
-import { getUser } from '@/lib/api'
 import type { User } from 'firebase/auth'
+
+// Firebase and the API client load on first use instead of with the landing page. On phones,
+// Firebase's Google sign-in setup also downloads Google's hidden sign-in frame (~140 KB), so
+// public pages start it once they're idle (App.vue); login and app pages start it right away.
+const loadFirebase = () => import('@/lib/firebase')
+const loadApi = () => import('@/lib/api')
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -10,16 +14,22 @@ export const useAuthStore = defineStore('auth', () => {
   const generationsUsed = ref(0)
   const hasProfile = ref(false)
   const loading = ref(true)
+  let initStarted = false
 
   const isLoggedIn = computed(() => !!user.value)
   const isPro = computed(() => plan.value === 'pro' || plan.value === 'lifetime')
   const canGenerate = computed(() => isPro.value || generationsUsed.value < 1)
 
-  function init() {
+  // Safe to call more than once: only the first call starts Firebase's login check.
+  async function init() {
+    if (initStarted) return
+    initStarted = true
+    const { onAuthChange } = await loadFirebase()
     onAuthChange(async (firebaseUser) => {
       user.value = firebaseUser
       if (firebaseUser) {
         try {
+          const { getUser } = await loadApi()
           const { data } = await getUser()
           plan.value = data.user.plan
           generationsUsed.value = data.user.generations_used
@@ -36,10 +46,14 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function login() {
+    // The login page already started init(), so this import is cached and the Google popup
+    // still opens within the tap (phones block popups that open too long after it).
+    const { signInWithGoogle } = await loadFirebase()
     await signInWithGoogle()
   }
 
   async function logout() {
+    const { logOut } = await loadFirebase()
     await logOut()
     user.value = null
     plan.value = 'free'
@@ -49,6 +63,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function refreshPlan() {
     try {
+      const { getUser } = await loadApi()
       const { data } = await getUser()
       plan.value = data.user.plan
       generationsUsed.value = data.user.generations_used
