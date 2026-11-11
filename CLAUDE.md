@@ -57,6 +57,8 @@ Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`, `idx_r
 - **Rate limits:** `checkRateLimit(userId, action)` on generate (30/h), regenerate (60/h), import_profile (10/h), import_target (20/h)
 - **Validation:** Shared `lib/validate.mts` (requireString, requireUUID, requireOneOf, optionalString) used by all mutating endpoints
 - **Payments:** Stripe Checkout for Pro ($9/mo subscription) and Lifetime ($69 one-time), webhook handles plan updates
+- **Pricing buttons → checkout (since 2026-11-11, T-0427):** the landing page's 'Start Pro' / 'Get Lifetime Access' go to `/upgrade/pro` / `/upgrade/lifetime` (`src/views/UpgradeView.vue`): sign-in first if needed (`/login?redirect=`), then straight to Stripe Checkout for that plan; this route is allowed without a finished profile (router guard exception), already-Pro users go to `/workspace`. Other landing buttons still go login → onboarding. Price IDs are hard-coded in UpgradeView, SettingsView and GenerateView: change all three together.
+- **Webhook and Lifetime (since 2026-11-11, T-0430):** `stripe-webhook.mts` subscription events (deleted, updated, invoice.payment_failed) only change users whose plan isn't 'lifetime' (`AND plan IS DISTINCT FROM 'lifetime'`), so an old Pro subscription's late events can't drop a $69 Lifetime buyer to Free.
 
 ### Key Patterns
 - All functions: `export default async (req: Request) => { ... }` with `authenticateRequest(req)` guard; top-level catch returns `{ status: errorStatus(e) }` (401 for `AuthError`, else 500)
