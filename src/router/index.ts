@@ -12,6 +12,9 @@ const router = createRouter({
     // Public legal pages (linked from the landing footer and the login card; prerendered)
     { path: '/privacy', name: 'privacy', component: () => import('@/views/PrivacyView.vue') },
     { path: '/terms', name: 'terms', component: () => import('@/views/TermsView.vue') },
+    // Public blog (posts live in src/content/posts; prerendered)
+    { path: '/blog', name: 'blog', component: () => import('@/views/BlogIndexView.vue') },
+    { path: '/blog/:slug', name: 'blog-post', component: () => import('@/views/BlogPostView.vue') },
     { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue') },
     {
       path: '/onboarding',

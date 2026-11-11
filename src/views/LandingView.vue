@@ -603,6 +603,7 @@ function toggleFaq(index: number) {
           <nav class="flex flex-wrap items-center justify-center gap-5 text-sm text-text-3">
             <a href="#features" class="hover:text-text no-underline transition">Features</a>
             <a href="#pricing" class="hover:text-text no-underline transition">Pricing</a>
+            <a href="/blog" class="hover:text-text no-underline transition">Blog</a>
             <a href="/privacy" class="hover:text-text no-underline transition">Privacy</a>
             <a href="/terms" class="hover:text-text no-underline transition">Terms</a>
             <a href="https://github.com/dizid/clientpilot" target="_blank" rel="noopener noreferrer" class="hover:text-text no-underline transition">
