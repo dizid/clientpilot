@@ -78,13 +78,20 @@
       }
     }
     </script>
-    <!-- Google Analytics 4 (G-3RVWGLPQEZ). Changing the inline script below? Recompute its CSP sha256 in netlify.toml -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-3RVWGLPQEZ"></script>
+    <!-- Google Analytics 4 (G-3RVWGLPQEZ). Changing the inline script below? Recompute its CSP sha256 in netlify.toml.
+         The 180 KB GA library loads after the page (commands queue in dataLayer until then), so on
+         phones it no longer competes with the page's own CSS, fonts and JS for the first seconds. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-3RVWGLPQEZ');
+      window.addEventListener('load', function () {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-3RVWGLPQEZ';
+        document.head.appendChild(s);
+      });
     </script>
 
     <!-- Fonts (Inter, JetBrains Mono) and Font Awesome 6.5.1 are self-hosted via npm packages, imported in src/main.ts -->
