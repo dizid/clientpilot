@@ -40,6 +40,13 @@ const router = createRouter({
       component: () => import('@/views/SettingsView.vue'),
       meta: { requiresAuth: true }
     },
+    // Pricing buttons on the landing page: sign in, then straight to Stripe Checkout
+    {
+      path: '/upgrade/:plan',
+      name: 'upgrade',
+      component: () => import('@/views/UpgradeView.vue'),
+      meta: { requiresAuth: true }
+    },
     // Backward compatibility redirects
     { path: '/dashboard', redirect: '/workspace' },
     { path: '/content/:type', redirect: '/workspace' },
@@ -78,7 +85,8 @@ router.beforeEach(async (to) => {
   }
 
   // Force users without a profile through onboarding before they can hit /generate etc.
-  if (!auth.hasProfile && to.name !== 'onboarding') {
+  // Exception: a buyer from the pricing buttons may pay first (Stripe returns them to the app).
+  if (!auth.hasProfile && to.name !== 'onboarding' && to.name !== 'upgrade') {
     return { name: 'onboarding' }
   }
 })

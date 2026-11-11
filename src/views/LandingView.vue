@@ -19,8 +19,20 @@ function startWithUrl() {
   router.push(auth.isLoggedIn ? '/onboarding' : { path: '/login', query: { redirect: '/onboarding' } })
 }
 
+// Pricing cards: keep the chosen plan through sign-in and open its checkout (/upgrade/:plan)
+const CHECKOUT_SOURCES: Record<string, string> = {
+  pricing_pro: '/upgrade/pro',
+  pricing_lifetime: '/upgrade/lifetime',
+}
+
 function getStarted(source: string = 'unknown') {
   track('cta_click', { source })
+  const checkoutPath = CHECKOUT_SOURCES[source]
+  if (checkoutPath) {
+    // The router guard sends signed-out visitors to /login?redirect=<checkoutPath>
+    router.push(checkoutPath)
+    return
+  }
   if (auth.isLoggedIn) {
     router.push('/dashboard')
   } else {
