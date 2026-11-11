@@ -100,7 +100,7 @@ Pick their most impressive project and write a focused case study article (600-9
 3. Covers the problem, tech decisions, architecture, and ONE key code insight
 4. Includes ONE realistic code snippet (10-20 lines, not a toy example)
 5. Ends with lessons learned and a soft CTA about their freelance work
-6. Has Dev.to frontmatter (title, description, tags)
+6. Has Dev.to frontmatter (title, description, tags). Tags: at most 4, on one line, comma-separated, lowercase letters and numbers only (no spaces, dots or hyphens), e.g. "tags: vue, javascript, webdev, career" (Dev.to refuses other tags)
 
 Return as JSON: { "text": "the full article in markdown" }`,
 

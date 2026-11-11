@@ -122,6 +122,32 @@ function parseSections(sections: unknown): Piece[] {
   }))
 }
 
+// Dev.to (Forem) only saves tags that are letters/numbers (max 30 characters each) and
+// at most 4 per article (dev.to/p/editor_guide; forem app/models/tag.rb, checked 11 Nov 2026)
+const DEVTO_MAX_TAGS = 4
+const DEVTO_MAX_TAG_LENGTH = 30
+
+/**
+ * Makes the front matter's one-line `tags:` field acceptable to Dev.to: lowercase,
+ * letters and numbers only ("vue.js" -> "vuejs", "web-dev" -> "webdev"), no duplicates,
+ * at most 4. Leaves the article untouched when there is no front matter or no one-line tags field.
+ */
+export function fixDevtoTags(markdown: string): string {
+  const frontMatter = markdown.match(/^(\s*---\r?\n)([\s\S]*?)(\r?\n---)/)
+  if (!frontMatter) return markdown
+  const [whole, open, body, close] = frontMatter
+  const fixedBody = body.replace(/^(tags:[ \t]*)(.+)$/m, (_line, key: string, value: string) => {
+    const tags = value
+      .replace(/^\[|\]$/g, '') // "[a, b]" form
+      .split(',')
+      .map((tag) => tag.trim().replace(/^["']|["']$/g, '').toLowerCase().replace(/[^a-z0-9]/g, ''))
+      .filter((tag) => tag.length > 0 && tag.length <= DEVTO_MAX_TAG_LENGTH)
+    const unique = [...new Set(tags)].slice(0, DEVTO_MAX_TAGS)
+    return `${key}${unique.join(', ')}`
+  })
+  return markdown.replace(whole, () => `${open}${fixedBody}${close}`)
+}
+
 /**
  * Splits a Claude AI response blob into individual labelled pieces.
  * Returns an array of { label, content } objects ready for DB insertion.
@@ -185,7 +211,7 @@ export function parsePieces(type: string, content: Record<string, unknown>): Pie
       case 'devto_article': {
         const text = content.text as string | undefined
         if (typeof text !== 'string') return [{ label: 'Article', content: JSON.stringify(content) }]
-        return [{ label: 'Article', content: text }]
+        return [{ label: 'Article', content: fixDevtoTags(text) }]
       }
 
       case 'platform_profile': {
