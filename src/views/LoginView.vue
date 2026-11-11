@@ -19,7 +19,11 @@ async function handleGoogleLogin() {
   try {
     await auth.login()
     track('login_success')
-    const redirect = (route.query.redirect as string) || '/onboarding'
+    // Load plan + profile state before navigating: the router guard reads hasProfile, which
+    // was still false right after the popup, so returning users landed on the setup form.
+    await auth.refreshPlan()
+    // Default to the workspace; the guard sends users without a profile to onboarding.
+    const redirect = (route.query.redirect as string) || '/workspace'
     router.push(redirect)
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'Sign in failed. Please try again.'

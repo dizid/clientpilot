@@ -51,7 +51,11 @@ export default async (req: Request) => {
 
     // Verify ownership + check not already running
     const pieceResult = await query(
-      'SELECT id, user_id, type, regen_status FROM pieces WHERE id = $1 AND user_id = $2',
+      // regen_active: a run marked 'running' more than 15 minutes ago is dead (background
+      // functions stop at 15 min); without this one lost worker locked the piece forever (409)
+      `SELECT id, user_id, type, regen_status,
+         (regen_status = 'running' AND updated_at > NOW() - INTERVAL '15 minutes') AS regen_active
+       FROM pieces WHERE id = $1 AND user_id = $2`,
       [pieceId, user.id]
     )
     if (pieceResult.rows.length === 0) {
@@ -59,7 +63,7 @@ export default async (req: Request) => {
     }
 
     const piece = pieceResult.rows[0] as PieceRow
-    if (piece.regen_status === 'running') {
+    if ((piece as PieceRow & { regen_active?: boolean }).regen_active) {
       return Response.json({ error: 'Regeneration already in progress' }, { status: 409 })
     }
 

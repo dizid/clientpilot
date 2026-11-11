@@ -67,10 +67,13 @@ export const useContentStore = defineStore('content', () => {
     if (idx >= 0) Object.assign(pieces.value[idx], patch)
     try {
       const { data } = await apiUpdatePiece(id, patch)
-      if (idx >= 0) pieces.value[idx] = data.piece
-    } catch {
-      // Roll back on failure
+      // Merge: the update returns only the piece's own columns, and replacing the object
+      // dropped the target tags (niche/platform from the list's JOIN) until a reload
+      if (idx >= 0) pieces.value[idx] = { ...pieces.value[idx], ...data.piece }
+    } catch (e) {
+      // Roll back, then let the card show the error (it used to say 'saved' anyway)
       if (idx >= 0 && backup) pieces.value[idx] = backup as ContentPiece
+      throw e
     } finally {
       delete savingIds.value[id]
     }
@@ -82,9 +85,10 @@ export const useContentStore = defineStore('content', () => {
     if (idx >= 0) pieces.value.splice(idx, 1)
     try {
       await apiDeletePiece(id)
-    } catch {
-      // Roll back on failure
+    } catch (e) {
+      // Roll back, then let the card show the error (it used to say 'deleted' anyway)
       if (backup && idx >= 0) pieces.value.splice(idx, 0, backup)
+      throw e
     }
   }
 
@@ -93,7 +97,7 @@ export const useContentStore = defineStore('content', () => {
     try {
       const { data } = await apiRegeneratePiece(id, feedback)
       const idx = pieces.value.findIndex(p => p.id === id)
-      if (idx >= 0) pieces.value[idx] = data.piece
+      if (idx >= 0) pieces.value[idx] = { ...pieces.value[idx], ...data.piece } // keep target tags
     } finally {
       delete savingIds.value[id]
     }

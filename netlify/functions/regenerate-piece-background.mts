@@ -1,5 +1,6 @@
 import { query } from './lib/db.mjs'
 import { buildProfileContext } from './lib/prompts.mjs'
+import { fixDevtoTags } from './lib/parse-pieces.mjs'
 
 /**
  * Background worker for single-piece regeneration.
@@ -146,7 +147,10 @@ Rewrite this single piece. Keep the same format and approximate length. Return O
     }
 
     const data = await response.json() as { content: Array<{ text: string }> }
-    const newContent = data.content[0].text.trim()
+    const rawContent = data.content[0].text.trim()
+    // Same clean-up as a first generation (parse-pieces): Dev.to only saves max 4 tags of
+    // letters/numbers, so a regenerated article could otherwise be refused again (T-0444)
+    const newContent = piece.type === 'devto_article' ? fixDevtoTags(rawContent) : rawContent
 
     // Persist updated content and clear regen_status
     await query(

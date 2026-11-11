@@ -139,7 +139,7 @@ async function markFailed(generationId: string, userId: string, reason: string):
     )
     // Give the free-tier credit back — counter was incremented at enqueue time
     await query(
-      'UPDATE users SET generations_used = GREATEST(generations_used - 1, 0), updated_at = NOW() WHERE id = $1',
+      'UPDATE users SET generations_used = GREATEST(generations_used - 1, 0), updated_at = NOW() WHERE id = $1 AND COALESCE(plan, \'free\') = \'free\'',
       [userId]
     )
   } catch (e) {

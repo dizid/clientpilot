@@ -13,7 +13,7 @@ export default async (req: Request) => {
     const result = await query(
       `SELECT
         COUNT(*)::int AS total_pieces,
-        COUNT(*) FILTER (WHERE status = 'used' AND created_at > NOW() - INTERVAL '7 days')::int AS used_this_week,
+        COUNT(*) FILTER (WHERE status = 'used' AND updated_at > NOW() - INTERVAL '7 days')::int AS used_this_week, -- updated_at: when it was marked used (created_at counted by generation date)
         COUNT(*) FILTER (WHERE status = 'replied')::int AS total_replies,
         COUNT(DISTINCT type)::int AS content_types_generated
        FROM pieces

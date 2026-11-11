@@ -85,7 +85,8 @@ async function handleUpgrade(priceId: string) {
           <p class="text-xs text-text-3">Replies</p>
         </div>
         <div class="bg-surface-2 rounded-lg p-3 text-center">
-          <p class="text-xl font-bold">{{ auth.generationsUsed }}</p>
+          <!-- generations_used only counts the free plan's 1 generation, so paying users saw 0 or 1 -->
+          <p class="text-xl font-bold">{{ auth.isPro ? 'Unlimited' : `${auth.generationsUsed} / 1` }}</p>
           <p class="text-xs text-text-3">Generations</p>
         </div>
       </div>

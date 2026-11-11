@@ -101,8 +101,10 @@ watch(() => content.activeTab, (tab) => {
             <p class="text-sm font-medium">Unlock unlimited content generation</p>
             <p class="text-xs text-text-3 mt-0.5">Upgrade to Pro for unlimited generations and full editing.</p>
           </div>
+          <!-- /upgrade/pro opens checkout (handles sign-in and plan); /generate showed no way
+               to pay until the free generation was used -->
           <router-link
-            to="/generate"
+            to="/upgrade/pro"
             class="px-4 py-2 bg-brand hover:bg-brand-dark text-white text-sm font-semibold rounded-lg no-underline transition shrink-0"
           >
             Upgrade

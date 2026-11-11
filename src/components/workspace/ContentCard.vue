@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useContentStore } from '@/stores/content'
 import { useToastStore } from '@/stores/toast'
+import { apiErrorMessage } from '@/lib/api'
 import type { ContentPiece } from '@/lib/api'
 import { renderMarkdown } from '@/lib/markdown'
 import { track } from '@/lib/analytics'
@@ -52,9 +53,14 @@ function cancelEdit() {
 }
 
 async function saveEdit() {
-  await content.updatePiece(props.piece.id, { content: editValue.value })
-  isEditing.value = false
-  toast.add('Content saved', 'success')
+  try {
+    await content.updatePiece(props.piece.id, { content: editValue.value })
+    isEditing.value = false
+    toast.add('Content saved', 'success')
+  } catch (e) {
+    // Keep the editor open so the text isn't lost
+    toast.add(apiErrorMessage(e, 'Could not save your changes. Please try again.'), 'error')
+  }
 }
 
 async function copyToClipboard() {
@@ -71,21 +77,35 @@ async function copyToClipboard() {
 async function onStatusChange(event: Event) {
   const select = event.target as HTMLSelectElement
   track('piece_status_change', { type: props.piece.type, status: select.value })
-  await content.updatePiece(props.piece.id, { status: select.value })
-  toast.add('Status updated', 'success')
+  try {
+    await content.updatePiece(props.piece.id, { status: select.value })
+    toast.add('Status updated', 'success')
+  } catch (e) {
+    select.value = props.piece.status // the store rolled back; show the real status again
+    toast.add(apiErrorMessage(e, 'Could not update the status. Please try again.'), 'error')
+  }
 }
 
 async function confirmRegenerate() {
-  await content.regenerate(props.piece.id, regenerateFeedback.value || undefined)
-  showRegenerateInput.value = false
-  regenerateFeedback.value = ''
-  toast.add('Content regenerated', 'success')
+  try {
+    await content.regenerate(props.piece.id, regenerateFeedback.value || undefined)
+    showRegenerateInput.value = false
+    regenerateFeedback.value = ''
+    toast.add('Content regenerated', 'success')
+  } catch (e) {
+    // e.g. 409 already running, 429 rate limit, AI failure or the 3-minute timeout
+    toast.add(apiErrorMessage(e, 'Regeneration failed. Please try again.'), 'error')
+  }
 }
 
 async function confirmDelete() {
   if (!window.confirm('Delete this piece? This cannot be undone.')) return
-  await content.removePiece(props.piece.id)
-  toast.add('Piece deleted', 'info')
+  try {
+    await content.removePiece(props.piece.id)
+    toast.add('Piece deleted', 'info')
+  } catch (e) {
+    toast.add(apiErrorMessage(e, 'Could not delete this piece. Please try again.'), 'error')
+  }
 }
 </script>
 

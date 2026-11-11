@@ -80,7 +80,7 @@ export default async (req: Request) => {
         )
         // Refund the free-tier credit
         await query(
-          'UPDATE users SET generations_used = GREATEST(generations_used - 1, 0), updated_at = NOW() WHERE id = $1',
+          'UPDATE users SET generations_used = GREATEST(generations_used - 1, 0), updated_at = NOW() WHERE id = $1 AND COALESCE(plan, \'free\') = \'free\'',
           [user.id]
         )
         return Response.json({ status: 'failed', error: 'Generation timed out. Please try again.' })
