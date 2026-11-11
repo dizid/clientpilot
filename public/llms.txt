@@ -18,6 +18,10 @@
 - Freelance and indie developers who want a steady stream of client-facing content without writing it from scratch each week.
 - Not an API or auto-poster yet: you copy the content and publish it yourself (LinkedIn and Dev.to publishing integrations are on the roadmap).
 
+## Blog (guides for freelance developers)
+- Index: https://clientpilot.dev/blog
+- Cold email for freelance developers: template and rules (example email, two follow-ups, Gmail and Yahoo sender requirements, CAN-SPAM, UK PECR, GDPR and national rules): https://clientpilot.dev/blog/cold-email-freelance-developer
+
 ## Links
 - Home and sign-up: https://clientpilot.dev/
 - Maker: https://dizid.com
