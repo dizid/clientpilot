@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, onBeforeUnmount, computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useProfileStore } from '@/stores/profile'
 import { useContentStore } from '@/stores/content'
@@ -29,6 +29,14 @@ const profileCompleteness = computed(() => {
 // A failed checkout used to do nothing at all (audit: Settings › Upgrade); now it says so
 const upgrading = ref(false)
 const upgradeError = ref('')
+
+// Back from Stripe with the browser's back button: phones may restore this page
+// from their page cache with the buttons still disabled; enable them again (T-0517)
+function onPageShow(event: PageTransitionEvent) {
+  if (event.persisted) upgrading.value = false
+}
+onMounted(() => window.addEventListener('pageshow', onPageShow))
+onBeforeUnmount(() => window.removeEventListener('pageshow', onPageShow))
 
 async function handleUpgrade(priceId: string) {
   if (upgrading.value) return

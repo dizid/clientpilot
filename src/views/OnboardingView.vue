@@ -373,6 +373,8 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
       @save="saveFromImport"
       @manual="mode = 'form'"
     />
+    <!-- The import screen saves through finish() too: show a failed save here as well (T-0517) -->
+    <p v-if="mode === 'import' && saveError" role="alert" class="mt-3 text-sm text-danger text-center">{{ saveError }}</p>
 
     <template v-else-if="mode === 'form'">
 
