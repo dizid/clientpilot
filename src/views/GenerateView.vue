@@ -233,7 +233,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
     <!-- Upgrade banner for free users who hit the limit -->
     <div v-if="!auth.isPro && !auth.canGenerate" class="bg-surface border border-brand/30 rounded-2xl p-8 text-center mb-8">
       <h3 class="text-xl font-bold mb-2">Free Preview Used</h3>
-      <p class="text-text-2 mb-6">Upgrade to unlock unlimited generations and full content export.</p>
+      <p class="text-text-2 mb-6">Upgrade to unlock unlimited generations and regenerating any piece with your feedback.</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           @click="handleUpgrade('price_1TJr2B8gBja0qkMx2ZfnugJ4')"

@@ -44,7 +44,7 @@ const features = [
   {
     icon: 'fa-brands fa-linkedin',
     title: 'LinkedIn Posts',
-    desc: 'AI writes 10 engaging posts that establish your expertise and attract clients. Schedule 3x/week.',
+    desc: 'AI writes 7 engaging posts that establish your expertise and attract clients. Schedule 3x/week.',
     preview: [
       '🚀 Just shipped a real-time analytics dashboard...',
       '💡 3 things I learned building SaaS for clients...',
@@ -55,7 +55,7 @@ const features = [
   {
     icon: 'fa-solid fa-envelope-open-text',
     title: 'Outreach Templates',
-    desc: '7 battle-tested templates — cold, warm, platform, and follow-ups. Personalized to your profile.',
+    desc: '6 battle-tested templates — cold, warm, platform, and follow-ups. Personalized to your profile.',
     preview: [
       'Subject: Quick question about [Company] stack',
       'Hi Alex, I noticed you\'re scaling your...',
@@ -125,7 +125,7 @@ interface FaqItem {
 const faqs = ref<FaqItem[]>([
   {
     q: 'What kind of content does ClientPilot generate?',
-    a: 'ClientPilot generates 6 types of content: LinkedIn Posts (10 engagement-focused posts), Outreach Templates (7 cold/warm/follow-up email templates), Dev.to Articles (full case studies with technical depth), Platform Profiles (tailored bios for Toptal, Arc.dev, freelance.nl, and more), Portfolio Page copy (complete /hire landing page), and Elevator Pitch formats (30-sec pitch, Twitter bio, LinkedIn headline, GitHub README).',
+    a: 'ClientPilot generates 6 types of content: LinkedIn Posts (7 engagement-focused posts), Outreach Templates (6 cold/warm/follow-up email templates), Dev.to Articles (full case studies with technical depth), Platform Profiles (tailored bios for Toptal, Arc.dev, freelance.nl, and more), Portfolio Page copy (complete /hire landing page), and Elevator Pitch formats (30-sec pitch, Twitter bio, LinkedIn headline, GitHub README).',
     open: false,
   },
   {
@@ -384,8 +384,8 @@ function toggleFaq(index: number) {
 
               <!-- Badges row -->
               <div class="flex flex-wrap gap-2 pt-1">
-                <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ 9 more LinkedIn posts</span>
-                <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ 6 email templates</span>
+                <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ 6 more LinkedIn posts</span>
+                <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ 5 more outreach templates</span>
                 <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ Dev.to article</span>
                 <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ 5 platform profiles</span>
               </div>
@@ -470,7 +470,7 @@ function toggleFaq(index: number) {
           <ul class="space-y-3 text-sm text-text-2 mb-8 flex-1">
             <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> 1 preview generation</li>
             <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> See all content types</li>
-            <li class="flex items-start gap-2"><i class="fa-solid fa-xmark text-text-3 mt-0.5 shrink-0"></i> <span class="text-text-3">Limited copy/export</span></li>
+            <li class="flex items-start gap-2"><i class="fa-solid fa-xmark text-text-3 mt-0.5 shrink-0"></i> <span class="text-text-3">Regenerate pieces with your feedback</span></li>
           </ul>
           <button
             @click="getStarted('pricing_free')"
@@ -492,8 +492,7 @@ function toggleFaq(index: number) {
           <ul class="space-y-3 text-sm text-text-2 mb-8 flex-1">
             <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> Unlimited generations</li>
             <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> All content types</li>
-            <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> Full copy/export</li>
-            <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> Weekly AI content refresh</li>
+            <li class="flex items-start gap-2"><i class="fa-solid fa-check text-success mt-0.5 shrink-0"></i> Regenerate any piece with your feedback</li>
           </ul>
           <button
             @click="getStarted('pricing_pro')"

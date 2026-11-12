@@ -99,7 +99,7 @@ watch(() => content.activeTab, (tab) => {
         >
           <div class="min-w-0">
             <p class="text-sm font-medium">Unlock unlimited content generation</p>
-            <p class="text-xs text-text-3 mt-0.5">Upgrade to Pro for unlimited generations and full editing.</p>
+            <p class="text-xs text-text-3 mt-0.5">Upgrade to Pro for unlimited generations and regenerating pieces with your feedback.</p>
           </div>
           <!-- /upgrade/pro opens checkout (handles sign-in and plan); /generate showed no way
                to pay until the free generation was used -->

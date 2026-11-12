@@ -45,6 +45,15 @@ export default async (req: Request) => {
       return Response.json({ error: validationError }, { status: 400 })
     }
 
+    // Regenerating a piece is a Pro feature (pricing card: Free has 1 generation;
+    // Pro/Lifetime "Regenerate any piece with your feedback"). Each run is an AI call.
+    if (user.plan !== 'pro' && user.plan !== 'lifetime') {
+      return Response.json(
+        { error: 'Regenerating a piece is part of ClientPilot Pro.', upgrade: true },
+        { status: 403 }
+      )
+    }
+
     if (!(await checkRateLimit(user.id, 'regenerate'))) {
       return Response.json({ error: RATE_LIMIT_MESSAGE }, { status: 429 })
     }

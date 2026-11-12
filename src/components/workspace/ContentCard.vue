@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useContentStore } from '@/stores/content'
 import { useToastStore } from '@/stores/toast'
+import { useAuthStore } from '@/stores/auth'
 import { apiErrorMessage } from '@/lib/api'
 import type { ContentPiece } from '@/lib/api'
 import { renderMarkdown } from '@/lib/markdown'
@@ -13,6 +14,7 @@ const props = defineProps<{
 
 const content = useContentStore()
 const toast = useToastStore()
+const auth = useAuthStore()
 
 // Edit state
 const isEditing = ref(false)
@@ -233,9 +235,9 @@ async function confirmDelete() {
         Edit
       </button>
 
-      <!-- Regenerate toggle -->
+      <!-- Regenerate toggle (Pro and Lifetime only: the server refuses Free) -->
       <button
-        v-if="!isEditing && !showRegenerateInput"
+        v-if="auth.isPro && !isEditing && !showRegenerateInput"
         @click="showRegenerateInput = true"
         :disabled="isSaving"
         class="flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-2 hover:text-text bg-surface-2 hover:bg-surface-3 rounded-lg transition-colors disabled:opacity-50 cursor-pointer border-0"
