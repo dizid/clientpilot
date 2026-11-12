@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { track } from '@/lib/analytics'
+import { detectInAppBrowser, chromeIntentUrl, type InAppBrowser } from '@/lib/in-app-browser'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -11,7 +12,32 @@ const loading = ref(false)
 const error = ref('')
 
 // Load Firebase (on phones also Google's sign-in frame) before the tap, so the popup isn't blocked
-onMounted(() => auth.init())
+onMounted(() => {
+  auth.init()
+  const nav = window.navigator as Navigator & { standalone?: boolean }
+  inApp.value = detectInAppBrowser(nav.userAgent, nav.standalone === true)
+  if (inApp.value) {
+    androidChromeUrl.value = chromeIntentUrl(window.location.href, inApp.value.platform)
+    track('login_in_app_browser', { app: inApp.value.appName ?? 'unknown' })
+  }
+})
+
+// Google blocks its sign-in inside apps' built-in browsers (LinkedIn, Facebook, Instagram…),
+// so there the page explains how to open it in a real browser first (T-0494).
+const inApp = ref<InAppBrowser | null>(null)
+const androidChromeUrl = ref<string | null>(null)
+const tryAnyway = ref(false)
+const linkCopied = ref(false)
+
+async function copyLink() {
+  try {
+    await navigator.clipboard.writeText(window.location.href)
+    linkCopied.value = true
+  } catch {
+    // Clipboard blocked in this webview: show the address so it can be copied by hand.
+    window.prompt('Copy this link and open it in your browser:', window.location.href)
+  }
+}
 
 async function handleGoogleLogin() {
   loading.value = true
@@ -47,7 +73,36 @@ async function handleGoogleLogin() {
 
       <!-- Card -->
       <div class="bg-surface border border-border rounded-2xl p-8">
+        <!-- In an app's built-in browser Google refuses the sign-in: explain first (T-0494) -->
+        <div v-if="inApp && !tryAnyway" class="text-center" data-in-app-notice>
+          <p class="font-semibold text-text text-base">Open this page in your browser to sign in</p>
+          <p class="text-text-2 text-sm mt-2">
+            Google doesn't allow sign-in inside {{ inApp.appName ? `the ${inApp.appName} app's` : "this app's" }} built-in browser.
+          </p>
+          <p class="text-text-2 text-sm mt-3" v-if="inApp.platform === 'ios'">
+            Tap <strong>•••</strong> or the share icon, then <strong>Open in Safari</strong> (or Open in browser).
+          </p>
+          <p class="text-text-2 text-sm mt-3" v-else>
+            Tap <strong>⋮</strong> (top right), then <strong>Open in browser</strong>.
+          </p>
+          <a
+            v-if="androidChromeUrl"
+            :href="androidChromeUrl"
+            class="mt-5 w-full inline-flex items-center justify-center gap-2 py-3 px-6 bg-brand text-white font-semibold rounded-xl no-underline"
+          >Open in Chrome</a>
+          <button
+            type="button"
+            @click="copyLink"
+            class="mt-4 w-full py-3 px-6 bg-white hover:bg-gray-50 text-gray-800 font-semibold rounded-xl cursor-pointer border-0 transition text-base"
+          >{{ linkCopied ? 'Link copied: paste it in your browser' : 'Copy link' }}</button>
+          <button
+            type="button"
+            @click="tryAnyway = true"
+            class="mt-4 text-xs text-text-3 hover:text-text-2 underline bg-transparent border-0 cursor-pointer"
+          >Try Google sign-in here anyway</button>
+        </div>
         <button
+          v-else
           @click="handleGoogleLogin"
           :disabled="loading"
           class="w-full flex items-center justify-center gap-3 py-4 px-6 bg-white hover:bg-gray-50 text-gray-800 font-semibold rounded-xl cursor-pointer border-0 transition text-base disabled:opacity-50"
