@@ -63,6 +63,23 @@ export const useAuthStore = defineStore('auth', () => {
     await signInWithGoogle()
   }
 
+  // Email link sign-in (works inside apps' built-in browsers, where Google refuses)
+  async function sendEmailLink(email: string, redirect: string | null) {
+    const { sendEmailSignInLink } = await loadFirebase()
+    await sendEmailSignInLink(email, redirect)
+  }
+
+  async function emailLinkState(href: string) {
+    const { isEmailSignInLink, rememberedSignInEmail } = await loadFirebase()
+    if (!isEmailSignInLink(href)) return null
+    return { rememberedEmail: rememberedSignInEmail() }
+  }
+
+  async function finishEmailLink(email: string, href: string) {
+    const { finishEmailSignIn } = await loadFirebase()
+    await finishEmailSignIn(email, href)
+  }
+
   async function logout() {
     const { logOut } = await loadFirebase()
     await logOut()
@@ -92,6 +109,6 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user, plan, generationsUsed, hasProfile, loading,
     isLoggedIn, isPro, canGenerate,
-    init, login, logout, refreshPlan, markProfileSaved,
+    init, login, logout, refreshPlan, markProfileSaved, sendEmailLink, emailLinkState, finishEmailLink,
   }
 })
