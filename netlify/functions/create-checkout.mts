@@ -3,6 +3,7 @@ import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
 import { validate, requireString } from './lib/validate.mjs'
 import { safeError, errorStatus } from './lib/errors.mjs'
+import { planForPrice, hasOtherLiveProSubscription } from './lib/plans.mjs'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -26,6 +27,13 @@ export default async (req: Request) => {
 
     if (validationError) {
       return Response.json({ error: validationError }, { status: 400 })
+    }
+
+    // Only ClientPilot's two prices: the Stripe account is shared with other apps,
+    // and any one-off price there (e.g. a $9.90 product) used to buy Lifetime.
+    const plan = planForPrice(priceId)
+    if (!plan) {
+      return Response.json({ error: 'Unknown plan' }, { status: 400 })
     }
 
     // Already paying: never open a second checkout (e.g. right after a purchase, before the
@@ -54,9 +62,14 @@ export default async (req: Request) => {
       )
     }
 
-    // Determine mode based on price type
-    const price = await stripe.prices.retrieve(priceId)
-    const mode = price.recurring ? 'subscription' : 'payment'
+    // A Pro subscription already paid in another tab (the webhook may not have
+    // switched the plan yet): no second subscription. Also fixes the plan.
+    if (plan === 'pro' && await hasOtherLiveProSubscription(stripe, customerId)) {
+      await query("UPDATE users SET plan = 'pro', updated_at = NOW() WHERE id = $1 AND plan IS DISTINCT FROM 'lifetime'", [user.id])
+      return Response.json({ error: 'You already have ClientPilot Pro', alreadyPro: true }, { status: 409 })
+    }
+
+    const mode = plan === 'pro' ? 'subscription' : 'payment'
 
     // Never trust req.headers.get('origin') — attacker can redirect Stripe to malicious URL
     const origin = process.env.SITE_URL || 'https://clientpilot-app.netlify.app'
@@ -67,7 +80,7 @@ export default async (req: Request) => {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${origin}/dashboard?checkout=success`,
       cancel_url: `${origin}/generate?checkout=cancelled`,
-      metadata: { user_id: user.id }
+      metadata: { user_id: user.id, app: 'clientpilot', plan }
     })
 
     return Response.json({ url: session.url })
