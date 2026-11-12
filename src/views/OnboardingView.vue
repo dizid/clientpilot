@@ -5,6 +5,7 @@ import { useProfileStore } from '@/stores/profile'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
 import { track } from '@/lib/analytics'
+import { apiErrorMessage } from '@/lib/api'
 import AppNav from '@/components/AppNav.vue'
 import ProfileImport from '@/components/ProfileImport.vue'
 import { takePendingImportUrl } from '@/lib/pending-import'
@@ -79,7 +80,9 @@ const errors = computed(() => {
       : p.bio.trim().length < 30
         ? 'At least 30 characters — give a bit more detail.'
         : '',
-    experience_years: p.experience_years < 0 || p.experience_years > 50
+    // An emptied number field gives '' (not a number), which the server rejects
+    experience_years: typeof p.experience_years !== 'number' || Number.isNaN(p.experience_years) ||
+      p.experience_years < 0 || p.experience_years > 50
       ? 'Enter a value between 0 and 50.'
       : '',
     skills: p.skills.length < 2 ? 'Add at least 2 skills.' : '',
@@ -329,14 +332,20 @@ function prevStep() {
 
 // ─── Finish ────────────────────────────────────────────────────────────────
 
+// A failed save used to leave the user on the last step with no message (audit)
+const saveError = ref('')
+
 async function finish() {
   saving.value = true
+  saveError.value = ''
   try {
     await profileStore.save()
     auth.markProfileSaved()
     track('onboarding_complete')
     clearDraft()
     router.push({ path: '/generate', query: { welcome: '1' } })
+  } catch (e) {
+    saveError.value = apiErrorMessage(e, "We couldn't save your profile. Check your connection and try again.")
   } finally {
     saving.value = false
   }
@@ -980,6 +989,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
             <i v-if="!saving" class="fa-solid fa-rocket ml-2"></i>
           </button>
         </div>
+        <p v-if="saveError" role="alert" class="mt-3 text-sm text-danger text-center">{{ saveError }}</p>
       </div>
     </Transition>
 

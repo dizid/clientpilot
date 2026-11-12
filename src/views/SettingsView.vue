@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useProfileStore } from '@/stores/profile'
 import { useContentStore } from '@/stores/content'
-import { createCheckout } from '@/lib/api'
+import { createCheckout, apiErrorMessage } from '@/lib/api'
 import { track } from '@/lib/analytics'
 import AppNav from '@/components/AppNav.vue'
 
@@ -26,10 +26,22 @@ const profileCompleteness = computed(() => {
   return Math.round((fields.filter(Boolean).length / fields.length) * 100)
 })
 
+// A failed checkout used to do nothing at all (audit: Settings › Upgrade); now it says so
+const upgrading = ref(false)
+const upgradeError = ref('')
+
 async function handleUpgrade(priceId: string) {
+  if (upgrading.value) return
   track('upgrade_click', { source: 'settings', price_id: priceId })
-  const { data } = await createCheckout(priceId)
-  window.location.href = data.url
+  upgrading.value = true
+  upgradeError.value = ''
+  try {
+    const { data } = await createCheckout(priceId)
+    window.location.href = data.url
+  } catch (e) {
+    upgradeError.value = apiErrorMessage(e, "We couldn't open the checkout. Please try again.")
+    upgrading.value = false
+  }
 }
 </script>
 
@@ -63,14 +75,15 @@ async function handleUpgrade(priceId: string) {
           </span>
         </div>
         <div v-if="!auth.isPro" class="flex gap-2">
-          <button @click="handleUpgrade('price_1TJr2B8gBja0qkMx2ZfnugJ4')" class="px-4 py-2 bg-brand hover:bg-brand-dark text-white text-sm font-semibold rounded-lg cursor-pointer border-0 transition">
+          <button @click="handleUpgrade('price_1TJr2B8gBja0qkMx2ZfnugJ4')" :disabled="upgrading" class="disabled:opacity-50 px-4 py-2 bg-brand hover:bg-brand-dark text-white text-sm font-semibold rounded-lg cursor-pointer border-0 transition">
             Pro — $9/mo
           </button>
-          <button @click="handleUpgrade('price_1TJr2H8gBja0qkMxM6sic98C')" class="px-4 py-2 bg-accent/20 text-accent-light text-sm font-semibold rounded-lg cursor-pointer border border-accent/30 transition">
+          <button @click="handleUpgrade('price_1TJr2H8gBja0qkMxM6sic98C')" :disabled="upgrading" class="disabled:opacity-50 px-4 py-2 bg-accent/20 text-accent-light text-sm font-semibold rounded-lg cursor-pointer border border-accent/30 transition">
             Lifetime — $69
           </button>
         </div>
       </div>
+      <p v-if="upgradeError" role="alert" class="-mt-2 mb-4 text-sm text-danger">{{ upgradeError }}</p>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-surface-2 rounded-lg p-3 text-center">
           <p class="text-xl font-bold">{{ content.stats.total_pieces }}</p>
