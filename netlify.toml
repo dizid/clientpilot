@@ -44,9 +44,55 @@
   status = 301
   force = true
 
-# SPA fallback: the plain app shell. index.html is the prerendered landing page
-# (scripts/prerender.mjs), which must not show up on /login, /workspace, ...
+# Old link target: the plans live on the landing page
 [[redirects]]
-  from = "/*"
+  from = "/pricing"
+  to = "/#pricing"
+  status = 301
+
+# SPA fallback, only for the app's own routes (src/router/index.ts): the plain app
+# shell. index.html is the prerendered landing page (scripts/prerender.mjs), which
+# must not show up on /login, /workspace, ... /dashboard is Stripe's success_url
+# (create-checkout.mts) and /content/* an old link; the router forwards both.
+# Every other unknown path gets dist/404.html with a real 404 status (Netlify serves
+# it automatically), so search engines don't index junk URLs as copies of the homepage.
+# A new app route needs a line here too.
+[[redirects]]
+  from = "/login"
+  to = "/app-shell.html"
+  status = 200
+
+[[redirects]]
+  from = "/onboarding"
+  to = "/app-shell.html"
+  status = 200
+
+[[redirects]]
+  from = "/workspace"
+  to = "/app-shell.html"
+  status = 200
+
+[[redirects]]
+  from = "/generate"
+  to = "/app-shell.html"
+  status = 200
+
+[[redirects]]
+  from = "/settings"
+  to = "/app-shell.html"
+  status = 200
+
+[[redirects]]
+  from = "/upgrade/*"
+  to = "/app-shell.html"
+  status = 200
+
+[[redirects]]
+  from = "/dashboard"
+  to = "/app-shell.html"
+  status = 200
+
+[[redirects]]
+  from = "/content/*"
   to = "/app-shell.html"
   status = 200

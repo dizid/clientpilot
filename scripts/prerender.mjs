@@ -8,9 +8,10 @@
 // In the browser, src/main.ts hydrates that HTML.
 //
 // The untouched SPA shell is saved first as dist/app-shell.html; netlify.toml's SPA
-// fallback serves it for every other route (/login, /workspace, ...), so those never
+// fallback serves it for the app routes (/login, /workspace, ...), so those never
 // flash the landing page. The shell drops the homepage canonical, which would otherwise
-// mark those pages as duplicates of the homepage.
+// mark those pages as duplicates of the homepage. A copy with noindex is dist/404.html,
+// which Netlify serves with a 404 status for every unknown path.
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -171,8 +172,13 @@ function headFor(html, path, { title, description, jsonLd }) {
   return page
 }
 
-// 1. The plain app shell for all other routes
-await writeFile(join(distDir, 'app-shell.html'), template.replace(CANONICAL_TAG, ''))
+// 1. The plain app shell for the app routes (netlify.toml lists them)
+const appShell = template.replace(CANONICAL_TAG, '')
+await writeFile(join(distDir, 'app-shell.html'), appShell)
+// ...and for every unknown path, which Netlify serves with a 404 status. The app still
+// loads: the router sends unknown paths to the homepage and shows "Post not found"
+// for a wrong blog slug. noindex keeps the page out of search results either way.
+await writeFile(join(distDir, '404.html'), appShell.replace('</head>', '  <meta name="robots" content="noindex">\n  </head>'))
 
 // 2. The public pages, rendered. data-ssg-route tells src/main.ts it may hydrate.
 for (const { path, file, head, jsonLd } of PAGES) {
@@ -188,4 +194,4 @@ for (const { path, file, head, jsonLd } of PAGES) {
   console.log(`prerender: ${path} -> ${file} (${Math.round(appHtml.length / 1024)} KB of HTML)`)
 }
 
-console.log('prerender: app-shell.html for other routes')
+console.log('prerender: app-shell.html for the app routes, 404.html for unknown paths')
