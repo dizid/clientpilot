@@ -11,6 +11,8 @@ import router from './router'
 
 // Blog posts for the prerender script (pages, head tags, JSON-LD, build-time checks)
 export { BLOG_POSTS } from './content/posts'
+// Landing FAQ for the homepage's FAQPage JSON-LD (the same list the page shows)
+export { LANDING_FAQS } from './content/landing-faqs'
 
 /** The app's HTML for one route, ready to go inside <div id="app">. */
 export async function render(url: string): Promise<string> {

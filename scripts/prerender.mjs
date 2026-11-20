@@ -18,16 +18,33 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = join(root, 'dist')
-const { render, BLOG_POSTS } = await import(pathToFileURL(join(root, 'dist-ssr', 'entry-server.js')).href)
+const { render, BLOG_POSTS, LANDING_FAQS } = await import(pathToFileURL(join(root, 'dist-ssr', 'entry-server.js')).href)
 
 const SITE_URL = 'https://clientpilot.dev'
 const APP_DIV = '<div id="app"></div>'
 const CANONICAL_TAG = /<link\s+rel="canonical"[^>]*>\s*/i
 
+/** FAQPage structured data from the landing page's FAQ (src/content/landing-faqs.ts). */
+function landingFaqJsonLd(faqs) {
+  if (!faqs?.length || faqs.some((faq) => !faq.q || !faq.a)) {
+    throw new Error('prerender: landing FAQ is empty or has an item without question/answer')
+  }
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((faq) => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    })),
+  }
+}
+
 // Public pages to prerender. `head` replaces the landing page's title, description,
 // canonical and share tags (keep the titles in sync with the views' document.title).
+// `jsonLd` adds structured data without touching the other head tags.
 const PAGES = [
-  { path: '/', file: 'index.html' },
+  { path: '/', file: 'index.html', jsonLd: landingFaqJsonLd(LANDING_FAQS) },
   {
     path: '/privacy',
     file: 'privacy.html',
@@ -131,6 +148,12 @@ function setTagValue(html, tagPattern, value, label) {
   return html.replace(tagPattern, (_match, before, after) => `${before}${escapeHtml(value)}${after}`)
 }
 
+/** Adds one JSON-LD script before </head>; "<" is escaped so no value can close the script tag early. */
+function withJsonLd(html, jsonLd) {
+  const script = `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>`
+  return html.replace('</head>', () => `  ${script}\n  </head>`)
+}
+
 /** The landing page's <head>, rewritten for another public page. */
 function headFor(html, path, { title, description, jsonLd }) {
   const url = `${SITE_URL}${path}`
@@ -144,11 +167,7 @@ function headFor(html, path, { title, description, jsonLd }) {
   page = setTagValue(page, /(<meta property="twitter:title" content=")[^"]*(")/, title, 'twitter:title')
   page = setTagValue(page, /(<meta property="twitter:description" content=")[^"]*(")/, description, 'twitter:description')
   page = setTagValue(page, /(<link rel="canonical" href=")[^"]*(")/, url, 'canonical')
-  if (jsonLd) {
-    // "<" escaped so no value can close the script tag early
-    const script = `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>`
-    page = page.replace('</head>', () => `  ${script}\n  </head>`)
-  }
+  if (jsonLd) page = withJsonLd(page, jsonLd)
   return page
 }
 
@@ -156,12 +175,13 @@ function headFor(html, path, { title, description, jsonLd }) {
 await writeFile(join(distDir, 'app-shell.html'), template.replace(CANONICAL_TAG, ''))
 
 // 2. The public pages, rendered. data-ssg-route tells src/main.ts it may hydrate.
-for (const { path, file, head } of PAGES) {
+for (const { path, file, head, jsonLd } of PAGES) {
   const appHtml = await render(path)
   if (!appHtml.includes('<h1')) {
     throw new Error(`prerender: ${path} rendered without an <h1>; refusing to ship it`)
   }
-  const pageTemplate = head ? headFor(template, path, head) : template
+  let pageTemplate = head ? headFor(template, path, head) : template
+  if (jsonLd) pageTemplate = withJsonLd(pageTemplate, jsonLd)
   const page = pageTemplate.replace(APP_DIV, () => `<div id="app" data-ssg-route="${path}">${appHtml}</div>`)
   await mkdir(dirname(join(distDir, file)), { recursive: true })
   await writeFile(join(distDir, file), page)

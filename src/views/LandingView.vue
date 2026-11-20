@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { track } from '@/lib/analytics'
 import { savePendingImportUrl } from '@/lib/pending-import'
+import { LANDING_FAQS, type LandingFaq } from '@/content/landing-faqs'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -55,7 +56,7 @@ const features = [
   {
     icon: 'fa-solid fa-envelope-open-text',
     title: 'Outreach Templates',
-    desc: '6 battle-tested templates — cold, warm, platform, and follow-ups. Personalized to your profile.',
+    desc: '6 templates — cold DMs and emails, a warm intro, a LinkedIn follow-up and a platform reply. Personalized to your profile.',
     preview: [
       'Subject: Quick question about [Company] stack',
       'Hi Alex, I noticed you\'re scaling your...',
@@ -66,46 +67,46 @@ const features = [
   {
     icon: 'fa-brands fa-dev',
     title: 'Dev.to Articles',
-    desc: 'Full case study articles from your projects. Technical depth that attracts hiring managers.',
+    desc: 'A case study article from your strongest project, Dev.to tags included. Technical depth that attracts hiring managers.',
     preview: [
       'How I Built a Real-Time Dashboard in 48 Hours',
       'TypeScript Tips That Saved My Client $8k/mo',
       'Migrating a Legacy API: Lessons Learned',
     ],
-    badge: '1,200 words',
+    badge: '600-900 words',
   },
   {
     icon: 'fa-solid fa-id-card',
     title: 'Platform Profiles',
-    desc: 'Copy-paste profiles for Toptal, freelance.nl, Arc.dev, and every major platform.',
+    desc: 'Reusable profile text for Toptal, Arc.dev, freelance.nl and similar platforms.',
     preview: [
-      'Toptal profile',
-      'Arc.dev profile',
-      'freelance.nl profile',
+      'Short bio (100 words)',
+      'Full bio (300 words)',
+      'Skills, availability, rate',
     ],
-    badge: '5 platform variants',
+    badge: '5 parts',
   },
   {
     icon: 'fa-solid fa-file-code',
     title: 'Portfolio Page',
-    desc: 'A complete /hire landing page with services, case studies, pricing, and contact form.',
+    desc: 'Copy for a complete /hire page: headline, services with price ranges, case studies, process and call to action.',
     preview: [
-      'Services & stack',
+      'Services & price ranges',
       'Case studies',
-      'Pricing + Contact',
+      'Process + CTA',
     ],
     badge: null,
   },
   {
     icon: 'fa-solid fa-bullhorn',
     title: 'Elevator Pitch',
-    desc: 'Your 30-second pitch, email signature, Twitter bio, and GitHub README — all consistent.',
+    desc: 'Your 30-second pitch, X bio, LinkedIn headline, email signature, GitHub README and one-liner — all consistent.',
     preview: [
       '30-sec verbal pitch',
       'Twitter / X bio',
       'LinkedIn headline',
     ],
-    badge: '4 formats',
+    badge: '6 formats',
   },
 ]
 
@@ -115,45 +116,13 @@ const steps = [
   { num: '3', title: 'Copy, Paste, Deploy', desc: 'Publish to LinkedIn, Dev.to, freelance platforms. Start getting clients.' },
 ]
 
-// FAQ accordion state
-interface FaqItem {
-  q: string
-  a: string
+// FAQ accordion state (questions and answers live in src/content/landing-faqs.ts,
+// shared with the prerender's FAQPage JSON-LD)
+interface FaqItem extends LandingFaq {
   open: boolean
 }
 
-const faqs = ref<FaqItem[]>([
-  {
-    q: 'What kind of content does ClientPilot generate?',
-    a: 'ClientPilot generates 6 types of content: LinkedIn Posts (7 engagement-focused posts), Outreach Templates (6 cold/warm/follow-up email templates), Dev.to Articles (full case studies with technical depth), Platform Profiles (tailored bios for Toptal, Arc.dev, freelance.nl, and more), Portfolio Page copy (complete /hire landing page), and Elevator Pitch formats (30-sec pitch, Twitter bio, LinkedIn headline, GitHub README).',
-    open: false,
-  },
-  {
-    q: 'How is this different from just using ChatGPT?',
-    a: 'ChatGPT gives generic output. ClientPilot uses your actual profile — your skills, stack, projects, and positioning — to generate content that sounds like you. The templates are built around freelance best practices, and everything stays consistent across all formats. No prompt engineering required.',
-    open: false,
-  },
-  {
-    q: 'Can I edit the generated content?',
-    a: 'Yes. All generated content is fully editable inline in the dashboard. You can tweak tone, swap examples, or regenerate individual sections. The content is a starting point — polished and professional — that you make yours.',
-    open: false,
-  },
-  {
-    q: 'What if I want to target different niches or client types?',
-    a: 'Use the Target Context feature when generating. Describe your ideal client — startup, agency, enterprise, specific industry — and the AI tailors the messaging, pain points, and positioning accordingly. You can run multiple targets from the same profile.',
-    open: false,
-  },
-  {
-    q: 'Is there an API or integrations?',
-    a: 'Not yet. Direct publishing integrations (LinkedIn, Dev.to) and an API for automation are on the roadmap. Lifetime plan holders will get these features at no extra cost when they ship.',
-    open: false,
-  },
-  {
-    q: 'Can I cancel my subscription?',
-    a: 'Yes, anytime. Email dev@dizid.com and we cancel it, no hoops, no retention flows. You keep access until the end of your billing period. If you want a refund within 7 days of purchase, email the same address.',
-    open: false,
-  },
-])
+const faqs = ref<FaqItem[]>(LANDING_FAQS.map((faq) => ({ ...faq, open: false })))
 
 function toggleFaq(index: number) {
   faqs.value[index].open = !faqs.value[index].open
@@ -253,7 +222,7 @@ function toggleFaq(index: number) {
         <div class="hidden sm:block w-px h-4 bg-border-2"></div>
         <div class="flex items-center gap-2">
           <i class="fa-solid fa-pen-to-square text-brand/60 text-base"></i>
-          <span>Every piece editable, one click to regenerate</span>
+          <span>Every piece editable, one click to copy</span>
         </div>
       </div>
     </section>
@@ -387,7 +356,7 @@ function toggleFaq(index: number) {
                 <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ 6 more LinkedIn posts</span>
                 <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ 5 more outreach templates</span>
                 <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ Dev.to article</span>
-                <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ 5 platform profiles</span>
+                <span class="px-2.5 py-1 bg-surface-3/50 text-text-3 text-xs rounded-md">+ Platform profile text</span>
               </div>
             </div>
           </div>
@@ -557,9 +526,9 @@ function toggleFaq(index: number) {
               ></i>
             </button>
 
-            <!-- Answer -->
+            <!-- Answer (v-show, not v-if: the prerendered HTML keeps every answer for crawlers) -->
             <div
-              v-if="faq.open"
+              v-show="faq.open"
               class="px-5 pb-5"
               style="animation: fade-up 0.2s ease both"
             >

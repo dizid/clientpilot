@@ -4,14 +4,14 @@
 
 ## What it does
 - You sign in with Google and give it your portfolio URL, GitHub profile or a pasted CV; it drafts your profile (skills, stack, projects, target market) for you to check.
-- One generation produces six content types from that profile: LinkedIn posts (10), outreach email templates, a Dev.to case-study article, platform profiles (Toptal, Arc.dev, freelance.nl and others), portfolio /hire page copy, and elevator pitches (30-second pitch, X bio, LinkedIn headline, GitHub README).
+- One generation produces six content types from that profile: 7 LinkedIn posts, 6 outreach templates (LinkedIn DMs and emails: cold to a funded startup, a CTO and an agency, warm to a former colleague, a message after engaging with someone's post, a reply to a freelance platform inquiry), a 600-900 word Dev.to case-study article, reusable platform profile text (short bio, full bio, skills, availability, rate wording for Toptal, Arc.dev, freelance.nl and similar platforms), portfolio /hire page copy (headline, services with price ranges, case studies, why hire me, process, call to action), and elevator pitches (30-second pitch, X bio, LinkedIn headline, email signature, GitHub README, one-liner).
 - Target context: describe an ideal client (startup, agency, a niche, or paste the prospect's website) and the messaging, pain points and positioning are tailored to that client. Several targets can share one profile.
-- Every piece is editable inline, can be regenerated on its own, copied, and tracked as draft, used or replied.
+- Every piece is editable inline, copied with one click, and tracked as draft, used or replied. Pro and Lifetime users can regenerate any single piece with their own feedback.
 - Content is generated with Anthropic's Claude.
 
 ## Pricing
-- Free: 1 preview generation, see all content types, limited copy/export.
-- Pro: $9 per month. Unlimited generations, all content types, full copy/export, weekly content refresh. Cancel anytime from Settings; refund on request within 7 days of purchase.
+- Free: 1 preview generation with all content types (edit and copy included; regenerating a piece is Pro).
+- Pro: $9 per month. Unlimited generations, all content types, regenerate any piece with your feedback. Cancel anytime by emailing dev@dizid.com (access runs to the end of the billing period); refund on request within 7 days of purchase.
 - Lifetime: $69 one-time payment. Everything in Pro, lifetime updates, priority support.
 
 ## Who it is for
