@@ -56,7 +56,7 @@ const post: BlogPost = {
 <li><strong>One or two sentences on how you would start,</strong> or a specific question that shows you read the post.</li>
 <li><strong>A next step:</strong> an invitation to talk or a question they can answer in one line.</li>
 </ol>
-<p>Many job posts add screening questions. A guest article hosted on Upwork's resource centre, written by a freelancer (Upwork says it doesn't necessarily reflect Upwork's views), claims that the answers to these questions are the first thing a client sees when the proposal opens, so you should answer them first and well (<a href="https://www.upwork.com/resources/write-proposals-freelancer-advice" target="_blank" rel="noopener noreferrer">Advice From Freelancers</a>). We can't confirm that order from Upwork's own documentation, but the safe approach doesn't depend on it: treat the answers as part of the pitch, be specific, and don't paste the same lines everywhere. The same author says a question about which part of the project will be hardest is a chance to offer a concrete idea.</p>
+<p>Many job posts add screening questions. A guest article hosted on Upwork's resource centre, written by a freelancer (Upwork says it doesn't necessarily reflect Upwork's views), claims that the answers to these questions are the first thing a client sees when the proposal opens, so you should answer them first and well (<a href="https://www.upwork.com/resources/leading-voices/write-proposals-freelancer-advice" target="_blank" rel="noopener noreferrer">Advice From Freelancers</a>). We can't confirm that order from Upwork's own documentation, but the safe approach doesn't depend on it: treat the answers as part of the pitch, be specific, and don't paste the same lines everywhere. The same author says a question about which part of the project will be hardest is a chance to offer a concrete idea.</p>
 
 <h2>Profile parts that matter</h2>
 <p>What Upwork says the client sees next to your proposal is a short list: name, picture, talent badges, hourly rate and Job Success Score. Of these, you can control your picture and rate directly. Your badges and score come from work you complete.</p>
@@ -107,7 +107,7 @@ const post: BlogPost = {
     {
       label:
         'Upwork resources: How to Write Proposals on Upwork, advice from a guest freelancer, not Upwork itself (read via Internet Archive copy, 16 Aug 2025)',
-      url: 'https://www.upwork.com/resources/write-proposals-freelancer-advice',
+      url: 'https://www.upwork.com/resources/leading-voices/write-proposals-freelancer-advice',
     },
     {
       label: 'Upwork Help: What is a Job Success Score? (read via Internet Archive copy, 7 Apr 2026)',
