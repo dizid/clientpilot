@@ -1,6 +1,9 @@
 import { authenticateRequest } from './lib/auth.mjs'
 import { query } from './lib/db.mjs'
-import { validate, requireString, optionalString } from './lib/validate.mjs'
+import {
+  validate, requireString, optionalString, checkStringList, checkProjects, checkSocialLinks,
+  normalizeProjects, normalizeSocialLinks, PROFILE_LIMITS
+} from './lib/validate.mjs'
 import { safeError, errorStatus } from './lib/errors.mjs'
 
 export default async (req: Request) => {
@@ -11,6 +14,9 @@ export default async (req: Request) => {
   try {
     const user = await authenticateRequest(req)
     const profile = await req.json()
+    if (typeof profile !== 'object' || profile === null || Array.isArray(profile)) {
+      return Response.json({ error: 'Profile must be an object' }, { status: 400 })
+    }
 
     // Validate required and optional fields
     const validationError = validate(
@@ -28,12 +34,13 @@ export default async (req: Request) => {
           : (profile.skills as unknown[]).some(s => typeof s !== 'string' || s.length > 50)
             ? 'skills: each item must be a string max 50 chars'
             : null,
-      // tech_stack: array, max 20 items
-      (!Array.isArray(profile.tech_stack))
-        ? 'tech_stack must be an array'
-        : profile.tech_stack.length > 20
-          ? 'tech_stack: max 20 items allowed'
-          : null,
+      // tech_stack: array, max 20 items, each string max 50 chars (like skills)
+      Array.isArray(profile.tech_stack)
+        ? checkStringList(profile.tech_stack, 'tech_stack', 20, PROFILE_LIMITS.techItem)
+        : 'tech_stack must be an array',
+      // projects + social_links go into every AI prompt: shape and size checked
+      checkProjects(profile.projects),
+      checkSocialLinks(profile.social_links),
       optionalString(profile.target_market, 'target_market'),
       optionalString(profile.pricing_model, 'pricing_model'),
       optionalString(profile.availability, 'availability')
@@ -66,8 +73,8 @@ export default async (req: Request) => {
         profile.skills || [],
         profile.tech_stack || [],
         profile.experience_years || 0,
-        JSON.stringify(profile.projects || []),
-        JSON.stringify(profile.social_links || {}),
+        JSON.stringify(normalizeProjects(profile.projects)),
+        JSON.stringify(normalizeSocialLinks(profile.social_links)),
         profile.target_market,
         profile.pricing_model,
         profile.availability
