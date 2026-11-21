@@ -13,6 +13,7 @@ const post: BlogPost = {
   date: '2026-11-14',
   checked: '2026-11-11',
   readingMinutes: 8,
+  related: ['freelance-developer-testimonials-referrals', 'freelance-developer-vetting-toptal-arc-lemon', 'cold-email-freelance-developer'],
   html: `
 <p>A case study is the proof you link from a proposal, a cold email or your profile. It answers one question for a buyer: has this developer solved a problem like mine, and can I believe it? Many developer case studies answer a different question, "what did I build and with which tools", and leave the buyer to work out the rest. This guide covers what to include, a structure with a made-up example, results under an NDA, getting the client's OK, and where to publish.</p>
 <p><em>A note on what this is.</em> There is no official standard for case studies, so the writing advice is practice, labelled as a rule of thumb where it matters. Platform facts come from each platform's own help pages, linked where used and checked in November 2026. Nothing here is legal advice.</p>

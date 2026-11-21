@@ -9,6 +9,7 @@ const post: BlogPost = {
   date: '2026-11-11',
   checked: '2026-11-11',
   readingMinutes: 9,
+  related: ['freelance-follow-up-email', 'linkedin-outreach-freelance-developer', 'freelance-developer-case-study'],
   html: `
 <p>The cold emails worth answering read like a note from one person who actually looked at the recipient's business. Here's a template with two follow-ups, the sender rules Gmail and Yahoo publish, and what the law says in the US, UK and EU. It's practical guidance, not legal advice.</p>
 

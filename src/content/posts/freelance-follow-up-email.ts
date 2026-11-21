@@ -10,6 +10,7 @@ const post: BlogPost = {
   date: '2026-11-12',
   checked: '2026-11-11',
   readingMinutes: 8,
+  related: ['cold-email-freelance-developer', 'freelance-invoice-late-payment', 'freelance-developer-testimonials-referrals'],
   html: `
 <p>Most freelance leads that go quiet haven't said no. They got busy, forwarded your proposal to someone, or meant to reply "tomorrow". A good follow-up gets you an answer, yes or no, without annoying anyone. A bad one ("just checking in!") is easy to ignore and tells the reader nothing new. This guide covers when to follow up, how many times, what each message should add, four short templates, and the few rules that still apply when the email is a follow-up.</p>
 

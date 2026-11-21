@@ -4,10 +4,12 @@
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import LegalFooter from '@/components/LegalFooter.vue'
-import { findPost, formatPostDate } from '@/content/posts'
+import { findPost, formatPostDate, relatedPostsFor } from '@/content/posts'
 
 const route = useRoute()
 const post = computed(() => findPost(String(route.params.slug ?? '')))
+// "Related guides" under the post: links every guide from other guides (in the prerendered HTML too)
+const relatedPosts = computed(() => (post.value ? relatedPostsFor(post.value) : []))
 
 onMounted(() => {
   document.title = post.value ? `${post.value.title} | ClientPilot` : 'Post not found | ClientPilot'
@@ -31,6 +33,16 @@ onMounted(() => {
         <ul class="list-disc pl-5 space-y-1 text-sm text-text-2">
           <li v-for="source in post.sources" :key="source.url">
             <a :href="source.url" target="_blank" rel="noopener noreferrer" class="text-brand-light hover:text-brand">{{ source.label }}</a>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Same box style as Sources above -->
+      <section v-if="relatedPosts.length" class="mt-6 bg-surface border border-border rounded-2xl p-6">
+        <h2 class="text-lg font-semibold text-text mb-3">Related guides</h2>
+        <ul class="list-disc pl-5 space-y-1 text-sm text-text-2">
+          <li v-for="related in relatedPosts" :key="related.slug">
+            <a :href="`/blog/${related.slug}`" class="text-brand-light hover:text-brand">{{ related.title }}</a>
           </li>
         </ul>
       </section>

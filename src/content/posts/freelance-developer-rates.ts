@@ -11,6 +11,7 @@ const post: BlogPost = {
   date: '2026-11-11',
   checked: '2026-11-11',
   readingMinutes: 8,
+  related: ['freelance-platform-fees-compared', 'freelance-project-proposal-template', 'freelance-developer-contract-clauses'],
   html: `
 <p>Your rate decides how many hours you need to sell and how much room you have in a slow month. Below is what Arc, Upwork, Malt and US labor statistics publish about developer pay, when to bill hourly, daily or fixed, how to work out your floor rate, and how to raise it.</p>
 

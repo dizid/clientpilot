@@ -9,6 +9,7 @@ const post: BlogPost = {
   date: '2026-11-14',
   checked: '2026-11-11',
   readingMinutes: 9,
+  related: ['freelance-developer-case-study', 'linkedin-outreach-freelance-developer', 'freelance-follow-up-email'],
   html: `
 <p>Most happy clients never think to say so in public, and "write me a testimonial" is a vague job. If you make the ask specific, easy and well-timed, you get short, concrete quotes you can use on your site and in proposals. Referrals work the same way: people recommend you when they know exactly who to recommend you to. This guide covers when to ask, three questions that produce a useful testimonial, three request templates, where to use the result, how to ask for referrals, and the rules that apply in the US, UK and EU.</p>
 

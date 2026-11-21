@@ -28,6 +28,7 @@ Posts live in code, no database: one file per post in `src/content/posts/<slug>.
 - Every fee, number or rule in a post links to the page it came from (`sources`) and the post shows its `checked` date. No invented stats.
 - IndexNow key file: `public/3a21ab3ea1ff0c44abe9a7620a6dd10f.txt`. After a post goes live: POST `https://api.indexnow.org/indexnow` with host `clientpilot.dev`, that key and the new URLs.
 - Footer link "Blog" on the landing page; posts end with a small "See how it works" box linking `/`.
+- "Related guides" box under each post (T-0636, Nov 21): a post's `related` field lists up to 3 hand-picked slugs (`relatedPostsFor()` in `src/content/posts/index.ts`; without it the newest other posts show). The prerender stops the build on an unknown slug, a duplicate, the post itself or more than 3. Give a new post a `related` list and add it to 1-2 older posts' lists, so no guide is left without links from other guides.
 
 ## Database Schema
 

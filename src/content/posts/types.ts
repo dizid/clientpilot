@@ -18,6 +18,12 @@ export interface BlogPost {
   /** Date the facts were last checked, YYYY-MM-DD. */
   checked: string
   readingMinutes: number
+  /**
+   * Slugs of up to 3 hand-picked posts shown as "Related guides" under this post.
+   * The prerender stops the build on an unknown slug, a duplicate or the post itself.
+   * Without it the post shows the newest other posts.
+   */
+  related?: string[]
   html: string
   sources: BlogSource[]
 }

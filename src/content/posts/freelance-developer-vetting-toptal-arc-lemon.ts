@@ -13,6 +13,7 @@ const post: BlogPost = {
   date: '2026-11-14',
   checked: '2026-11-11',
   readingMinutes: 7,
+  related: ['freelance-platform-fees-compared', 'upwork-proposal-developer', 'freelance-developer-rates'],
   html: `
 <p>Toptal, Arc.dev and Lemon.io all say they only accept vetted developers. For a working freelancer the question is practical: what exactly do they ask you to do, how long does it take, and is it worth the unpaid hours? This post goes through each screen as the platforms describe it on their own pages, and what you can do to prepare.</p>
 <p>Where a platform doesn't publish something, such as test content or reapplication rules, this post says so instead of guessing. For what each platform charges, see <a href="/blog/freelance-platform-fees-compared">freelance platform fees compared</a>.</p>

@@ -9,6 +9,7 @@ const post: BlogPost = {
   date: '2026-11-13',
   checked: '2026-11-11',
   readingMinutes: 9,
+  related: ['freelance-developer-contract-clauses', 'freelance-follow-up-email', 'freelance-developer-rates'],
   html: `
 <p>A late invoice is rarely a refusal. Usually it sits in someone's inbox, waits for an approval, or fell behind a more urgent job. Some are not so innocent. Either way, you get paid faster when the invoice is easy to pay, when you chase on a fixed schedule and when you know what the law lets you add. This guide covers what to put on an invoice, a reminder schedule with templates, stopping work, and the late-payment rules in the EU, the Netherlands, the UK and New York City.</p>
 

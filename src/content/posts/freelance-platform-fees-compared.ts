@@ -11,6 +11,7 @@ const post: BlogPost = {
   date: '2026-11-11',
   checked: '2026-11-11',
   readingMinutes: 9,
+  related: ['freelance-developer-vetting-toptal-arc-lemon', 'upwork-proposal-developer', 'freelance-developer-rates'],
   html: `
 <p>Freelance platforms make money in different ways: a cut of what you earn, a fee to apply, a subscription, or a margin on what the client pays. Some cost you nothing in money but weeks in screening. Here is what ten platforms ask of a freelance web developer, the catch with each, the channels that charge nothing, and a simple 30-day plan.</p>
 

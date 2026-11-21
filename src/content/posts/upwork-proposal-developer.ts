@@ -13,6 +13,7 @@ const post: BlogPost = {
   date: '2026-11-13',
   checked: '2026-11-11',
   readingMinutes: 8,
+  related: ['freelance-platform-fees-compared', 'freelance-developer-vetting-toptal-arc-lemon', 'freelance-project-proposal-template'],
   html: `
 <p>On Upwork you pay to apply, the client sees your proposal in a list next to many others, and you get a few seconds of attention. A developer who understands what is shown first, what an application costs and where the rules bite can spend fewer Connects and write better proposals. This guide covers what the client sees, how Connects and boosted proposals work, the cover letter and screening questions, which profile parts matter, a short example for a development job and the mistakes that can cost you your account.</p>
 <p><strong>Checked November 2026.</strong> Upwork's help pages block automated readers, so we read the latest Internet Archive copies of Upwork's own pages. The copy date is next to each link in the sources. Upwork changes Connects and boost rules often, so look at the live page before you spend money. For Upwork's fees, see our <a href="/blog/freelance-platform-fees-compared">platform fees comparison</a>; this post doesn't repeat them.</p>

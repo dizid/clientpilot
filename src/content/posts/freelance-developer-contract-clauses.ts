@@ -11,6 +11,7 @@ const post: BlogPost = {
   date: '2026-11-12',
   checked: '2026-11-11',
   readingMinutes: 9,
+  related: ['freelance-invoice-late-payment', 'freelance-project-proposal-template', 'freelance-developer-rates'],
   html: `
 <p>Most freelance disputes aren't about bad code. They're about things nobody wrote down: what was included, who pays for the extra page, when the invoice is due, who owns the result. This guide goes through the clauses that matter most for a freelance web or app developer, what each one should say, and the legal rules worth knowing in the US, the EU and New York.</p>
 <p><em>This is a summary, not legal advice. Rules depend on where you and the client are.</em></p>

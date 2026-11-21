@@ -11,6 +11,7 @@ const post: BlogPost = {
   date: '2026-11-12',
   checked: '2026-11-11',
   readingMinutes: 8,
+  related: ['cold-email-freelance-developer', 'freelance-developer-testimonials-referrals', 'freelance-follow-up-email'],
   html: `
 <p>LinkedIn is a good place to reach the people who hire freelance developers: founders, marketing leads, product managers and agency owners. It's also a place where an obvious pitch gets ignored or reported. This guide covers what to fix on your profile first, which way of contacting someone to use, what LinkedIn says about limits and automation, and a three-message sequence you can adapt.</p>
 <p>Every rule below comes from LinkedIn's own Help Center, User Agreement or Professional Community Policies, linked where it's used. LinkedIn doesn't publish a weekly invitation number, so this post doesn't give one either.</p>

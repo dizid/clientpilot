@@ -87,6 +87,22 @@ function checkBlogPost(post) {
   if (!post.sources?.length || post.sources.some((source) => !source.url.startsWith('https://'))) {
     throw new Error(`prerender: ${where}: needs sources, all https`)
   }
+  checkRelatedPosts(post, where)
+}
+
+const POST_SLUGS = new Set(BLOG_POSTS.map((post) => post.slug))
+
+/** Throws if a post's hand-picked "Related guides" list has an unknown slug, a duplicate, itself or more than 3. */
+function checkRelatedPosts(post, where) {
+  if (post.related === undefined) return
+  if (!Array.isArray(post.related) || post.related.length === 0 || post.related.length > 3) {
+    throw new Error(`prerender: ${where}: related must list 1-3 post slugs`)
+  }
+  if (new Set(post.related).size !== post.related.length) throw new Error(`prerender: ${where}: related has a duplicate`)
+  for (const slug of post.related) {
+    if (slug === post.slug) throw new Error(`prerender: ${where}: related lists the post itself`)
+    if (!POST_SLUGS.has(slug)) throw new Error(`prerender: ${where}: related slug "${slug}" is not a post`)
+  }
 }
 
 /** BlogPosting structured data for one post. */

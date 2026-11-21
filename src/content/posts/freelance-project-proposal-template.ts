@@ -12,6 +12,7 @@ const post: BlogPost = {
   date: '2026-11-13',
   checked: '2026-11-11',
   readingMinutes: 8,
+  related: ['freelance-developer-contract-clauses', 'freelance-developer-case-study', 'upwork-proposal-developer'],
   html: `
 <p>A project proposal has one job: make it easy for one person to say yes. That person is busy, may not be technical, and often has to show your proposal to someone else before they can decide. So the best proposals are short, written in the client's words, and end with one clear next step. This guide covers the structure, how long it should be, what changes when you send it cold or after a call, a copy-paste template for a web development job, and the mistakes that cost freelancers jobs.</p>
 

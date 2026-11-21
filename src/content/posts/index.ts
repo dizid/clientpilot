@@ -16,6 +16,24 @@ export function findPost(slug: string): BlogPost | undefined {
   return BLOG_POSTS.find((post) => post.slug === slug)
 }
 
+/** Number of "Related guides" links under each post. */
+export const RELATED_POST_COUNT = 3
+
+/**
+ * The posts listed under `post` as "Related guides": its hand-picked `related` slugs,
+ * or the newest other posts when it has none. Unknown slugs are skipped here; the
+ * prerender (scripts/prerender.mjs) stops the build on them, so none go live.
+ */
+export function relatedPostsFor(post: BlogPost): BlogPost[] {
+  if (post.related?.length) {
+    return post.related
+      .map((slug) => findPost(slug))
+      .filter((related): related is BlogPost => related !== undefined && related.slug !== post.slug)
+      .slice(0, RELATED_POST_COUNT)
+  }
+  return BLOG_POSTS.filter((other) => other.slug !== post.slug).slice(0, RELATED_POST_COUNT)
+}
+
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December',
