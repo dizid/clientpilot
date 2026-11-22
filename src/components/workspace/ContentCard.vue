@@ -126,6 +126,7 @@ async function confirmDelete() {
         <select
           :value="piece.status"
           @change="onStatusChange"
+          :aria-label="`Status of ${piece.label}`"
           class="text-xs px-2 py-1 rounded-full border-0 cursor-pointer appearance-none"
           :class="{
             'bg-surface-2 text-text-3': piece.status === 'draft',
@@ -155,11 +156,12 @@ async function confirmDelete() {
       <!-- Dev.to article: rendered markdown -->
       <div
         v-if="piece.type === 'devto_article' && renderedContent"
-        class="text-sm text-text-2 leading-relaxed prose-sm"
+        class="text-sm text-text-2 leading-relaxed prose-sm break-words"
         v-html="renderedContent"
       ></div>
-      <!-- All other types: plain text -->
-      <p v-else class="text-sm text-text-2 leading-relaxed whitespace-pre-wrap">
+      <!-- All other types: plain text. break-words: a long URL or word wraps inside the card
+           instead of making the whole page scroll sideways on phones (T-0636) -->
+      <p v-else class="text-sm text-text-2 leading-relaxed whitespace-pre-wrap break-words">
         {{ piece.content }}
       </p>
     </div>
@@ -169,6 +171,7 @@ async function confirmDelete() {
       <textarea
         v-model="editValue"
         rows="8"
+        :aria-label="`Edit ${piece.label}`"
         class="w-full bg-surface-2 border border-border-2 rounded-lg p-3 text-sm text-text resize-y focus:outline-none focus:border-brand transition-colors"
       ></textarea>
       <div class="flex items-center gap-2">
@@ -190,8 +193,9 @@ async function confirmDelete() {
 
     <!-- Regenerate feedback input -->
     <div v-if="showRegenerateInput && !isEditing" class="space-y-2 pt-2 border-t border-border">
-      <p class="text-xs text-text-3">What should be different? (optional)</p>
+      <label :for="`regen-feedback-${piece.id}`" class="block text-xs text-text-3">What should be different? (optional)</label>
       <textarea
+        :id="`regen-feedback-${piece.id}`"
         v-model="regenerateFeedback"
         rows="2"
         placeholder="e.g. Make it shorter, more casual tone..."

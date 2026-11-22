@@ -54,20 +54,27 @@ function isActive(path: string) {
           <span v-else class="text-xs font-semibold px-2 py-1 rounded-full bg-surface-2 text-text-3">FREE</span>
 
           <img v-if="auth.user?.photoURL" :src="auth.user.photoURL" class="w-8 h-8 rounded-full" alt="" />
-          <button @click="handleLogout" class="text-xs text-text-3 hover:text-text cursor-pointer bg-transparent border-0">
+          <button @click="handleLogout" class="text-xs text-text-3 hover:text-text cursor-pointer bg-transparent border-0 py-1 -my-1">
             Sign out
           </button>
         </div>
       </div>
 
-      <!-- Mobile toggle -->
-      <button class="md:hidden text-text bg-transparent border-0 text-xl cursor-pointer" @click="mobileOpen = !mobileOpen" aria-label="Toggle menu">
+      <!-- Mobile toggle: p-2 -m-2 makes the tap area 34x44 px without moving the icon (was 18 px
+           wide); aria-expanded tells screen readers whether the menu is open (T-0636) -->
+      <button
+        class="md:hidden text-text bg-transparent border-0 text-xl cursor-pointer p-2 -m-2"
+        @click="mobileOpen = !mobileOpen"
+        aria-label="Menu"
+        :aria-expanded="mobileOpen"
+        aria-controls="app-mobile-menu"
+      >
         <i :class="mobileOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
       </button>
     </div>
 
     <!-- Mobile menu -->
-    <div v-if="mobileOpen" class="md:hidden border-t border-border bg-surface p-4 flex flex-col gap-1">
+    <div v-if="mobileOpen" id="app-mobile-menu" class="md:hidden border-t border-border bg-surface p-4 flex flex-col gap-1">
       <router-link
         v-for="link in navLinks"
         :key="link.to"
@@ -91,7 +98,8 @@ function isActive(path: string) {
           </span>
           <span v-else class="text-xs font-semibold px-2 py-0.5 rounded-full bg-surface-2 text-text-3">FREE</span>
         </div>
-        <button @click="handleLogout" class="text-xs text-text-3 hover:text-text cursor-pointer bg-transparent border-0">
+        <!-- py-1.5 -my-1.5: 28 px tap height, the row doesn't move (T-0636) -->
+        <button @click="handleLogout" class="text-xs text-text-3 hover:text-text cursor-pointer bg-transparent border-0 py-1.5 -my-1.5">
           Sign out
         </button>
       </div>

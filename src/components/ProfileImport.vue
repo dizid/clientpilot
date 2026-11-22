@@ -186,15 +186,16 @@ function chipClass(selected: boolean): string {
       <div class="w-12 h-12 mx-auto mb-3 rounded-xl bg-brand/15 flex items-center justify-center">
         <i class="fa-solid fa-wand-magic-sparkles text-brand-light text-xl"></i>
       </div>
-      <h2 class="text-xl font-bold">Skip the forms</h2>
+      <h1 class="text-xl font-bold">Skip the forms</h1>
       <p class="text-sm text-text-2 mt-1">Paste your portfolio link — we'll pull your projects, skills and bio from it. You just check it.</p>
     </div>
 
     <form @submit.prevent="runImport" class="space-y-3">
-      <div class="flex items-center gap-2 bg-surface-2 border border-border rounded-xl px-4 py-3.5 focus-within:border-brand transition">
+      <label class="flex items-center gap-2 bg-surface-2 border border-border rounded-xl px-4 py-3.5 focus-within:border-brand transition cursor-text">
         <i class="fa-solid fa-globe text-text-3 shrink-0"></i>
         <input
           v-model="url"
+          aria-label="Your portfolio or website URL"
           type="text"
           inputmode="url"
           autocomplete="url"
@@ -202,23 +203,25 @@ function chipClass(selected: boolean): string {
           placeholder="yourportfolio.com"
           class="flex-1 bg-transparent text-text placeholder-text-3 focus:outline-none min-w-0 text-base"
         />
-      </div>
+      </label>
 
       <!-- Optional extra sources -->
-      <div v-if="showGithub" class="flex items-center gap-2 bg-surface-2 border border-border rounded-xl px-4 py-3 focus-within:border-brand transition">
+      <label v-if="showGithub" class="flex items-center gap-2 bg-surface-2 border border-border rounded-xl px-4 py-3 focus-within:border-brand transition cursor-text">
         <i class="fa-brands fa-github text-text-3 shrink-0"></i>
         <input
           v-model="github"
+          aria-label="GitHub username"
           type="text"
           autocapitalize="off"
           placeholder="GitHub username"
           class="flex-1 bg-transparent text-text placeholder-text-3 focus:outline-none min-w-0 text-base"
         />
-      </div>
+      </label>
 
       <textarea
         v-if="showPaste"
         v-model="pastedText"
+        aria-label="Your CV, LinkedIn About section or work description"
         rows="5"
         placeholder="Paste your CV, LinkedIn 'About' section, or anything describing your work…"
         class="w-full px-4 py-3 bg-surface-2 border border-border rounded-xl text-text text-sm placeholder-text-3 focus:outline-none focus:border-brand transition resize-y"
@@ -261,7 +264,7 @@ function chipClass(selected: boolean): string {
       <button
         type="button"
         @click="emit('manual')"
-        class="text-brand-light hover:underline bg-transparent border-0 p-0 cursor-pointer text-xs"
+        class="text-brand-light hover:underline bg-transparent border-0 px-0 py-1 -my-1 cursor-pointer text-xs"
       >Fill in the form manually</button>
     </p>
   </div>
@@ -280,9 +283,10 @@ function chipClass(selected: boolean): string {
   ─────────────────────────────────────────────────────────── -->
   <div v-else class="space-y-4">
     <div class="bg-success/10 border border-success/30 rounded-xl px-4 py-3 text-sm">
-      <p class="font-semibold text-success">
+      <!-- The review screen's h1 (same look as before) (T-0636) -->
+      <h1 class="font-semibold text-success">
         <i class="fa-solid fa-circle-check mr-1.5"></i>Here's what we found — look right?
-      </p>
+      </h1>
       <p class="text-xs text-text-3 mt-1 break-words">Read from: {{ sources.join(' · ') }}</p>
     </div>
 
@@ -292,7 +296,7 @@ function chipClass(selected: boolean): string {
 
     <!-- The two things a website can't tell us -->
     <div class="bg-surface border border-brand/40 rounded-2xl p-5 space-y-4">
-      <h3 class="font-semibold">Two quick taps</h3>
+      <h2 class="font-semibold">Two quick taps</h2>
 
       <div>
         <p class="text-sm text-text-2 mb-2">Who do you want as clients? <span class="text-danger">*</span></p>
@@ -337,8 +341,9 @@ function chipClass(selected: boolean): string {
     <!-- Prefilled profile (lightly editable) -->
     <div class="bg-surface border border-border rounded-2xl p-5 space-y-5">
       <div>
-        <label class="block text-xs font-medium text-text-3 uppercase tracking-wide mb-1.5">Headline</label>
+        <label for="import-headline" class="block text-xs font-medium text-text-3 uppercase tracking-wide mb-1.5">Headline</label>
         <input
+          id="import-headline"
           v-model="profileStore.profile.headline"
           type="text"
           class="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-text text-sm focus:outline-none focus:border-brand transition"
@@ -346,8 +351,9 @@ function chipClass(selected: boolean): string {
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-text-3 uppercase tracking-wide mb-1.5">Bio</label>
+        <label for="import-bio" class="block text-xs font-medium text-text-3 uppercase tracking-wide mb-1.5">Bio</label>
         <textarea
+          id="import-bio"
           v-model="profileStore.profile.bio"
           rows="4"
           class="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-text text-sm focus:outline-none focus:border-brand transition resize-y"

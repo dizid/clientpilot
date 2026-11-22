@@ -52,6 +52,9 @@ const touched = ref({
 
 // ─── Skill & tech suggestions ──────────────────────────────────────────────
 
+// Step names: the label under the step dots and the dots' screen-reader names
+const STEP_NAMES = ['About You', 'Skills & Stack', 'Projects', 'Links & Market']
+
 const SKILL_SUGGESTIONS = [
   'AI Integration', 'API Development', 'Frontend', 'Backend',
   'DevOps', 'UI/UX', 'Mobile', 'E-commerce', 'Performance', 'Security'
@@ -363,7 +366,8 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 <template>
   <AppNav />
 
-  <div class="pt-20 pb-20 px-4 sm:px-6 max-w-2xl mx-auto">
+  <!-- main landmark: screen readers can jump straight to the content (T-0636) -->
+  <main class="pt-20 pb-20 px-4 sm:px-6 max-w-2xl mx-auto">
 
     <!-- One-URL AI import (default for new users) -->
     <ProfileImport
@@ -414,6 +418,8 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
         <template v-for="s in 4" :key="s">
           <button
             @click="goToStep(s)"
+            :aria-label="`Step ${s}: ${STEP_NAMES[s - 1]}${stepComplete[s as 1|2|3|4] ? ' (done)' : ''}`"
+            :aria-current="step === s ? 'step' : undefined"
             class="flex items-center gap-1.5 cursor-pointer border-0 bg-transparent p-0"
           >
             <div
@@ -442,7 +448,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
         <span class="text-xs text-text-3">
           Step {{ step }} of 4 —
           <span class="font-medium text-text-2">
-            {{ ['About You', 'Skills & Stack', 'Projects', 'Links & Market'][step - 1] }}
+            {{ STEP_NAMES[step - 1] }}
           </span>
         </span>
         <span class="text-xs text-text-3">
@@ -460,12 +466,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Headline -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <label for="ob-headline" class="block text-sm font-medium text-text-2 mb-1.5">
             Professional Headline
             <span class="text-danger ml-0.5">*</span>
           </label>
           <div class="relative">
             <input
+              id="ob-headline"
               v-model="profileStore.profile.headline"
               @blur="touched.headline = true"
               type="text"
@@ -483,12 +490,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Bio -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <label for="ob-bio" class="block text-sm font-medium text-text-2 mb-1.5">
             Short Bio
             <span class="text-danger ml-0.5">*</span>
           </label>
           <div class="relative">
             <textarea
+              id="ob-bio"
               v-model="profileStore.profile.bio"
               @blur="touched.bio = true"
               rows="4"
@@ -508,12 +516,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Experience years -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <label for="ob-years" class="block text-sm font-medium text-text-2 mb-1.5">
             Years of Experience
             <span class="text-danger ml-0.5">*</span>
           </label>
           <div class="flex items-center gap-3">
             <input
+              id="ob-years"
               v-model.number="profileStore.profile.experience_years"
               @blur="touched.experience_years = true"
               type="number"
@@ -550,7 +559,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Skills -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <label for="ob-skill" class="block text-sm font-medium text-text-2 mb-1.5">
             Skills
             <span class="text-danger ml-0.5">*</span>
             <span class="ml-2 text-xs text-text-3 font-normal">min. 2 required</span>
@@ -578,12 +587,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
           <!-- Add input -->
           <div class="flex gap-2 mb-2">
             <input
+              id="ob-skill"
               v-model="newSkill"
               @keyup.enter="addSkill()"
               @blur="touched.skills = true"
               type="text"
               placeholder="Or type a custom skill..."
-              class="flex-1 px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-text-3 text-sm focus:outline-none focus:border-brand transition"
+              class="flex-1 min-w-0 px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-text-3 text-sm focus:outline-none focus:border-brand transition"
             />
             <button
               @click="addSkill()"
@@ -601,7 +611,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
               class="inline-flex items-center gap-1.5 px-3 py-1 bg-brand/10 text-brand-light rounded-full text-xs font-medium border border-brand/20"
             >
               {{ skill }}
-              <button @click="removeSkill(i)" class="text-brand/50 hover:text-danger cursor-pointer bg-transparent border-0 text-xs leading-none">&times;</button>
+              <button @click="removeSkill(i)" :aria-label="`Remove ${skill}`" class="text-brand/50 hover:text-danger cursor-pointer bg-transparent border-0 text-xs leading-none px-2 py-1.5 -mx-2 -my-1.5">&times;</button>
             </span>
           </div>
           <p v-if="touched.skills && errors.skills" class="mt-1 text-xs text-danger">{{ errors.skills }}</p>
@@ -612,7 +622,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Tech Stack -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <label for="ob-tech" class="block text-sm font-medium text-text-2 mb-1.5">
             Tech Stack
             <span class="text-danger ml-0.5">*</span>
             <span class="ml-2 text-xs text-text-3 font-normal">min. 2 required</span>
@@ -640,12 +650,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
           <!-- Add input -->
           <div class="flex gap-2 mb-2">
             <input
+              id="ob-tech"
               v-model="newTech"
               @keyup.enter="addTech()"
               @blur="touched.tech_stack = true"
               type="text"
               placeholder="Or type a technology..."
-              class="flex-1 px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-text-3 text-sm focus:outline-none focus:border-brand transition"
+              class="flex-1 min-w-0 px-3 py-2 bg-surface-2 border border-border rounded-lg text-text placeholder-text-3 text-sm focus:outline-none focus:border-brand transition"
             />
             <button
               @click="addTech()"
@@ -663,7 +674,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
               class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-2 text-text-2 rounded-full text-xs font-medium border border-border"
             >
               {{ tech }}
-              <button @click="removeTech(i)" class="text-text-3 hover:text-danger cursor-pointer bg-transparent border-0 text-xs leading-none">&times;</button>
+              <button @click="removeTech(i)" :aria-label="`Remove ${tech}`" class="text-text-3 hover:text-danger cursor-pointer bg-transparent border-0 text-xs leading-none px-2 py-1.5 -mx-2 -my-1.5">&times;</button>
             </span>
           </div>
           <p v-if="touched.tech_stack && errors.tech_stack" class="mt-1 text-xs text-danger">{{ errors.tech_stack }}</p>
@@ -707,7 +718,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
               <div class="min-w-0">
                 <div class="flex items-center gap-2 mb-1">
                   <i class="fa-solid fa-folder text-brand text-xs shrink-0"></i>
-                  <h4 class="font-semibold text-sm truncate">{{ project.name }}</h4>
+                  <h3 class="font-semibold text-sm truncate">{{ project.name }}</h3>
                 </div>
                 <p v-if="project.description" class="text-xs text-text-3 line-clamp-2 mb-2">{{ project.description }}</p>
                 <div class="flex flex-wrap gap-1.5">
@@ -726,7 +737,8 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
                     :href="project.url"
                     target="_blank"
                     rel="noopener"
-                    class="text-xs text-brand-light hover:underline"
+                    class="text-xs text-brand-light hover:underline py-1 -my-1"
+                    :aria-label="`View ${project.name} (opens in a new tab)`"
                   >
                     <i class="fa-solid fa-arrow-up-right-from-square mr-1 text-xs"></i>View
                   </a>
@@ -734,7 +746,8 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
               </div>
               <button
                 @click="removeProject(i)"
-                class="text-text-3 hover:text-danger cursor-pointer bg-transparent border-0 p-1 shrink-0 text-lg leading-none"
+                :aria-label="`Remove ${project.name}`"
+                class="text-text-3 hover:text-danger cursor-pointer bg-transparent border-0 px-2 py-1 -mx-1 shrink-0 text-lg leading-none"
               >&times;</button>
             </div>
           </div>
@@ -760,11 +773,12 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
           <div v-if="showProjectForm" class="border border-border-2 rounded-xl p-4 space-y-3 bg-surface-2">
             <div class="flex items-center justify-between mb-1">
               <span class="text-sm font-semibold text-text-2">New Project</span>
-              <button @click="showProjectForm = false" class="text-text-3 hover:text-text cursor-pointer bg-transparent border-0 text-lg leading-none">&times;</button>
+              <button @click="showProjectForm = false" aria-label="Close the new project form" class="text-text-3 hover:text-text cursor-pointer bg-transparent border-0 text-lg leading-none px-2 py-1 -mx-2 -my-1">&times;</button>
             </div>
 
             <input
               v-model="newProject.name"
+              aria-label="Project name"
               type="text"
               placeholder="Project name (e.g. E-commerce Dashboard)"
               class="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-text text-sm placeholder-text-3 focus:outline-none focus:border-brand transition"
@@ -772,6 +786,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
             <textarea
               v-model="newProject.description"
+              aria-label="Project description"
               rows="2"
               placeholder="What does it do? What problem does it solve? (e.g. Inventory management SaaS that reduced manual work by 80%)"
               class="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-text text-sm placeholder-text-3 focus:outline-none focus:border-brand transition resize-y"
@@ -781,6 +796,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
               <div>
                 <input
                   v-model="newProject.url"
+                  aria-label="Project live URL (optional)"
                   type="url"
                   placeholder="Live URL (optional)"
                   class="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-text text-sm placeholder-text-3 focus:outline-none focus:border-brand transition"
@@ -795,6 +811,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
               </div>
               <input
                 v-model="newProject.timeline"
+                aria-label="Project timeline"
                 type="text"
                 placeholder="Timeline (e.g. 3 weeks)"
                 class="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-text text-sm placeholder-text-3 focus:outline-none focus:border-brand transition"
@@ -803,6 +820,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
             <input
               v-model="newProject.tech"
+              aria-label="Project tech stack, comma separated"
               type="text"
               placeholder="Tech stack — comma separated (e.g. Vue 3, Node.js, PostgreSQL)"
               class="w-full px-3 py-2.5 bg-surface border border-border rounded-lg text-text text-sm placeholder-text-3 focus:outline-none focus:border-brand transition"
@@ -855,52 +873,56 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Social links -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <p class="block text-sm font-medium text-text-2 mb-1.5">
             Your Links
             <span class="text-danger ml-0.5">*</span>
             <span class="ml-2 text-xs text-text-3 font-normal">at least 1 required</span>
-          </label>
+          </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2.5 focus-within:border-brand transition">
+            <label class="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2.5 focus-within:border-brand transition cursor-text">
               <i class="fa-brands fa-github text-text-3 shrink-0"></i>
               <input
                 v-model="(profileStore.profile.social_links as Record<string, string>).github"
+                aria-label="GitHub profile URL"
                 @blur="touched.social_links = true"
                 type="url"
                 placeholder="github.com/you"
                 class="flex-1 bg-transparent text-text text-sm placeholder-text-3 focus:outline-none min-w-0"
               />
-            </div>
-            <div class="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2.5 focus-within:border-brand transition">
+            </label>
+            <label class="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2.5 focus-within:border-brand transition cursor-text">
               <i class="fa-brands fa-linkedin text-text-3 shrink-0"></i>
               <input
                 v-model="(profileStore.profile.social_links as Record<string, string>).linkedin"
+                aria-label="LinkedIn profile URL"
                 @blur="touched.social_links = true"
                 type="url"
                 placeholder="linkedin.com/in/you"
                 class="flex-1 bg-transparent text-text text-sm placeholder-text-3 focus:outline-none min-w-0"
               />
-            </div>
-            <div class="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2.5 focus-within:border-brand transition">
+            </label>
+            <label class="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2.5 focus-within:border-brand transition cursor-text">
               <i class="fa-brands fa-x-twitter text-text-3 shrink-0"></i>
               <input
                 v-model="(profileStore.profile.social_links as Record<string, string>).twitter"
+                aria-label="X (Twitter) profile URL"
                 @blur="touched.social_links = true"
                 type="url"
                 placeholder="x.com/you"
                 class="flex-1 bg-transparent text-text text-sm placeholder-text-3 focus:outline-none min-w-0"
               />
-            </div>
-            <div class="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2.5 focus-within:border-brand transition">
+            </label>
+            <label class="flex items-center gap-2 bg-surface-2 border border-border rounded-lg px-3 py-2.5 focus-within:border-brand transition cursor-text">
               <i class="fa-solid fa-globe text-text-3 shrink-0"></i>
               <input
                 v-model="(profileStore.profile.social_links as Record<string, string>).website"
+                aria-label="Your website URL"
                 @blur="touched.social_links = true"
                 type="url"
                 placeholder="yoursite.com"
                 class="flex-1 bg-transparent text-text text-sm placeholder-text-3 focus:outline-none min-w-0"
               />
-            </div>
+            </label>
           </div>
           <p v-if="touched.social_links && errors.social_links" class="mt-1.5 text-xs text-danger">
             <i class="fa-solid fa-triangle-exclamation mr-1"></i>{{ errors.social_links }}
@@ -912,12 +934,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Target Market -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <label for="ob-market" class="block text-sm font-medium text-text-2 mb-1.5">
             Target Market
             <span class="text-danger ml-0.5">*</span>
           </label>
           <div class="relative">
             <select
+              id="ob-market"
               v-model="profileStore.profile.target_market"
               @blur="touched.target_market = true"
               :class="['w-full px-4 py-3 bg-surface-2 border rounded-lg text-text focus:outline-none transition appearance-none pr-9', fieldClass(errors.target_market !== '', touched.target_market)]"
@@ -935,12 +958,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Availability -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <label for="ob-availability" class="block text-sm font-medium text-text-2 mb-1.5">
             Availability
             <span class="text-danger ml-0.5">*</span>
           </label>
           <div class="relative">
             <select
+              id="ob-availability"
               v-model="profileStore.profile.availability"
               @blur="touched.availability = true"
               :class="['w-full px-4 py-3 bg-surface-2 border rounded-lg text-text focus:outline-none transition appearance-none pr-9', fieldClass(errors.availability !== '', touched.availability)]"
@@ -958,12 +982,13 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 
         <!-- Pricing Model (optional) -->
         <div>
-          <label class="block text-sm font-medium text-text-2 mb-1.5">
+          <label for="ob-pricing" class="block text-sm font-medium text-text-2 mb-1.5">
             Pricing Model
             <span class="ml-2 text-xs text-text-3 font-normal">optional</span>
           </label>
           <div class="relative">
             <select
+              id="ob-pricing"
               v-model="profileStore.profile.pricing_model"
               class="w-full px-4 py-3 bg-surface-2 border border-border rounded-lg text-text focus:outline-none focus:border-brand transition appearance-none pr-9"
             >
@@ -996,7 +1021,7 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
     </Transition>
 
     </template>
-  </div>
+  </main>
 </template>
 
 <style scoped>
@@ -1012,5 +1037,11 @@ function fieldClass(hasError: boolean, isTouched: boolean): string {
 .slide-leave-to {
   opacity: 0;
   transform: translateX(-20px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-enter-from,
+  .slide-leave-to {
+    transform: none;
+  }
 }
 </style>

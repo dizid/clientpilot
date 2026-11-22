@@ -55,7 +55,8 @@ async function handleUpgrade(priceId: string) {
 
 <template>
   <AppNav />
-  <div class="pt-24 pb-16 px-4 sm:px-6 max-w-2xl mx-auto">
+  <!-- main landmark: screen readers can jump straight to the content (T-0636) -->
+  <main class="pt-24 pb-16 px-4 sm:px-6 max-w-2xl mx-auto">
     <h1 class="text-3xl font-bold mb-8">Settings</h1>
 
     <!-- Account -->
@@ -63,9 +64,11 @@ async function handleUpgrade(priceId: string) {
       <h2 class="text-lg font-semibold mb-4">Account</h2>
       <div class="flex items-center gap-4">
         <img v-if="auth.user?.photoURL" :src="auth.user.photoURL" class="w-12 h-12 rounded-full" alt="" />
-        <div>
-          <p class="font-medium">{{ auth.user?.displayName }}</p>
-          <p class="text-sm text-text-3">{{ auth.user?.email }}</p>
+        <!-- min-w-0 + break-words: a long email address wraps inside the card instead of
+             making the page scroll sideways on small phones (T-0636) -->
+        <div class="min-w-0">
+          <p class="font-medium break-words">{{ auth.user?.displayName }}</p>
+          <p class="text-sm text-text-3 break-words">{{ auth.user?.email }}</p>
         </div>
       </div>
     </div>
@@ -122,7 +125,7 @@ async function handleUpgrade(priceId: string) {
             {{ profileCompleteness }}% complete
           </span>
         </div>
-        <router-link to="/onboarding" class="text-sm text-brand hover:text-brand-light no-underline font-medium">
+        <router-link to="/onboarding" class="text-sm text-brand hover:text-brand-light no-underline font-medium py-1 -my-1">
           <i class="fa-solid fa-pen mr-1"></i> Edit Profile
         </router-link>
       </div>
@@ -136,5 +139,5 @@ async function handleUpgrade(priceId: string) {
         <router-link to="/onboarding" class="text-brand no-underline">Set up your profile</router-link> to start generating content.
       </p>
     </div>
-  </div>
+  </main>
 </template>

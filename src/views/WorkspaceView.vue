@@ -111,11 +111,11 @@ watch(() => content.activeTab, (tab) => {
           </router-link>
         </div>
 
-        <!-- Section header -->
+        <!-- Section header: the page's h1 (same look as before; the workspace had no h1) (T-0636) -->
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-base font-semibold">
+          <h1 class="text-base font-semibold">
             {{ tabLabels[content.activeTab] ?? content.activeTab }}
-          </h2>
+          </h1>
           <span
             v-if="!content.loading"
             class="text-xs text-text-3 bg-surface-2 px-2.5 py-1 rounded-full"
@@ -146,9 +146,9 @@ watch(() => content.activeTab, (tab) => {
           <div class="w-16 h-16 rounded-full bg-surface-2 flex items-center justify-center text-2xl text-text-3 mb-4">
             <i class="fa-solid fa-wand-magic-sparkles"></i>
           </div>
-          <h3 class="text-lg font-semibold mb-2">
+          <h2 class="text-lg font-semibold mb-2">
             No {{ tabLabels[content.activeTab] ?? content.activeTab }} yet
-          </h3>
+          </h2>
           <p class="text-text-3 text-sm mb-6">
             Generate your first batch of content to get started.
           </p>

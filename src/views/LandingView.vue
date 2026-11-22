@@ -152,6 +152,8 @@ function toggleFaq(index: number) {
       </div>
     </nav>
 
+    <!-- main landmark: screen readers can jump past the nav to the content (T-0636) -->
+    <main>
     <!-- ─── Hero ─────────────────────────────────────────────── -->
     <section class="pt-32 pb-16 px-4 sm:px-6 text-center relative overflow-hidden">
       <!-- Background glow -->
@@ -196,7 +198,7 @@ function toggleFaq(index: number) {
 
         <p class="text-sm text-text-3 mb-12">
           Free, no credit card ·
-          <button type="button" @click="getStarted('hero_no_portfolio')" class="text-brand-light hover:underline bg-transparent border-0 p-0 cursor-pointer text-sm">No portfolio? Start anyway</button>
+          <button type="button" @click="getStarted('hero_no_portfolio')" class="text-brand-light hover:underline bg-transparent border-0 px-0 py-1 -my-1 cursor-pointer text-sm">No portfolio? Start anyway</button>
           ·
           <a href="#demo" class="text-brand-light hover:underline no-underline">See it in action</a>
         </p>
@@ -568,6 +570,8 @@ function toggleFaq(index: number) {
       </div>
     </section>
 
+    </main>
+
     <!-- ─── Footer ────────────────────────────────────────────── -->
     <footer class="py-10 px-4 sm:px-6 border-t border-border">
       <div class="max-w-5xl mx-auto">
@@ -581,15 +585,15 @@ function toggleFaq(index: number) {
 
           <!-- Links -->
           <nav class="flex flex-wrap items-center justify-center gap-5 text-sm text-text-3">
-            <a href="#features" class="hover:text-text no-underline transition">Features</a>
-            <a href="#pricing" class="hover:text-text no-underline transition">Pricing</a>
-            <a href="/blog" class="hover:text-text no-underline transition">Blog</a>
-            <a href="/privacy" class="hover:text-text no-underline transition">Privacy</a>
-            <a href="/terms" class="hover:text-text no-underline transition">Terms</a>
-            <a href="https://github.com/dizid/clientpilot" target="_blank" rel="noopener noreferrer" class="hover:text-text no-underline transition">
+            <a href="#features" class="hover:text-text no-underline transition py-1 -my-1">Features</a>
+            <a href="#pricing" class="hover:text-text no-underline transition py-1 -my-1">Pricing</a>
+            <a href="/blog" class="hover:text-text no-underline transition py-1 -my-1">Blog</a>
+            <a href="/privacy" class="hover:text-text no-underline transition py-1 -my-1">Privacy</a>
+            <a href="/terms" class="hover:text-text no-underline transition py-1 -my-1">Terms</a>
+            <a href="https://github.com/dizid/clientpilot" target="_blank" rel="noopener noreferrer" class="hover:text-text no-underline transition py-1 -my-1">
               <i class="fa-brands fa-github mr-1"></i>GitHub
             </a>
-            <a href="https://x.com/dizid" target="_blank" rel="noopener noreferrer" class="hover:text-text no-underline transition">
+            <a href="https://x.com/dizid" target="_blank" rel="noopener noreferrer" class="hover:text-text no-underline transition py-1 -my-1">
               <i class="fa-brands fa-x-twitter mr-1"></i>Twitter
             </a>
           </nav>

@@ -60,7 +60,8 @@ async function handleGoogleLogin() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center px-4">
+  <!-- main landmark + h1 (T-0636): the sign-in page had neither; same look as before -->
+  <main class="min-h-screen flex items-center justify-center px-4">
     <div class="w-full max-w-md">
       <!-- Logo -->
       <div class="text-center mb-10">
@@ -68,7 +69,7 @@ async function handleGoogleLogin() {
           <i class="fa-solid fa-rocket text-brand"></i>
           Client<span class="text-brand">Pilot</span>
         </router-link>
-        <p class="text-text-2 mt-2">Sign in to start getting clients</p>
+        <h1 class="text-text-2 mt-2">Sign in to start getting clients</h1>
       </div>
 
       <!-- Card -->
@@ -127,5 +128,5 @@ async function handleGoogleLogin() {
         </p>
       </div>
     </div>
-  </div>
+  </main>
 </template>

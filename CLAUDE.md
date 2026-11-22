@@ -72,6 +72,14 @@ Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`, `idx_r
 - Optimistic updates in content store with rollback on error
 - Input validation via `validate()` helper at top of every mutating function, returns 400 on failure
 
+### Phone + screen-reader rules (since 2026-11-22, T-0636)
+- Every page has one `<h1>` and one `<main>` (nav and footer outside it); headings go h1 → h2 → h3 without skips. Where a page had no title, an existing line became the h1 with the same classes (Tailwind's reset gives h1 no own size/weight): Workspace tab title, Login "Sign in to start getting clients", import screen "Skip the forms" / "Here's what we found".
+- Every field has a name: `<label for>` + `id` (ids `ob-*` in onboarding, `target-*` in the Generate modal, `import-*` in ProfileImport), or `aria-label` when there's no visible label. An icon box around an input is a `<label>`, so tapping anywhere in the box focuses the field.
+- Tap targets ≥ 24 px without moving anything: padding + the same negative margin (`py-1 -my-1`, `p-2 -m-2`).
+- User text (generated pieces, emails, names) gets `break-words` (plus `min-w-0` in a flex row), so a long URL or address can't make the page scroll sideways at 320 px.
+- `src/style.css`: on touch screens, `input`/`textarea` with `text-xs`/`text-sm` and `select.text-sm` get 16 px text (iPhone Safari zooms the page in on smaller fields). The 12 px status pill (`select.text-xs` on content cards) is left as is on purpose.
+- `src/style.css`: `prefers-reduced-motion: reduce` cuts all animations/transitions short.
+
 ## E2E Tests
 
 `e2e/new-user-journey.spec.ts` drives the full no-forms journey (landing URL → Google sign-in → auto import → first targeted outreach) against the local Vite dev server with real functions and real Claude calls.

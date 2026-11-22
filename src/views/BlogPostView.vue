@@ -17,9 +17,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg text-text">
+  <!-- main landmark (T-0636) -->
+  <main class="min-h-screen bg-bg text-text">
     <article v-if="post" class="max-w-3xl mx-auto px-4 py-10 md:py-16">
-      <a href="/blog" class="text-sm text-brand-light hover:text-brand no-underline">&larr; Blog</a>
+      <a href="/blog" class="inline-block py-1 -my-1 text-sm text-brand-light hover:text-brand no-underline">&larr; Blog</a>
       <h1 class="text-3xl md:text-4xl font-bold mt-4 mb-3 leading-tight">{{ post.title }}</h1>
       <p class="text-sm text-text-3 mb-8">
         <time :datetime="post.date">{{ formatPostDate(post.date) }}</time> · {{ post.readingMinutes }} min read ·
@@ -65,7 +66,7 @@ onMounted(() => {
       <h1 class="text-3xl font-bold mb-4">Post not found</h1>
       <a href="/blog" class="text-brand-light hover:text-brand">See all posts</a>
     </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>

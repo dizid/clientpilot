@@ -219,7 +219,8 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
 <template>
   <AppNav />
-  <div class="pt-24 pb-16 px-4 sm:px-6 max-w-3xl mx-auto">
+  <!-- main landmark: screen readers can jump straight to the content (T-0636) -->
+  <main class="pt-24 pb-16 px-4 sm:px-6 max-w-3xl mx-auto">
 
     <!-- Header -->
     <div class="text-center mb-10">
@@ -232,7 +233,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
     <!-- Upgrade banner for free users who hit the limit -->
     <div v-if="!auth.isPro && !auth.canGenerate" class="bg-surface border border-brand/30 rounded-2xl p-8 text-center mb-8">
-      <h3 class="text-xl font-bold mb-2">Free Preview Used</h3>
+      <h2 class="text-xl font-bold mb-2">Free Preview Used</h2>
       <p class="text-text-2 mb-6">Upgrade to unlock unlimited generations and regenerating any piece with your feedback.</p>
       <div class="flex flex-col sm:flex-row gap-3 justify-center">
         <button
@@ -321,7 +322,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
             <i :class="ct.icon"></i>
           </div>
           <div class="min-w-0">
-            <h3 class="font-medium text-sm">{{ ct.title }}</h3>
+            <h2 class="font-medium text-sm">{{ ct.title }}</h2>
             <p class="text-xs text-text-3">{{ ct.time }}</p>
           </div>
         </div>
@@ -363,7 +364,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
         View Generated Content
       </button>
     </div>
-  </div>
+  </main>
 
   <!-- ── Target Context Modal (inline Teleport) ──────────────────────────── -->
   <Teleport to="body">
@@ -373,17 +374,17 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
         class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
         @click.self="closeModal"
       >
-        <div class="bg-surface border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl">
+        <div class="bg-surface border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="target-modal-title">
 
           <!-- Title -->
           <div class="flex items-start justify-between mb-6">
             <div>
-              <h2 class="text-lg font-bold">Who Are You Targeting?</h2>
+              <h2 id="target-modal-title" class="text-lg font-bold">Who Are You Targeting?</h2>
               <p class="text-text-3 text-sm mt-1">Tailor content for a specific audience or skip for general output.</p>
             </div>
             <button
               @click="closeModal"
-              class="text-text-3 hover:text-text transition ml-4 mt-0.5 cursor-pointer border-0 bg-transparent p-1"
+              class="text-text-3 hover:text-text transition ml-4 mt-0.5 cursor-pointer border-0 bg-transparent p-2 -m-1"
               aria-label="Close"
             >
               <i class="fa-solid fa-xmark text-lg"></i>
@@ -394,11 +395,12 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
           <div class="space-y-4 mb-6">
             <!-- Prospect URL (AI fills the fields below) -->
             <div>
-              <label class="block text-sm font-medium text-text-2 mb-1.5">
+              <label for="target-url" class="block text-sm font-medium text-text-2 mb-1.5">
                 Their website <span class="text-xs text-text-3 font-normal">— we'll fill in the rest</span>
               </label>
               <form @submit.prevent="analyzeProspect" class="flex gap-2">
                 <input
+                  id="target-url"
                   v-model="prospectUrl"
                   type="text"
                   inputmode="url"
@@ -423,8 +425,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
             <!-- Niche -->
             <div>
-              <label class="block text-sm font-medium text-text-2 mb-1.5">Niche</label>
+              <label for="target-niche" class="block text-sm font-medium text-text-2 mb-1.5">Niche</label>
               <select
+                id="target-niche"
                 v-model="targetNiche"
                 class="w-full bg-surface-2 border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:outline-none focus:border-brand transition appearance-none cursor-pointer"
               >
@@ -435,8 +438,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
             <!-- Platform -->
             <div>
-              <label class="block text-sm font-medium text-text-2 mb-1.5">Platform</label>
+              <label for="target-platform" class="block text-sm font-medium text-text-2 mb-1.5">Platform</label>
               <select
+                id="target-platform"
                 v-model="targetPlatform"
                 class="w-full bg-surface-2 border border-border rounded-lg px-3 py-2.5 text-text text-sm focus:outline-none focus:border-brand transition appearance-none cursor-pointer"
               >
@@ -452,8 +456,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
 
             <!-- Pain Point -->
             <div>
-              <label class="block text-sm font-medium text-text-2 mb-1.5">Pain Point</label>
+              <label for="target-pain" class="block text-sm font-medium text-text-2 mb-1.5">Pain Point</label>
               <input
+                id="target-pain"
                 v-model="targetPainPoint"
                 type="text"
                 placeholder="What problem do they have?"

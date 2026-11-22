@@ -11,9 +11,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-bg text-text">
+  <!-- main landmark (T-0636) -->
+  <main class="min-h-screen bg-bg text-text">
     <div class="max-w-3xl mx-auto px-4 py-10 md:py-16">
-      <a href="/" class="text-sm text-brand-light hover:text-brand no-underline">&larr; ClientPilot</a>
+      <a href="/" class="inline-block py-1 -my-1 text-sm text-brand-light hover:text-brand no-underline">&larr; ClientPilot</a>
       <h1 class="text-3xl font-bold mt-4 mb-2">ClientPilot blog</h1>
       <p class="text-text-2 mb-8 leading-relaxed">
         Practical guides for freelance developers who want more clients: where to look, what to send,
@@ -38,5 +39,5 @@ onMounted(() => {
 
       <LegalFooter />
     </div>
-  </div>
+  </main>
 </template>
