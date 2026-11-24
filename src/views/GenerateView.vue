@@ -397,14 +397,18 @@ onUnmounted(() => {
   <!-- ── Target Context Modal (inline Teleport) ──────────────────────────── -->
   <Teleport to="body">
     <Transition name="modal">
+      <!-- overflow-y-auto + the panel's m-auto: centred as before when it fits; on a phone held
+           sideways (or a short phone) the dialog is taller than the screen and used to be cut
+           off at the top and bottom (Close and Skip couldn't be reached). Now it starts at the
+           top and scrolls; overscroll-contain keeps the page behind from scrolling along. (T-0636) -->
       <div
         v-if="showTargetModal"
-        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex overflow-y-auto overscroll-contain p-4"
         @click.self="closeModal"
       >
         <!-- tabindex -1 + ref: focus starts here when the dialog opens (no ring on the panel;
              the next Tab goes to Close) -->
-        <div ref="modalPanel" tabindex="-1" class="bg-surface border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl focus:outline-none" role="dialog" aria-modal="true" aria-labelledby="target-modal-title">
+        <div ref="modalPanel" tabindex="-1" class="m-auto bg-surface border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl focus:outline-none" role="dialog" aria-modal="true" aria-labelledby="target-modal-title">
 
           <!-- Title -->
           <div class="flex items-start justify-between mb-6">
