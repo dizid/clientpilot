@@ -151,7 +151,7 @@ const post: BlogPost = {
     { label: 'Freelancer.com: membership plans', url: 'https://www.freelancer.com/membership' },
     { label: 'PeoplePerHour: terms and conditions', url: 'https://www.peopleperhour.com/static/terms' },
     { label: 'PeoplePerHour: manual (last reviewed 10 Oct 2026)', url: 'https://www.peopleperhour.com/static/manual' },
-    { label: 'Braintrust: how it works for talent', url: 'https://usebraintrust.com/how-it-works-for-talent' },
+    { label: 'Braintrust: for talent', url: 'https://www.usebraintrust.com/for-talent' },
     { label: 'Braintrust: pricing', url: 'https://www.usebraintrust.com/pricing' },
     {
       label: 'Braintrust Help: How does Braintrust make money? (updated 2023, read via Internet Archive copy, 27 Apr 2025)',

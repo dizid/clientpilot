@@ -17,10 +17,12 @@ export function renderMarkdown(text: string): string {
       keep(`<pre class="bg-surface-2 rounded-lg p-4 overflow-x-auto my-4 text-sm"><code>${code}</code></pre>`))
     .replace(/`([^`]+)`/g, (_match, code: string) =>
       keep(`<code class="bg-surface-2 px-1.5 py-0.5 rounded text-brand-light text-sm">${code}</code>`))
-    // Headings (order: h3 before h2 before h1 to avoid partial matches)
-    .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-6 mb-2">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-8 mb-3">$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')
+    // Headings (order: ### before ## before # to avoid partial matches), one level down:
+    // the preview sits under the workspace page's own <h1>, so an article's "# Title" is an
+    // <h2> (a page has one <h1>). The classes set the size, so they look the same as before.
+    .replace(/^### (.+)$/gm, '<h4 class="text-lg font-semibold mt-6 mb-2">$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3 class="text-xl font-bold mt-8 mb-3">$1</h3>')
+    .replace(/^# (.+)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4">$1</h2>')
     // Bold + italic (order: triple before double/single)
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')

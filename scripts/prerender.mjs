@@ -105,6 +105,15 @@ function checkRelatedPosts(post, where) {
   }
 }
 
+/**
+ * The post's "modified" date for structured data and link previews: the later of its
+ * publish date and its facts-checked date. Posts were written and checked before their
+ * staggered publish dates, and a modified date before the published date is invalid.
+ */
+function modifiedDate(post) {
+  return post.checked > post.date ? post.checked : post.date
+}
+
 /** BlogPosting structured data for one post. */
 function blogPostJsonLd(post) {
   const url = `${SITE_URL}/blog/${post.slug}`
@@ -114,13 +123,35 @@ function blogPostJsonLd(post) {
     headline: post.title,
     description: post.description,
     datePublished: post.date,
-    dateModified: post.checked,
+    dateModified: modifiedDate(post),
     url,
     mainEntityOfPage: url,
     image: `${SITE_URL}/og-image.png`,
     inLanguage: 'en',
     author: { '@type': 'Person', name: 'Marc de Ruijter', url: 'https://dizid.com' },
     publisher: { '@type': 'Organization', name: 'ClientPilot', url: `${SITE_URL}/` },
+  }
+}
+
+const BLOG_INDEX_DESCRIPTION = 'Practical guides for freelance developers who want more clients: where to look, what to send, and the rules that apply to platforms and cold email.'
+
+/** Blog structured data for /blog: the blog itself plus every post (newest first, as listed on the page). */
+function blogIndexJsonLd(posts) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Blog',
+    name: 'ClientPilot blog',
+    description: BLOG_INDEX_DESCRIPTION,
+    url: `${SITE_URL}/blog`,
+    inLanguage: 'en',
+    publisher: { '@type': 'Organization', name: 'ClientPilot', url: `${SITE_URL}/` },
+    blogPost: posts.map((post) => ({
+      '@type': 'BlogPosting',
+      headline: post.title,
+      url: `${SITE_URL}/blog/${post.slug}`,
+      datePublished: post.date,
+      dateModified: modifiedDate(post),
+    })),
   }
 }
 
@@ -138,14 +169,21 @@ PAGES.push(
     file: 'blog.html',
     head: {
       title: 'Blog: finding freelance clients | ClientPilot',
-      description: 'Practical guides for freelance developers who want more clients: where to look, what to send, and the rules that apply to platforms and cold email.',
+      description: BLOG_INDEX_DESCRIPTION,
+      jsonLd: blogIndexJsonLd(BLOG_POSTS),
     },
   },
   ...BLOG_POSTS.map((post) => ({
     path: `/blog/${post.slug}`,
     // <path>.html (not <path>/index.html) so Netlify serves it without a trailing-slash redirect (TestSwap pattern)
     file: `blog/${post.slug}.html`,
-    head: { title: `${post.title} | ClientPilot`, description: post.description, jsonLd: blogPostJsonLd(post) },
+    head: {
+      title: `${post.title} | ClientPilot`,
+      description: post.description,
+      jsonLd: blogPostJsonLd(post),
+      // Link previews (LinkedIn, Facebook) read a post as an article with its dates
+      article: { published: post.date, modified: modifiedDate(post) },
+    },
   })),
 )
 
@@ -171,8 +209,15 @@ function withJsonLd(html, jsonLd) {
   return html.replace('</head>', () => `  ${script}\n  </head>`)
 }
 
+/** og:type "article" plus its published/modified dates (YYYY-MM-DD), for blog posts. */
+function withArticleMeta(html, { published, modified }) {
+  const page = setTagValue(html, /(<meta property="og:type" content=")[^"]*(")/, 'article', 'og:type')
+  const dates = `<meta property="article:published_time" content="${escapeHtml(published)}">\n    <meta property="article:modified_time" content="${escapeHtml(modified)}">`
+  return page.replace(/(<meta property="og:type" content="article">)/, (tag) => `${tag}\n    ${dates}`)
+}
+
 /** The landing page's <head>, rewritten for another public page. */
-function headFor(html, path, { title, description, jsonLd }) {
+function headFor(html, path, { title, description, jsonLd, article }) {
   const url = `${SITE_URL}${path}`
   let page = setTagValue(html, /(<title>)[^<]*(<\/title>)/, title, 'title')
   page = setTagValue(page, /(<meta name="title" content=")[^"]*(")/, title, 'meta title')
@@ -184,6 +229,7 @@ function headFor(html, path, { title, description, jsonLd }) {
   page = setTagValue(page, /(<meta property="twitter:title" content=")[^"]*(")/, title, 'twitter:title')
   page = setTagValue(page, /(<meta property="twitter:description" content=")[^"]*(")/, description, 'twitter:description')
   page = setTagValue(page, /(<link rel="canonical" href=")[^"]*(")/, url, 'canonical')
+  if (article) page = withArticleMeta(page, article)
   if (jsonLd) page = withJsonLd(page, jsonLd)
   return page
 }

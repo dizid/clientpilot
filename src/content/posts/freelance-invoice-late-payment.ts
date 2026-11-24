@@ -84,7 +84,7 @@ const post: BlogPost = {
 </thead>
 <tbody>
 <tr><td>EU</td><td>Statutory interest at least 8 percentage points above the ECB reference rate; at least EUR 40 for recovery costs</td><td><a href="https://eur-lex.europa.eu/eli/dir/2011/7/oj/eng" target="_blank" rel="noopener noreferrer">Directive 2011/7/EU (EUR-Lex)</a></td></tr>
-<tr><td>Netherlands</td><td>Statutory commercial interest 10.4% since 1 July 2026</td><td><a href="https://www.rijksoverheid.nl/onderwerpen/schulden/vraag-en-antwoord/hoogte-wettelijke-rente" target="_blank" rel="noopener noreferrer">Rijksoverheid</a></td></tr>
+<tr><td>Netherlands</td><td>Statutory commercial interest 10.4% since 1 July 2026</td><td><a href="https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/schulden/hoogte-wettelijke-rente" target="_blank" rel="noopener noreferrer">Rijksoverheid</a></td></tr>
 <tr><td>UK</td><td>8% plus the Bank of England base rate; fixed sum of 40, 70 or 100 pounds by debt size</td><td><a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery" target="_blank" rel="noopener noreferrer">gov.uk</a></td></tr>
 <tr><td>New York City</td><td>Right to double the unpaid amount, plus damages for retaliation and attorneys' fees and costs</td><td><a href="https://www.nyc.gov/site/dca/workers/workersrights/freelancer-workers.page" target="_blank" rel="noopener noreferrer">NYC DCWP</a></td></tr>
 </tbody>
@@ -95,7 +95,7 @@ const post: BlogPost = {
 <p>The European Union's <a href="https://europa.eu/youreurope/business/finance-and-tax/making-receiving-payments/late-payment/index_en.htm" target="_blank" rel="noopener noreferrer">Your Europe</a> page adds the practical points. If the contract sets no payment period, interest becomes payable 30 days after the client receives the invoice. The EUR 40 is a flat fee for each invoice paid late, and you can claim more if your recovery costs were higher. It also says that for two parties in the same country, national late-payment rules apply, and the listed statutory rates differ by country. The directive is implemented through each country's own law, so check the national rule that applies to you. These rules do not apply to consumers.</p>
 
 <h3>Netherlands</h3>
-<p>The Dutch government says the <a href="https://www.rijksoverheid.nl/onderwerpen/schulden/vraag-en-antwoord/hoogte-wettelijke-rente" target="_blank" rel="noopener noreferrer">wettelijke rente voor handelstransacties</a> (statutory interest on commercial transactions) is 10.4% since 1 July 2026, and that it covers agreements between businesses and between businesses and government bodies. The rate is adjusted over time, so look at that page for the figure that applies on the day you calculate it. (Your Europe's country table lists 10.15% for the Netherlands for the same half-year; for a Dutch claim, go by the Dutch government's own page.)</p>
+<p>The Dutch government says the <a href="https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/schulden/hoogte-wettelijke-rente" target="_blank" rel="noopener noreferrer">wettelijke rente voor handelstransacties</a> (statutory interest on commercial transactions) is 10.4% since 1 July 2026, and that it covers agreements between businesses and between businesses and government bodies. The rate is adjusted over time, so look at that page for the figure that applies on the day you calculate it. (Your Europe's country table lists 10.15% for the Netherlands for the same half-year; for a Dutch claim, go by the Dutch government's own page.)</p>
 
 <h3>United Kingdom</h3>
 <p>The <a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery" target="_blank" rel="noopener noreferrer">gov.uk guidance on late commercial payments</a> says that if you don't agree a payment date, the payment is late 30 days after the customer receives the invoice or you deliver the goods or service, whichever is later. On <a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery/charging-interest-commercial-debt" target="_blank" rel="noopener noreferrer">charging interest</a>, it says the interest is 8% plus the Bank of England base rate for business-to-business transactions. On <a href="https://www.gov.uk/late-commercial-payments-interest-debt-recovery/claim-debt-recovery-costs" target="_blank" rel="noopener noreferrer">debt recovery costs</a>, you can charge a fixed sum of 40 pounds for debts up to 999.99 pounds, 70 pounds for 1,000 to 9,999.99 pounds and 100 pounds for 10,000 pounds or more, once per payment. As a supplier you can also claim reasonable costs each time you try to recover the debt.</p>
@@ -142,7 +142,7 @@ const post: BlogPost = {
     },
     {
       label: 'Rijksoverheid: Hoogte wettelijke rente',
-      url: 'https://www.rijksoverheid.nl/onderwerpen/schulden/vraag-en-antwoord/hoogte-wettelijke-rente',
+      url: 'https://www.rijksoverheid.nl/documenten/vraag-en-antwoord/schulden/hoogte-wettelijke-rente',
     },
     {
       label: 'GOV.UK: Late commercial payments: charging interest and debt recovery',

@@ -40,7 +40,7 @@ const post: BlogPost = {
 <p>Hi Jane, if you have five minutes, would you write a short LinkedIn recommendation for the booking system project? Something about what the problem was and what changed would help most. I'm happy to send you a few bullet points to jog your memory. Thanks either way, it was a pleasure working with you.</p>
 <p>Sam</p>
 </blockquote>
-<p>On LinkedIn, <a href="https://www.linkedin.com/help/linkedin/answer/a541653" target="_blank" rel="noopener noreferrer">LinkedIn Help</a> says you can ask for a recommendation from 1st-degree connections you work with or have worked with. When someone writes one for you, you can accept it, dismiss it or request changes, and once accepted it is shown by default but you can hide it. <a href="https://www.linkedin.com/help/linkedin/answer/165" target="_blank" rel="noopener noreferrer">LinkedIn's hide and unhide page</a> explains the toggle. So the client writes it and you keep control over what appears on your profile. If you use LinkedIn to find work, our guide to <a href="/blog/linkedin-outreach-freelance-developer">LinkedIn outreach for freelance developers</a> covers the rest of the profile.</p>
+<p>On LinkedIn, <a href="https://www.linkedin.com/help/linkedin/answer/a541653" target="_blank" rel="noopener noreferrer">LinkedIn Help</a> says you can ask for a recommendation from 1st-degree connections you work with or have worked with. When someone writes one for you, you can accept it, dismiss it or request changes, and once accepted it is shown by default but you can hide it. <a href="https://www.linkedin.com/help/linkedin/answer/a542730" target="_blank" rel="noopener noreferrer">LinkedIn's hide and unhide page</a> explains the toggle. So the client writes it and you keep control over what appears on your profile. If you use LinkedIn to find work, our guide to <a href="/blog/linkedin-outreach-freelance-developer">LinkedIn outreach for freelance developers</a> covers the rest of the profile.</p>
 
 <h3>3. Referral ask</h3>
 <blockquote>
@@ -165,7 +165,7 @@ const post: BlogPost = {
     },
     {
       label: 'LinkedIn Help: Hide or unhide recommendations',
-      url: 'https://www.linkedin.com/help/linkedin/answer/165',
+      url: 'https://www.linkedin.com/help/linkedin/answer/a542730',
     },
     {
       label: 'GDPR Article 7, conditions for consent (legislation.gov.uk)',

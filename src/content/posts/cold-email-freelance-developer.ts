@@ -60,21 +60,21 @@ const post: BlogPost = {
 
 <h2>What to avoid</h2>
 <ul>
-<li><strong>Mass templates.</strong> The same text sent to hundreds of businesses can't contain a real observation, and it invites spam reports. <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google's sender guidelines</a> say not to send messages to people who didn't sign up, because those recipients might mark your messages as spam. Cold email is unrequested by definition, so keep it rare and relevant.</li>
-<li><strong>Fake "Re:" or "Fwd:" subjects.</strong> <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says not to start a subject with Re: or Fwd: unless the message really is a reply or forward. The <a href="https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business" target="_blank" rel="noopener noreferrer">FTC</a> says the subject line must accurately reflect the content.</li>
+<li><strong>Mass templates.</strong> The same text sent to hundreds of businesses can't contain a real observation, and it invites spam reports. <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google's sender guidelines</a> say not to send messages to people who didn't sign up, because those recipients might mark your messages as spam. Cold email is unrequested by definition, so keep it rare and relevant.</li>
+<li><strong>Fake "Re:" or "Fwd:" subjects.</strong> <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says not to start a subject with Re: or Fwd: unless the message really is a reply or forward. The <a href="https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business" target="_blank" rel="noopener noreferrer">FTC</a> says the subject line must accurately reflect the content.</li>
 <li><strong>Attachments.</strong> A file from a stranger is a trust decision for the recipient. A link is easier to check, and easier to ignore.</li>
-<li><strong>Tracking-pixel heavy tools on a fresh domain.</strong> The <a href="https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/" target="_blank" rel="noopener noreferrer">ICO</a> says the UK's PECR rules on cookies and similar technologies apply to tracking pixels that store or access information on the reader's device. <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says it doesn't track open rates and can't verify the open rates third parties report. A reply is the only signal that counts, and a fresh domain should start slow (see below).</li>
-<li><strong>Personal addresses scraped from the web.</strong> A sole trader's own Gmail or a named address from a directory is personal data, and under UK PECR sole traders count as individuals. The <a href="https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/" target="_blank" rel="noopener noreferrer">ICO</a> says you can't assume public personal data means the person agrees to direct marketing, and <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says not to purchase email addresses. Use the enquiry address the business publishes on its own site.</li>
+<li><strong>Tracking-pixel heavy tools on a fresh domain.</strong> The <a href="https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/" target="_blank" rel="noopener noreferrer">ICO</a> says the UK's PECR rules on cookies and similar technologies apply to tracking pixels that store or access information on the reader's device. <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says it doesn't track open rates and can't verify the open rates third parties report. A reply is the only signal that counts, and a fresh domain should start slow (see below).</li>
+<li><strong>Personal addresses scraped from the web.</strong> A sole trader's own Gmail or a named address from a directory is personal data, and under UK PECR sole traders count as individuals. The <a href="https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/" target="_blank" rel="noopener noreferrer">ICO</a> says you can't assume public personal data means the person agrees to direct marketing, and <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says not to purchase email addresses. Use the enquiry address the business publishes on its own site.</li>
 </ul>
 
 <h2>Deliverability basics for 1:1 senders</h2>
-<p><em>Checked November 2026 against Google's <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Email sender guidelines</a>, Google's <a href="https://support.google.com/a/answer/14229414" target="_blank" rel="noopener noreferrer">Email sender guidelines FAQ</a> and Yahoo's <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Sender Best Practices</a>.</em></p>
+<p><em>Checked November 2026 against Google's <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Email sender guidelines</a>, Google's <a href="https://support.google.com/mail/answer/14229414" target="_blank" rel="noopener noreferrer">Email sender guidelines FAQ</a> and Yahoo's <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Sender Best Practices</a>.</em></p>
 
 <h3>SPF, DKIM and DMARC</h3>
-<p><strong>SPF</strong> lists the servers allowed to send mail for your domain. <strong>DKIM</strong> signs each message so receivers can check that your domain sent it. <strong>DMARC</strong>, in Google's words, "tells receiving servers what to do with your messages that don't pass SPF or DKIM". <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> requires a DKIM key of 1024 bits or longer for personal Gmail accounts and recommends 2048 bits.</p>
+<p><strong>SPF</strong> lists the servers allowed to send mail for your domain. <strong>DKIM</strong> signs each message so receivers can check that your domain sent it. <strong>DMARC</strong>, in Google's words, "tells receiving servers what to do with your messages that don't pass SPF or DKIM". <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> requires a DKIM key of 1024 bits or longer for personal Gmail accounts and recommends 2048 bits.</p>
 
 <h3>What Gmail and Yahoo require</h3>
-<p>Both split their rules into all senders and bulk senders (<a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google</a>, <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Yahoo</a>). Google's rules cover mail to personal Gmail accounts (addresses ending in @gmail.com or @googlemail.com).</p>
+<p>Both split their rules into all senders and bulk senders (<a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google</a>, <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Yahoo</a>). Google's rules cover mail to personal Gmail accounts (addresses ending in @gmail.com or @googlemail.com).</p>
 <table>
 <thead>
 <tr><th>Requirement</th><th>All senders</th><th>Bulk senders</th></tr>
@@ -86,14 +86,14 @@ const post: BlogPost = {
 <tr><td>DNS and format</td><td>Valid forward and reverse DNS records, RFC 5322 format. Gmail also requires TLS</td><td>Same</td></tr>
 </tbody>
 </table>
-<p><strong>Who is a bulk sender?</strong> <a href="https://support.google.com/a/answer/14229414" target="_blank" rel="noopener noreferrer">Google's FAQ</a> says it's a sender that sends "close to 5,000 messages or more to personal Gmail accounts within a 24-hour period", counting all mail from the same primary domain. Meet that once and the status is permanent. Yahoo's page gives no number.</p>
+<p><strong>Who is a bulk sender?</strong> <a href="https://support.google.com/mail/answer/14229414" target="_blank" rel="noopener noreferrer">Google's FAQ</a> says it's a sender that sends "close to 5,000 messages or more to personal Gmail accounts within a 24-hour period", counting all mail from the same primary domain. Meet that once and the status is permanent. Yahoo's page gives no number.</p>
 <p>Sending 1:1 emails, you're far below that, but the all-sender rules still apply, including the 0.3% spam rate. Spam rate is a share of your mail, so when you send little, each "Report spam" click counts for a lot. <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Yahoo</a> strongly urges all senders to publish DMARC, so set up all three.</p>
 
 <h3>Why not to send outreach from your main domain</h3>
-<p>Your main domain carries quotes, invoices and client updates. <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says spam reports can lower your domain's reputation over time. <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Yahoo</a> says each IP and DKIM domain has a reputation that unsolicited commercial email can hurt, and recommends separating mail types by IP or DKIM domain. If you send cold email regularly, use a separate outreach domain that is still clearly you.</p>
+<p>Your main domain carries quotes, invoices and client updates. <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says spam reports can lower your domain's reputation over time. <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Yahoo</a> says each IP and DKIM domain has a reputation that unsolicited commercial email can hurt, and recommends separating mail types by IP or DKIM domain. If you send cold email regularly, use a separate outreach domain that is still clearly you.</p>
 
 <h3>Keep volume low</h3>
-<p><a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> advises starting with a low volume, increasing slowly and avoiding sudden spikes, because suddenly doubling your volume can lead to rate limiting or a drop in reputation. For a freelancer, that means a handful of researched emails a day.</p>
+<p><a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> advises starting with a low volume, increasing slowly and avoiding sudden spikes, because suddenly doubling your volume can lead to rate limiting or a drop in reputation. For a freelancer, that means a handful of researched emails a day.</p>
 
 <h2>The rules (not legal advice)</h2>
 <p><em>Checked November 2026 against the official sources linked below. A summary, not legal advice: the rules depend on where you and the recipient are, so check both.</em></p>
@@ -141,11 +141,11 @@ const post: BlogPost = {
   sources: [
     {
       label: 'Google: Email sender guidelines (Gmail Help)',
-      url: 'https://support.google.com/a/answer/81126',
+      url: 'https://support.google.com/mail/answer/81126',
     },
     {
       label: 'Google: Email sender guidelines FAQ (Gmail Help)',
-      url: 'https://support.google.com/a/answer/14229414',
+      url: 'https://support.google.com/mail/answer/14229414',
     },
     {
       label: 'Yahoo Sender Hub: Sender Best Practices',

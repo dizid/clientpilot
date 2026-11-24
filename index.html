@@ -62,7 +62,16 @@
           "price": "9",
           "priceCurrency": "USD",
           "name": "Pro",
-          "billingIncrement": "P1M"
+          "priceSpecification": {
+            "@type": "UnitPriceSpecification",
+            "price": "9",
+            "priceCurrency": "USD",
+            "referenceQuantity": {
+              "@type": "QuantitativeValue",
+              "value": 1,
+              "unitCode": "MON"
+            }
+          }
         },
         {
           "@type": "Offer",

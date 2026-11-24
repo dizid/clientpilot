@@ -75,7 +75,7 @@ const post: BlogPost = {
 <li><strong>"Just checking in" and "bumping this".</strong> Neither gives the reader anything.</li>
 <li><strong>Guilt.</strong> "I haven't heard back from you" sounds like a debt collector. State what's new instead.</li>
 <li><strong>Daily nudges.</strong> If two working days is too soon for you to read a proposal properly, it's too soon for them.</li>
-<li><strong>A fake "Re:" on a new thread.</strong> <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google's sender guidelines</a> say not to start a subject with Re: or Fwd: unless the message really is a reply or forward. Reply to your own earlier message in the same thread, and it's honest.</li>
+<li><strong>A fake "Re:" on a new thread.</strong> <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google's sender guidelines</a> say not to start a subject with Re: or Fwd: unless the message really is a reply or forward. Reply to your own earlier message in the same thread, and it's honest.</li>
 <li><strong>Switching channels to dodge silence.</strong> If email got no answer, one message on the platform where you first met is fine. Emailing, DMing, calling and posting a comment in the same week is not.</li>
 <li><strong>Ignoring a "no".</strong> A reply that says no, not now or please stop ends the sequence for that person. Reply once with thanks, and put them on a do-not-contact list so nobody emails them by accident later.</li>
 </ul>
@@ -87,7 +87,7 @@ const post: BlogPost = {
 <li><strong>United States:</strong> The <a href="https://www.ftc.gov/business-guidance/resources/can-spam-act-compliance-guide-business" target="_blank" rel="noopener noreferrer">FTC's CAN-SPAM guide</a> says the law covers all commercial messages, "makes no exception for business-to-business email", and requires an accurate subject line, a valid physical postal address and a clear way to opt out. Opt-outs must be honored within 10 business days. Putting that footer on every message in the sequence, not just the first, keeps you inside the rule.</li>
 <li><strong>United Kingdom:</strong> The ICO's guidance on <a href="https://ico.org.uk/for-organisations/direct-marketing-and-privacy-and-electronic-communications/business-to-business-marketing/" target="_blank" rel="noopener noreferrer">business-to-business marketing</a> says that emailing individual subscribers, including sole traders and some partnerships, needs their consent, while corporate subscribers, such as limited companies, don't need to consent but must be given a valid opt-out. Put the opt-out line in every follow-up either way.</li>
 <li><strong>European Union:</strong> Under <a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj" target="_blank" rel="noopener noreferrer">GDPR Article 21</a>, a person can object to direct marketing at any time, after which you must stop. National rules for business email differ by country.</li>
-<li><strong>Gmail and Yahoo:</strong> <a href="https://support.google.com/a/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says to keep the spam rate below 0.3% and warns that recipients who didn't sign up might mark your messages as spam. When you send a few emails, a single spam report counts for a lot, which is another reason to stop after the last follow-up. <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Yahoo's sender guidance</a> covers the same ground.</li>
+<li><strong>Gmail and Yahoo:</strong> <a href="https://support.google.com/mail/answer/81126" target="_blank" rel="noopener noreferrer">Google</a> says to keep the spam rate below 0.3% and warns that recipients who didn't sign up might mark your messages as spam. When you send a few emails, a single spam report counts for a lot, which is another reason to stop after the last follow-up. <a href="https://senders.yahooinc.com/best-practices/" target="_blank" rel="noopener noreferrer">Yahoo's sender guidance</a> covers the same ground.</li>
 </ul>
 <p>A simple footer that covers this on every message: your name, your business and postal address, one line saying how to stop ("reply 'no' and I won't email you again"), and a link to your privacy notice.</p>
 
@@ -135,7 +135,7 @@ const post: BlogPost = {
     },
     {
       label: 'Google: Email sender guidelines (Gmail Help)',
-      url: 'https://support.google.com/a/answer/81126',
+      url: 'https://support.google.com/mail/answer/81126',
     },
     {
       label: 'Yahoo Sender Hub: Sender Best Practices',

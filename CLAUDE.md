@@ -23,7 +23,7 @@ AI-powered freelance client acquisition platform — generates personalized outr
 - Landing FAQ lives in `src/content/landing-faqs.ts`: the page shows it (answers use `v-show`, so the prerendered HTML holds every answer) and the prerender turns it into the homepage's FAQPage JSON-LD. Landing, FAQ and `public/llms.txt` claims must match `netlify/functions/lib/prompts.mts` (7 posts, 6 templates, one 600-900 word article, 5-part platform profile, 6 pitch formats) and the plan rules (regenerating is Pro-only; cancelling is by email, no Settings button) (T-0636).
 
 ## Blog (since 2026-11-11, T-0352)
-Posts live in code, no database: one file per post in `src/content/posts/<slug>.ts` (shape in `types.ts`; registry `index.ts` picks up every file). `/blog` and `/blog/<slug>` are prerendered to `dist/blog.html` and `dist/blog/<slug>.html` (no trailing-slash redirect on Netlify) with their own title, description, canonical and BlogPosting JSON-LD.
+Posts live in code, no database: one file per post in `src/content/posts/<slug>.ts` (shape in `types.ts`; registry `index.ts` picks up every file). `/blog` and `/blog/<slug>` are prerendered to `dist/blog.html` and `dist/blog/<slug>.html` (no trailing-slash redirect on Netlify) with their own title, description, canonical and BlogPosting JSON-LD. `/blog` also has Blog JSON-LD listing every post; posts have `og:type` article + `article:published_time`/`modified_time`. Modified date = the later of `date` and `checked` (posts were checked Nov 11 but dated Nov 12-14; a modified date before the published date is invalid) (T-0636, Nov 24).
 - To add a post: add the file, add its URL to `public/sitemap.xml` and a line to `public/llms.txt` as a Markdown link (`- [Title](https://clientpilot.dev/blog/<slug>): what it covers`; Lighthouse's llms-txt check fails on bare URLs), build. The prerender stops the build if the post uses a tag outside the allowed list, has style/class attributes, a description outside 120-170 characters, no https sources, or is missing from the sitemap.
 - Every fee, number or rule in a post links to the page it came from (`sources`) and the post shows its `checked` date. No invented stats.
 - IndexNow key file: `public/3a21ab3ea1ff0c44abe9a7620a6dd10f.txt`. After a post goes live: POST `https://api.indexnow.org/indexnow` with host `clientpilot.dev`, that key and the new URLs.
@@ -79,6 +79,7 @@ Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`, `idx_r
 - User text (generated pieces, emails, names) gets `break-words` (plus `min-w-0` in a flex row), so a long URL or address can't make the page scroll sideways at 320 px.
 - `src/style.css`: on touch screens, `input`/`textarea` with `text-xs`/`text-sm` and `select.text-sm` get 16 px text (iPhone Safari zooms the page in on smaller fields). The 12 px status pill (`select.text-xs` on content cards) is left as is on purpose.
 - `src/style.css`: `prefers-reduced-motion: reduce` cuts all animations/transitions short.
+- `src/lib/markdown.ts` (Dev.to article preview in the workspace) renders `#`/`##`/`###` as h2/h3/h4 with the old size classes, so an article title isn't a second h1 (Nov 24). Copy still copies the raw markdown.
 
 ## E2E Tests
 
