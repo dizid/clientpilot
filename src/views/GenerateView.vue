@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToastStore } from '@/stores/toast'
@@ -213,8 +213,36 @@ function onKeyDown(e: KeyboardEvent) {
   if (e.key === 'Escape' && showTargetModal.value) closeModal()
 }
 
+// ── Target dialog focus (keyboard + screen readers, T-0636) ─────────────────
+// The dialog is teleported to <body>, outside #app. Before, focus stayed on the page behind the
+// dark backdrop: Tab walked through the 6 Generate buttons first and never reached the dialog.
+// Now, while it is open, the page behind is inert, focus starts on the dialog itself (not on
+// the URL field: on phones that would pop the keyboard up over it), and on close focus goes
+// back to the button that opened it.
+const modalPanel = ref<HTMLElement | null>(null)
+let modalOpener: HTMLElement | null = null
+
+watch(showTargetModal, async (open) => {
+  const pageBehind = document.getElementById('app')
+  if (open) {
+    modalOpener = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    pageBehind?.setAttribute('inert', '')
+    await nextTick()
+    modalPanel.value?.focus()
+  } else {
+    pageBehind?.removeAttribute('inert')
+    // If generation has started, the opener may be disabled or gone: focus then stays put
+    modalOpener?.focus({ preventScroll: true })
+    modalOpener = null
+  }
+})
+
 onMounted(() => window.addEventListener('keydown', onKeyDown))
-onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeyDown)
+  // Left the page with the dialog open (browser back): don't leave the next page inert
+  document.getElementById('app')?.removeAttribute('inert')
+})
 </script>
 
 <template>
@@ -374,7 +402,9 @@ onUnmounted(() => window.removeEventListener('keydown', onKeyDown))
         class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
         @click.self="closeModal"
       >
-        <div class="bg-surface border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="target-modal-title">
+        <!-- tabindex -1 + ref: focus starts here when the dialog opens (no ring on the panel;
+             the next Tab goes to Close) -->
+        <div ref="modalPanel" tabindex="-1" class="bg-surface border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl focus:outline-none" role="dialog" aria-modal="true" aria-labelledby="target-modal-title">
 
           <!-- Title -->
           <div class="flex items-start justify-between mb-6">

@@ -254,7 +254,9 @@ function toggleFaq(index: number) {
     </section>
 
     <!-- ─── Live Demo (Before / After) ───────────────────────── -->
-    <section id="demo" class="py-20 px-4 sm:px-6 border-b border-border bg-surface/30">
+    <!-- -scroll-mt-18: cancels html's scroll-padding-top (style.css) so "See it in action"
+         lands where it always did (T-0636) -->
+    <section id="demo" class="-scroll-mt-18 py-20 px-4 sm:px-6 border-b border-border bg-surface/30">
       <div class="max-w-5xl mx-auto">
         <div class="text-center mb-12">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/10 border border-accent/20 rounded-full text-accent-light text-sm font-medium mb-4">
@@ -379,7 +381,7 @@ function toggleFaq(index: number) {
     </section>
 
     <!-- ─── Features ─────────────────────────────────────────── -->
-    <section id="features" class="py-20 px-4 sm:px-6 border-b border-border">
+    <section id="features" class="-scroll-mt-18 py-20 px-4 sm:px-6 border-b border-border">
       <div class="max-w-5xl mx-auto text-center mb-16">
         <h2 class="text-3xl font-bold mb-4">Everything You Need to Land Clients</h2>
         <p class="text-text-2">One profile generates all of this — tailored to your skills, projects, and market.</p>
@@ -425,7 +427,7 @@ function toggleFaq(index: number) {
     </section>
 
     <!-- ─── Pricing ───────────────────────────────────────────── -->
-    <section id="pricing" class="py-20 px-4 sm:px-6 border-b border-border bg-surface/20">
+    <section id="pricing" class="-scroll-mt-18 py-20 px-4 sm:px-6 border-b border-border bg-surface/20">
       <div class="max-w-4xl mx-auto text-center mb-16">
         <h2 class="text-3xl font-bold mb-4">Simple Pricing for Indie Devs</h2>
         <p class="text-text-2">Start free. Upgrade when you're ready.</p>

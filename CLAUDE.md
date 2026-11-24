@@ -80,6 +80,7 @@ Indexes: `idx_pieces_user_type`, `idx_pieces_status`, `idx_targets_user`, `idx_r
 - `src/style.css`: on touch screens, `input`/`textarea` with `text-xs`/`text-sm` and `select.text-sm` get 16 px text (iPhone Safari zooms the page in on smaller fields). The 12 px status pill (`select.text-xs` on content cards) is left as is on purpose.
 - `src/style.css`: `prefers-reduced-motion: reduce` cuts all animations/transitions short.
 - `src/lib/markdown.ts` (Dev.to article preview in the workspace) renders `#`/`##`/`###` as h2/h3/h4 with the old size classes, so an article title isn't a second h1 (Nov 24). Copy still copies the raw markdown.
+- Keyboard (Nov 25): `html:has(nav.fixed)` has `scroll-padding-top: 4.5rem`, so Shift+Tab never parks focus under the fixed 64 px top bar; the landing's `#demo`/`#features`/`#pricing` sections carry `-scroll-mt-18` to cancel it (their links land where they always did). A new in-page anchor on the landing page needs `-scroll-mt-18` too. The app's phone menu (AppNav) closes on Escape (focus back to the Menu button) and when focus leaves the top bar. The Generate page's target dialog makes `#app` inert while open, focuses the dialog panel (not the URL field: no phone keyboard pop-up) and returns focus to the button that opened it. A new dialog should do the same (it's teleported to `<body>`, outside `#app`).
 
 ## E2E Tests
 

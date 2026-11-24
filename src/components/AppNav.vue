@@ -7,6 +7,24 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 const mobileOpen = ref(false)
+const menuToggle = ref<HTMLButtonElement | null>(null)
+
+// Phone menu by keyboard (T-0636): Escape closes it and puts focus back on the menu button.
+function closeMenuByKey() {
+  if (!mobileOpen.value) return
+  mobileOpen.value = false
+  menuToggle.value?.focus()
+}
+
+// Tab past the menu's last item (Sign out) went on to the workspace tabs that the open menu
+// lies over, so focus was hidden under it. Close the menu as soon as focus leaves the top bar.
+// relatedTarget is null for taps on plain page text: the menu then stays as it was.
+function onNavFocusOut(event: FocusEvent) {
+  const next = event.relatedTarget as Node | null
+  if (mobileOpen.value && next && !(event.currentTarget as HTMLElement).contains(next)) {
+    mobileOpen.value = false
+  }
+}
 
 async function handleLogout() {
   await auth.logout()
@@ -25,7 +43,11 @@ function isActive(path: string) {
 </script>
 
 <template>
-  <nav class="fixed top-0 inset-x-0 z-50 border-b border-border bg-bg/90 backdrop-blur-lg">
+  <nav
+    class="fixed top-0 inset-x-0 z-50 border-b border-border bg-bg/90 backdrop-blur-lg"
+    @keydown.esc="closeMenuByKey"
+    @focusout="onNavFocusOut"
+  >
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
       <router-link to="/workspace" class="flex items-center gap-2 text-lg font-bold text-text no-underline">
         <i class="fa-solid fa-rocket text-brand"></i>
@@ -63,6 +85,7 @@ function isActive(path: string) {
       <!-- Mobile toggle: p-2 -m-2 makes the tap area 34x44 px without moving the icon (was 18 px
            wide); aria-expanded tells screen readers whether the menu is open (T-0636) -->
       <button
+        ref="menuToggle"
         class="md:hidden text-text bg-transparent border-0 text-xl cursor-pointer p-2 -m-2"
         @click="mobileOpen = !mobileOpen"
         aria-label="Menu"

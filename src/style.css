@@ -49,6 +49,15 @@ body {
   color: white;
 }
 
+/* The landing page and the app pages have a fixed 64 px top bar. When keyboard focus moves
+   up the page (Shift+Tab), the browser scrolled the focused button just to the top edge, under
+   that bar (landing FAQ, Generate buttons, the free-plan Pro button). Keep 8 px of air below
+   it. The landing page's #demo/#features/#pricing sections cancel this with a negative
+   scroll-margin, so the Features/Pricing links still land exactly where they did. (T-0636) */
+html:has(nav.fixed) {
+  scroll-padding-top: 4.5rem;
+}
+
 /* iPhone Safari zooms the whole page in when a text field under 16px gets focus, and it stays
    zoomed after typing. On touch screens the small typing fields get 16px text. Plain CSS (no
    layer) so it wins over the text-xs/text-sm utilities. The 12px status pill on content cards
