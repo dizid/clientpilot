@@ -4,7 +4,30 @@ import { safeError } from './lib/errors.mjs'
 import { planForPrice, isProSubscription, hasOtherLiveProSubscription, UUID_PATTERN } from './lib/plans.mjs'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+
+function stripeWebhookSecrets(): string[] {
+  return [...new Set(
+    [process.env.STRIPE_WEBHOOK_SECRET, process.env.STRIPE_WEBHOOK_SECRET_DIZID]
+      .map((s) => s?.trim())
+      .filter((s): s is string => Boolean(s))
+  )]
+}
+
+function constructStripeEvent(body: string, signature: string): Stripe.Event {
+  const secrets = stripeWebhookSecrets()
+  if (!secrets.length) {
+    throw new Error('STRIPE_WEBHOOK_SECRET is not set')
+  }
+  let lastError: unknown
+  for (const secret of secrets) {
+    try {
+      return stripe.webhooks.constructEvent(body, signature, secret)
+    } catch (e) {
+      lastError = e
+    }
+  }
+  throw lastError
+}
 
 export default async (req: Request) => {
   if (req.method !== 'POST') {
@@ -19,7 +42,7 @@ export default async (req: Request) => {
   let event: Stripe.Event
   try {
     const body = await req.text()
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+    event = constructStripeEvent(body, signature)
   } catch (e: unknown) {
     return Response.json({ error: safeError(e, 'Webhook verification failed') }, { status: 400 })
   }
